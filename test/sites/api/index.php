@@ -1,19 +1,16 @@
 <?php
 error_reporting(E_ALL);
-ini_set('display_errors', true);
+ini_set('display_errors', false);
+define('APP_PATH', __DIR__);
 
-define('ROOT_PATH', __DIR__ . '/../..');
-require ROOT_PATH . '/vendor/autoload.php';
+require __DIR__ . '/../../core.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
-use Fogito\Application;
 use Fogito\Config;
 use Fogito\Loader;
-use Fogito\Request;
-use Fogito\Response;
 use Fogito\Router;
-
-define('COMPANY_ID', 2);
-define('APP_ID', 265);
+use Lib\App;
+use Lib\Response;
 
 try {
     $loader = new Loader();
@@ -24,72 +21,46 @@ try {
     ]);
     $loader->register();
 
-    $url    = isset($_GET['_url']) ? urldecode($_GET['_url']) : '/';
-    $router = new Router($url);
-    $router->setDefaultModule('index');
-    $router->setDefaultController('index');
-    $router->setDefaultAction('index');
-    $router->setPattern(':id', '(?P<id>[a-z0-9]{24}+)');
-    $routes = require ROOT_PATH . '/config/routes.php';
-    foreach ($routes as $key => $value) {
-        $router->add($key, $value);
-    }
-    $router->execute();
+    $app = new App();
+    $app->set('config', function () {
+        $rootConfig = require ROOT_PATH . '/config/config.php';
+        $appConfig  = require APP_PATH . '/config/config.php';
+        $config     = new Config($rootConfig);
+        $config->merge($appConfig);
+        return $config;
+    });
 
-    $request = new Request();
-    $request->execute();
+    $app->set('router', function () {
+        $router = new Router(false);
+        $router->removeExtraSlashes(true);
+        $router->setDefaultModule('auth');
+        $router->setDefaultController('login');
+        $router->setDefaultAction('index');
+        $routes = require APP_PATH . '/config/routes.php';
+        foreach ($routes as $key => $value) {
+            $router->add($key, $value);
+        }
+        return $router;
+    });
 
-    Response::setFormat(Response::FORMAT_JSON);
-    Response::setHeaders([
-        'Access-Control-Allow-Headers'     => 'Content-Type, Accept',
-        'Access-Control-Allow-Methods'     => 'GET, POST',
-        'Access-Control-Allow-Credentials' => 'true',
-    ]);
-
-    Config::setData([
-        's2s'   => [
-            'api_url'     => '',
-            'credentials' => [
-                'server_token' => '',
-                'app_id'       => APP_ID,
-                'timezone'     => 101,
-                'lang'         => 'en',
-            ],
-        ],
-        'mongo' => [
-            'server' => [
-                'host'     => '127.0.0.1',
-                'port'     => 27017,
-                'username' => null,
-                'password' => null,
-            ],
-            'dbname' => 'gpp',
-        ],
-    ]);
-
-    $modules = [
-        'categories' => [
-            'className' => 'Categories\Module',
-            'path'      => __DIR__ . '/modules/categories/Module.php',
-        ],
-        'services'   => [
-            'className' => 'Services\Module',
-            'path'      => __DIR__ . '/modules/services/Module.php',
-        ],
-    ];
-    $app = new Application($modules, $router);
+    $modules = require APP_PATH . '/config/modules.php';
+    $app->registerModules($modules);
     $app->setControllerSuffix('Controller');
     $app->setActionSuffix(null);
-    $app->run();
+    $app->handle();
 
 } catch (\Fogito\Exception $e) {
-    Response::setJsonContent($e->getAppError());
+    Response::setJsonContent(\array_merge([
+        Response::KEY_STATUS  => Response::STATUS_ERROR,
+        Response::KEY_CODE    => $e->getCode(),
+        Response::KEY_MESSAGE => $e->getMessage(),
+    ], $e->getData()));
     Response::send();
 } catch (\Exception $e) {
     Response::setJsonContent([
-        Response::$keyStatus  => Response::STATUS_ERROR,
-        Response::$keyCode    => $e->getCode(),
-        Response::$keyMessage => $e->getMessage(),
+        Response::KEY_STATUS  => Response::STATUS_ERROR,
+        Response::KEY_CODE    => $e->getCode(),
+        Response::KEY_MESSAGE => $e->getMessage(),
     ]);
     Response::send();
 }

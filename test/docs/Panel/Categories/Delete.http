@@ -1,0 +1,14 @@
+POST {{panel_api_url}}/categories/delete HTTP/1.1
+Content-Type: application/json
+
+{
+  "token": "{{panel_token}}",
+  "app_id": "{{panel_app_id}}",
+  "lang": "{{lang}}",
+  "source": "{{source}}",
+  "env": "{{env}}",
+  "v": "{{version}}",
+  "data": {
+    "id": ["621285f19011e54433352a19"]
+  }
+}

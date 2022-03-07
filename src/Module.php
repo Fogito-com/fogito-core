@@ -1,8 +1,17 @@
 <?php
 namespace Fogito;
 
-class Module
+use Fogito\AppInterface;
+use Fogito\ModuleInterface;
+
+class Module implements ModuleInterface
 {
-    public function register($app)
+    /**
+     * register
+     *
+     * @param  mixed $app
+     * @return void
+     */
+    public function register(AppInterface $app)
     {}
 }

@@ -1,0 +1,14 @@
+GET {{panel_api_url}}/users/list
+  ?token={{panel_token}}
+  &app_id={{panel_app_id}}
+  &lang={{lang}}
+  &source={{source}}
+  &env={{env}}
+  &v={{version}}
+  &keyword=
+  &type=
+  &status=
+  &limit=25
+  &skip=0
+  &sort[field]=
+  &sort[order]=

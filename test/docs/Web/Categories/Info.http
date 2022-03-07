@@ -1,0 +1,8 @@
+GET {{api_url}}/categories/info
+  ?token={{token}}
+  &app_id={{web_app_id}}
+  &lang={{lang}}
+  &source={{source}}
+  &env={{env}}
+  &v={{version}}
+  &id=6213d8519011e56cc70fa67d

@@ -1,7 +1,7 @@
 <?php
 namespace Lib;
 
-use Fogito\Config;
+use Lib\App;
 use Lib\Auth;
 
 class RemoteModelManager extends \Fogito\Db\RemoteModelManager
@@ -13,7 +13,7 @@ class RemoteModelManager extends \Fogito\Db\RemoteModelManager
      */
     public static function getUrl()
     {
-        return Config::get('s2s.api_url');
+        return App::$di->config->s2s->api_url;
     }
 
     /**
@@ -34,7 +34,7 @@ class RemoteModelManager extends \Fogito\Db\RemoteModelManager
      */
     public static function filterRequestParams($parameters = [])
     {
-        $credentials = Config::get('s2s.credentials');
+        $credentials = App::$di->config->s2s->credentials;
         if ($credentials && \is_array($credentials)) {
             $parameters = \array_merge($parameters, $credentials);
         }

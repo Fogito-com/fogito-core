@@ -1,0 +1,6 @@
+GET {{api_url}}/data/translations
+  ?app_id={{web_app_id}}
+  &lang={{lang}}
+  &source={{source}}
+  &env={{env}}
+  &v={{version}}

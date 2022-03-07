@@ -1,0 +1,8 @@
+GET {{panel_api_url}}/users/info
+  ?token={{panel_token}}
+  &app_id={{panel_app_id}}
+  &lang={{lang}}
+  &source={{source}}
+  &env={{env}}
+  &v={{version}}
+  &id=621508dc9011e57f5e097364

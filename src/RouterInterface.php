@@ -4,101 +4,185 @@ namespace Fogito;
 interface RouterInterface
 {
     /**
-     * __construct
+     * Sets the name of the default module
      *
-     * @param  string $url
-     * @return void
+     * @param string $moduleName
      */
-    public function __construct(string $url);
+    public function setDefaultModule($moduleName);
 
     /**
-     * add
+     * Sets the default controller name
      *
-     * @param  mixed $pattern
-     * @param  mixed $handle
-     * @return void
+     * @param string $controllerName
      */
-    public function add($pattern, $handle);
+    public function setDefaultController($controllerName);
 
     /**
-     * setPattern
+     * Sets the default action name
      *
-     * @param  mixed $key
-     * @param  mixed $regex
-     * @return void
+     * @param string $actionName
      */
-    public function setPattern($key, $regex);
+    public function setDefaultAction($actionName);
 
     /**
-     * execute
+     * Sets an array of default paths
      *
-     * @return void
+     * @param array $defaults
      */
-    public function execute();
+    public function setDefaults($defaults);
 
     /**
-     * setDefaultModule
+     * Handles routing information received from the rewrite engine
      *
-     * @param  string $module
-     * @return void
+     * @param string|null $uri
      */
-    public function setDefaultModule(string $module);
+    public function handle($uri = null);
 
     /**
-     * setDefaultController
+     * Adds a route to the router on any HTTP method
      *
-     * @param  string $controller
-     * @return void
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @param string|null $httpMethods
+     * @return \Fogito\Router\RouteInterface
      */
-    public function setDefaultController(string $controller);
+    public function add($pattern, $paths = null, $httpMethods = null);
 
     /**
-     * setDefaultAction
+     * Adds a route to the router that only match if the HTTP method is GET
      *
-     * @param  string $action
-     * @return void
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @return \Fogito\Router\RouteInterface
      */
-    public function setDefaultAction(string $action);
+    public function addGet($pattern, $paths = null);
 
     /**
-     * getRoute
+     * Adds a route to the router that only match if the HTTP method is POST
      *
-     * @return mixed
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @return \Fogito\Router\RouteInterface
      */
-    public function getRoute();
+    public function addPost($pattern, $paths = null);
 
     /**
-     * getModuleName
+     * Adds a route to the router that only match if the HTTP method is PUT
+     *
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @return \Fogito\Router\RouteInterface
+     */
+    public function addPut($pattern, $paths = null);
+
+    /**
+     * Adds a route to the router that only match if the HTTP method is DELETE
+     *
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @return \Fogito\Router\RouteInterface
+     */
+    public function addDelete($pattern, $paths = null);
+
+    /**
+     * Add a route to the router that only match if the HTTP method is OPTIONS
+     *
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @return \Fogito\Router\RouteInterface
+     */
+    public function addOptions($pattern, $paths = null);
+
+    /**
+     * Adds a route to the router that only match if the HTTP method is HEAD
+     *
+     * @param string $pattern
+     * @param string|array|null $paths
+     * @return \Fogito\Router\RouteInterface
+     */
+    public function addHead($pattern, $paths = null);
+
+    /**
+     * Removes all the defined routes
+     */
+    public function clear();
+
+    /**
+     * Returns processed module name
      *
      * @return string
      */
     public function getModuleName();
 
     /**
-     * getControllerName
+     * Returns processed controller name
      *
      * @return string
      */
     public function getControllerName();
 
     /**
-     * getActionName
+     * Returns processed action name
      *
      * @return string
      */
     public function getActionName();
 
     /**
-     * getParams
+     * Returns processed extra params
      *
      * @return array
      */
     public function getParams();
 
     /**
-     * getUrl
+     * Returns the route that matchs the handled URI
      *
-     * @return string
+     * @return \Fogito\Router\RouteInterface
      */
-    public function getUrl();
+    public function getMatchedRoute();
+
+    /**
+     * Return the sub expressions in the regular expression matched
+     *
+     * @return array
+     */
+    public function getMatches();
+
+    /**
+     * Check if the router macthes any of the defined routes
+     *
+     * @return bool
+     */
+    public function wasMatched();
+
+    /**
+     * Return all the routes defined in the router
+     *
+     * @return \Fogito\Router\RouteInterface[]
+     */
+    public function getRoutes();
+
+    /**
+     * Returns a route object by its id
+     *
+     * @param string $id
+     * @return \Fogito\Router\RouteInterface
+     */
+    public function getRouteById($id);
+
+    /**
+     * Returns a route object by its name
+     *
+     * @param string $name
+     * @return \Fogito\Router\RouteInterface
+     */
+    public function getRouteByName($name);
+
+    /**
+     * Returns whether controller name should not be mangled
+     *
+     * @return bool
+     */
+    public function isExactControllerName();
 }

@@ -1,0 +1,27 @@
+POST {{panel_api_url}}/categories/create HTTP/1.1
+Content-Type: application/json
+
+{
+  "token": "{{panel_token}}",
+  "app_id": "{{panel_app_id}}",
+  "lang": "{{lang}}",
+  "source": "{{source}}",
+  "env": "{{env}}",
+  "v": "{{version}}",
+  "data": {
+    "title": "title",
+    "descriptions": "description",
+    "translations": {
+      "title": {
+        "en": "title en",
+        "ru": "title ru"
+      },
+      "description": {
+        "en": "description en",
+        "ru": "description ru"
+      }
+    },
+    "slug": "",
+    "avatar_id": "6213d5269011e56b7d1b9ea3"
+  }
+}

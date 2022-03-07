@@ -2,11 +2,9 @@
 namespace Fogito\Db;
 
 use Fogito\Exception;
+use Fogito\Db\ModelManagerInterface;
 
-/**
- * ModelManager
- */
-abstract class ModelManager
+abstract class ModelManager implements ModelManagerInterface
 {
     protected static $_server;
     protected static $_db;
@@ -315,7 +313,7 @@ abstract class ModelManager
      *
      * @return void
      */
-    public function delete()
+    public function delete(): bool
     {
         if (!$this->getId()) {
             return false;
@@ -335,20 +333,22 @@ abstract class ModelManager
      * @param  mixed $forceInsert
      * @return void
      */
-    public function save($forceInsert = false)
+    public function save($forceInsert = false): bool
     {
-        if (!$this->getId() || $forceInsert) {
-            $this->beforeSave($forceInsert);
-            $properties = (array) $this;
-        } else {
-            $this->beforeUpdate();
-            $properties = \array_filter((array) $this, function ($x) {
-                return $x != '_id';
-            }, ARRAY_FILTER_USE_KEY);
+        if (isset($this->_id) && !$this->_id instanceof \MongoDB\BSON\ObjectID) {
+            $this->_id = self::objectId($this->_id);
         }
 
-        if (!$this->_id instanceof \MongoDB\BSON\ObjectID) {
-            $this->_id = self::objectId($this->_id);
+        if (!$this->_id || $forceInsert) {
+            $this->beforeSave($forceInsert);
+            $properties = (array) $this;
+            if (!$forceInsert) {
+                unset($properties['_id']);
+            }
+        } else {
+            $this->beforeUpdate();
+            $properties = (array) $this;
+            unset($properties['_id']);
         }
 
         $properties = self::filterBinds($properties);
@@ -356,13 +356,12 @@ abstract class ModelManager
         if ($this->_id && !$forceInsert) {
             $result = self::update(['_id' => $this->_id], $properties);
             $this->afterSave($forceInsert);
-            return $result;
         } else {
             $result    = self::insert($properties);
             $this->_id = self::objectId($result);
             $this->afterUpdate();
-            return !!$result;
         }
+        return !!$result;
     }
 
     /**
@@ -519,7 +518,7 @@ abstract class ModelManager
     {
         $data = [];
         foreach ($documents as $row) {
-            $combine[$row->getId()] = $callback ? $callback($row) : $row;
+            $data[$row->getId()] = $callback ? $callback($row) : $row;
         }
         return $data;
     }
@@ -538,7 +537,7 @@ abstract class ModelManager
         $data = [];
         foreach ($documents as $row) {
             if (\is_array($row)) {
-                if (\array_key_exists((array) $row, $key)) {
+                if (\array_key_exists($key, (array) $row)) {
                     if ($dynamic) {
                         $data[$row[$key]] = $callback ? $callback($row) : $row;
                     } else {
@@ -606,7 +605,7 @@ abstract class ModelManager
      * @param \MongoDB\BSON\ObjectID|string|false $id
      * @return bool
      */
-    public static function isMongoId($id)
+    public static function isMongoId($id): bool
     {
         if (!$id) {
             return false;
@@ -668,9 +667,11 @@ abstract class ModelManager
     public static function getDate($time = false)
     {
         if (!$time) {
-            $time = time();
+            $time = round(microtime(true) * 1000);
+        } else {
+            $time *= 1000;
         }
-        return new \MongoDB\BSON\UTCDateTime($time * 1000);
+        return new \MongoDB\BSON\UTCDateTime($time);
     }
 
     /**
@@ -704,7 +705,7 @@ abstract class ModelManager
      *
      * @return void
      */
-    private static function execute()
+    public static function execute()
     {
         $db = static::getDB();
         if (!$db) {
@@ -832,47 +833,5 @@ abstract class ModelManager
     public static function filterBinds($filter = [])
     {
         return $filter;
-    }
-
-    /**
-     * __get
-     *
-     * @param  mixed $property
-     * @return void
-     */
-    public function __get($property)
-    {
-        if (!\property_exists($this, $property)) {
-            $this->{$property} = null;
-        }
-        return $this->{$property};
-    }
-
-    /**
-     * __callStatic
-     *
-     * @param  mixed $method
-     * @param  mixed $arguments
-     * @return void
-     */
-    public static function __callStatic($method, $arguments)
-    {
-        if (!\method_exists(self::class, $method)) {
-            throw new Exception('Method "' . $method . '" does not exist in ' . self::class);
-        }
-    }
-
-    /**
-     * __call
-     *
-     * @param  mixed $method
-     * @param  mixed $args
-     * @return void
-     */
-    public function __call($method, $args)
-    {
-        if (!\method_exists(self::class, $method)) {
-            throw new Exception('Method "' . $method . '" does not exist in ' . self::class);
-        }
     }
 }

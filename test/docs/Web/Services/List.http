@@ -1,0 +1,13 @@
+GET {{api_url}}/services
+  ?token={{token}}
+  &app_id={{web_app_id}}
+  &lang={{lang}}
+  &source={{source}}
+  &env={{env}}
+  &v={{version}}
+  &category_id=6213d8519011e56cc70fa67d
+  &keyword=
+  &limit=25
+  &skip=0
+  &sort[field]=title
+  &sort[order]=asc

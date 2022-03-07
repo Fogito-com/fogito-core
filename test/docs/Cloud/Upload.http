@@ -1,0 +1,41 @@
+POST {{cloud_api_url}}/upload HTTP/1.1
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySW82gHkB7rRdtL51
+
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="token"
+
+{{panel_token}}
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="app_id"
+
+{{panel_app_id}}
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="lang"
+
+{{lang}}
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="source"
+
+{{source}}
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="env"
+
+{{env}}
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="v"
+
+{{version}}
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="aspect_ratio"
+
+1/1
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="crop_type"
+
+best_fit
+------WebKitFormBoundarySW82gHkB7rRdtL51
+Content-Disposition: form-data; name="file"; filename="test.jpeg"
+Content-Type: image/jpeg
+
+< ./avatar.jpeg
+------WebKitFormBoundarySW82gHkB7rRdtL51--

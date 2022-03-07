@@ -2,11 +2,9 @@
 namespace Fogito\Db;
 
 use Fogito\Exception;
+use Fogito\Db\RemoteModelManagerInterface;
 
-/**
- * RemoteModelManager
- */
-abstract class RemoteModelManager
+abstract class RemoteModelManager implements RemoteModelManagerInterface
 {
     const STATUS_SUCCESS = 'success';
     const STATUS_ERROR   = 'error';
@@ -31,9 +29,7 @@ abstract class RemoteModelManager
      */
     public static function find($parameters = [])
     {
-        $options = [
-            'filter' => [],
-        ];
+        $options = [];
 
         if (isset($parameters['columns']) && \is_array($parameters['columns'])) {
             $options['columns'] = $parameters['columns'];
@@ -87,9 +83,7 @@ abstract class RemoteModelManager
      */
     public static function findFirst($parameters = [])
     {
-        $options = [
-            'filter' => [],
-        ];
+        $options = [];
 
         if (isset($parameters['columns']) && \is_array($parameters['columns'])) {
             $options['columns'] = $parameters['columns'];
@@ -213,7 +207,7 @@ abstract class RemoteModelManager
      *
      * @return void
      */
-    public function delete()
+    public function delete(): bool
     {
         if (!$this->getId()) {
             return false;
@@ -233,7 +227,7 @@ abstract class RemoteModelManager
      * @param  mixed $forceInsert
      * @return void
      */
-    public function save($forceInsert = false)
+    public function save($forceInsert = false): bool
     {
         if (!$this->getId() || $forceInsert) {
             $this->beforeSave($forceInsert);
@@ -254,13 +248,12 @@ abstract class RemoteModelManager
         if ($this->id && !$forceInsert) {
             $result = self::update(['id' => $this->id], $properties);
             $this->afterSave($forceInsert);
-            return $result;
         } else {
-            $insertId = self::insert($properties);
-            $this->id = $insertId;
+            $result = self::insert($properties);
+            $this->id = $result;
             $this->afterUpdate();
-            return !!$insertId;
         }
+        return !!$insertId;
     }
 
     /**
@@ -677,7 +670,7 @@ abstract class RemoteModelManager
      * @param \MongoDB\BSON\ObjectID|string|false $id
      * @return bool
      */
-    public static function isMongoId($id)
+    public static function isMongoId($id): bool
     {
         if (!$id) {
             return false;
@@ -739,9 +732,11 @@ abstract class RemoteModelManager
     public static function getDate($time = false)
     {
         if (!$time) {
-            $time = time();
+            $time = round(microtime(true) * 1000);
+        } else {
+            $time *= 1000;
         }
-        return new \MongoDB\BSON\UTCDateTime($time * 1000);
+        return new \MongoDB\BSON\UTCDateTime($time);
     }
 
     /**
@@ -778,47 +773,5 @@ abstract class RemoteModelManager
     public static function getData()
     {
         return self::$_data;
-    }
-
-    /**
-     * __get
-     *
-     * @param  mixed $property
-     * @return void
-     */
-    public function __get($property)
-    {
-        if (!\property_exists($this, $property)) {
-            $this->{$property} = null;
-        }
-        return $this->{$property};
-    }
-
-    /**
-     * __callStatic
-     *
-     * @param  mixed $method
-     * @param  mixed $arguments
-     * @return void
-     */
-    public static function __callStatic($method, $arguments)
-    {
-        if (!\method_exists(self::class, $method)) {
-            throw new Exception('Method "' . $method . '" does not exist in ' . self::class);
-        }
-    }
-
-    /**
-     * __call
-     *
-     * @param  mixed $method
-     * @param  mixed $args
-     * @return void
-     */
-    public function __call($method, $args)
-    {
-        if (!\method_exists(self::class, $method)) {
-            throw new Exception('Method "' . $method . '" does not exist in ' . self::class);
-        }
     }
 }

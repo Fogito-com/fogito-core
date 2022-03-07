@@ -2,132 +2,605 @@
 namespace Fogito;
 
 use Fogito\Exception;
+use Fogito\Text;
 
 class Loader
 {
-    private static $prefix;
-    private static $baseDir    = '/';
-    private static $namespaces = [];
+    /**
+     * Events Manager
+     *
+     * @var null
+     * @access protected
+    */
+    protected $_eventsManager;
 
     /**
-     * registerNamespaces
+     * Found Path
      *
-     * @param  mixed $namespaces
-     * @return void
+     * @var string|null
+     * @access protected
+    */
+    protected $_foundPath;
+
+    /**
+     * Checked Path
+     *
+     * @var string|null
+     * @access protected
+    */
+    protected $_checkedPath;
+
+    /**
+     * Prefixes
+     *
+     * @var array|null
+     * @access protected
+    */
+    protected $_prefixes;
+
+    /**
+     * Classes
+     *
+     * @var array|null
+     * @access protected
+    */
+    protected $_classes;
+
+    /**
+     * Extensions
+     *
+     * @var array
+     * @access protected
+    */
+    protected $_extensions;
+
+    /**
+     * Namespaces
+     *
+     * @var array|null
+     * @access protected
+    */
+    protected $_namespaces;
+
+    /**
+     * Directories
+     *
+     * @var array|null
+     * @access protected
+    */
+    protected $_directories;
+
+    /**
+     * Registered
+     *
+     * @var boolean
+     * @access protected
+    */
+    protected $_registered = false;
+
+    /**
+     * \Fogito\Loader constructor
      */
-    public function registerNamespaces(array $namespaces = [])
+    public function __construct()
     {
-        foreach ($namespaces as $key => $value) {
-            if (self::$prefix) {
-                $key = \str_replace(self::$prefix, '', $key);
+        $this->_extensions = array('php');
+    }
+
+    /**
+     * Sets the events manager
+     *
+     * @param $eventsManager
+     * @throws \Fogito\Loader\Exception
+     */
+    public function setEventsManager($eventsManager)
+    {
+        if (is_object($eventsManager) === false) {
+            throw new Exception('Invalid parameter type.');
+        }
+
+        $this->_eventsManager = $eventsManager;
+    }
+
+    /**
+     * Returns the internal event manager
+     *
+     * @return null
+     */
+    public function getEventsManager()
+    {
+        return $this->_eventsManager;
+    }
+
+    /**
+     * Sets an array of extensions that the loader must try in each attempt to locate the file
+     *
+     * @param array $extensions
+     * @return \Fogito\Loader
+     * @throws \Fogito\Loader\Exception
+     */
+    public function setExtensions($extensions)
+    {
+        if (is_array($extensions) === false) {
+            throw new Exception('Parameter extension must be an array');
+        }
+
+        $this->_extensions = $extensions;
+
+        return $this;
+    }
+
+    /**
+     * Return file extensions registered in the loader
+     *
+     * @return array
+     */
+    public function getExtensions()
+    {
+        return $this->_extensions;
+    }
+
+    /**
+     * Register namespaces and their related directories
+     *
+     * @param array $namespaces
+     * @param boolean|null $merge
+     * @return \Fogito\Loader
+     * @throws \Fogito\Loader\Exception
+     */
+    public function registerNamespaces($namespaces, $merge = null)
+    {
+        if (is_null($merge) === true) {
+            $merge = false;
+        } elseif (is_bool($merge) === false) {
+            throw new Exception('Invalid parameter type.');
+        }
+
+        if (is_array($namespaces) === false) {
+            throw new Exception('Parameter namespaces must be an array');
+        }
+
+        if ($merge === true && is_array($this->_namespaces) === true) {
+            $this->_namespaces = array_merge($this->_namespaces, $namespaces);
+        } else {
+            $this->_namespaces = $namespaces;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return current namespaces registered in the autoloader
+     *
+     * @return array|null
+     */
+    public function getNamespaces()
+    {
+        return $this->_namespaces;
+    }
+
+    /**
+     * Register directories on which "not found" classes could be found
+     *
+     * @param array $prefixes
+     * @param boolean|null $merge
+     * @return \Fogito\Loader
+     * @throws \Fogito\Loader\Exception
+     */
+    public function registerPrefixes($prefixes, $merge = null)
+    {
+        if (is_null($merge) === true) {
+            $merge = false;
+        } elseif (is_bool($merge) === false) {
+            throw new Exception('Invalid parameter type.');
+        }
+
+        if (is_array($prefixes) === false) {
+            throw new Exception('Parameter prefixes must be an array');
+        }
+
+        if ($merge === true && is_array($this->_prefixes) === true) {
+            $this->_prefixes = array_merge($this->_prefixes, $prefixes);
+        } else {
+            $this->_prefixes = $prefixes;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return current prefixes registered in the autoloader
+     *
+     * @param array|null
+     */
+    public function getPrefixes()
+    {
+        return $this->_prefixes;
+    }
+
+    /**
+     * Register directories on which "not found" classes could be found
+     *
+     * @param array $directories
+     * @param boolean|null $merge
+     * @return \Fogito\Loader
+     * @throws \Fogito\Loader\Exception
+     */
+    public function registerDirs($directories, $merge = null)
+    {
+        if (is_null($merge) === true) {
+            $merge = false;
+        } elseif (is_bool($merge) === false) {
+            throw new Exception('Invalid parameter type.');
+        }
+
+        if (is_array($directories) === false) {
+            throw new Exception('Parameter directories must be an array');
+        }
+
+        if ($merge === true && is_array($this->_directories) === true) {
+            $this->_directories = array_merge($this->_directories, $directories);
+        } else {
+            $this->_directories = $directories;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return current directories registered in the autoloader
+     *
+     * @return array|null
+     */
+    public function getDirs()
+    {
+        return $this->_directories;
+    }
+
+    /**
+     * Register classes and their locations
+     *
+     * @param array $classes
+     * @param boolean|null $merge
+     * @return \Fogito\Loader
+     * @throws \Fogito\Loader\Exception
+     */
+    public function registerClasses($classes, $merge = null)
+    {
+        if (is_null($merge) === true) {
+            $merge = false;
+        } elseif (is_bool($merge) === false) {
+            throw new Exception('Invalid parameter type.');
+        }
+
+        if (is_array($classes) === false) {
+            throw new Exception('Parameter classes must be an array');
+        }
+
+        if ($merge === true && is_array($this->_classes) === true) {
+            $this->_classes = array_merge($this->_classes, $classes);
+        } else {
+            $this->_classes = $classes;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Return the current class-map registered in the autoloader
+     *
+     * @return array|null
+     */
+    public function getClasses()
+    {
+        return $this->_classes;
+    }
+
+    /**
+     * Register the autoload method
+     *
+     * @return \Fogito\Loader
+     */
+    public function register()
+    {
+        if ($this->_registered === false) {
+            spl_autoload_register(array($this, 'autoLoad'));
+            $this->_registered = true;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Unregister the autoload method
+     *
+     * @return \Fogito\Loader
+     */
+    public function unregister()
+    {
+        if ($this->_registered === true) {
+            spl_autoload_unregister(array($this, 'autoLoad'));
+            $this->_registered = false;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Removes the prefix from a class name,
+     * removes malicious characters,
+     * replace namespace seperator by directory seperator
+     *
+     * @param string $prefix
+     * @param string $className
+     * @param string $virtualSeperator
+     * @param string|null $seperator
+     * @return string|boolean
+    */
+    private static function possibleAutoloadFilePath($prefix, $className, $virtualSeperator, $seperator = null)
+    {
+        if (is_string($prefix) === false ||
+            is_string($className) === false ||
+            is_string($virtualSeperator) === false ||
+            (is_string($seperator) === false &&
+            is_null($seperator) === false)) {
+            return false;
+        }
+
+        $length = strlen($prefix);
+        if ($length === 0 || $length > strlen($className)) {
+            return false;
+        }
+
+        if (is_null($seperator) === false &&
+            is_string($seperator) === true &&
+            $prefix[$length-1] === $seperator[0]) {
+            $length--;
+        }
+
+        $virtualStr = '';
+
+        $lengthClassName = strlen($className);
+        for ($i = $length + 1; $i < $lengthClassName; ++$i) {
+            $ch = ord($className[$i]);
+
+            //Anticipated end of string
+            if ($ch === 0) {
+                break;
             }
-            $key                    = trim($key, '\\');
-            self::$namespaces[$key] = '/' . trim($value, '/');
+
+            //Replace namespace seperator by directory seperator (\)
+            if ($ch === 92) {
+                $virtualStr .= $virtualSeperator;
+                continue;
+            }
+
+            //Replace seperator
+            if ($ch === ord($seperator)) {
+                $virtualStr .= $virtualSeperator;
+                continue;
+            }
+
+            //Basic alphanumeric characters
+            if ($ch === 95 || // _
+                ($ch >= 48 && $ch <= 57) || // >="0" && <= "9"
+                ($ch >= 97 && $ch <= 122) || // >="a" && <= "z"
+                ($ch >= 65 && $ch <= 90)) {
+                // >= "A" && <= "Z"
+                $virtualStr .= $className[$i];
+                continue;
+            }
+
+            //Multibyte characters?
+            if ($ch > 127) {
+                $virtualStr .= $className[$i];
+                continue;
+            }
+        }
+
+        if (empty($virtualStr) === false) {
+            return $virtualStr;
+        } else {
+            return false;
         }
     }
 
     /**
-     * setBaseDir
+     * Adds a trailing directory seperator if the path doesn't have it
      *
-     * @param  mixed $dir
-     * @return void
-     */
-    public function setBaseDir($dir)
+     * @param string $path
+     * @param string $directorySeperator
+     * @return string|null
+    */
+    private static function fixPath($path, $directorySeperator)
     {
-        self::$baseDir = rtrim($dir, '/') . '/';
-    }
-
-    /**
-     * getBaseDir
-     *
-     * @return void
-     */
-    public function getBaseDir()
-    {
-        return self::$baseDir;
-    }
-
-    /**
-     * setPrefix
-     *
-     * @param  mixed $prefix
-     * @return void
-     */
-    public function setPrefix($prefix)
-    {
-        self::$prefix = trim($prefix, '\\');
-    }
-
-    /**
-     * getPrefix
-     *
-     * @return void
-     */
-    public function getPrefix()
-    {
-        return self::$prefix;
-    }
-
-    /**
-     * Loads the given class or interface.
-     *
-     * @param string $class The name of the class
-     *
-     * @return bool|null True, if loaded
-     */
-    private function loadClass($class)
-    {
-        if (strncmp(self::$prefix, $class, strlen(self::$prefix)) !== 0) {
+        if (is_string($path) === false ||
+            is_string($directorySeperator) === false) {
             return;
         }
 
-        if (self::$prefix) {
-            $class = \str_replace(self::$prefix, '', $class);
+        //@note we assume $directorySeparator is a char and not a string
+
+        $pathLength = strlen($path);
+
+        if (empty($pathLength) === false &&
+            empty($directorySeperator) === false &&
+            $path[$pathLength-1] !== '\\' &&
+            $path[$pathLength-1] !== '/') {
+            return $path.$directorySeperator;
         }
 
-        $class     = trim($class, '\\');
-        $exp       = \explode('\\', $class);
-        $classPath = \implode('\\', \array_slice($exp, 0, \count($exp) - 1));
-        $className = \end($exp);
+        return $path;
+    }
 
-        $file = self::$baseDir . \strtolower(\str_replace('\\', DIRECTORY_SEPARATOR, $classPath)) . DIRECTORY_SEPARATOR . $className . '.php';
+    /**
+     * Makes the work of autoload registered classes
+     *
+     * @param string $className
+     * @return boolean
+     */
+    public function autoLoad($className)
+    {
+        $eventsManager = $this->_eventsManager;
+        if (is_object($eventsManager) === true) {
+            $eventsManager->fire('loader:beforeCheckClass', $this, $className);
+        }
 
-        if (\array_key_exists($class, self::$namespaces) || \array_key_exists($classPath, self::$namespaces)) {
-            $namespace = \array_key_exists($class, self::$namespaces) ? self::$namespaces[$class] : self::$namespaces[$classPath];
-            if ($namespace) {
-                if (\is_file($namespace) && \pathinfo($namespace, PATHINFO_EXTENSION) == 'php') {
-                    $file = rtrim(self::$baseDir, DIRECTORY_SEPARATOR) . $namespace;
-                } else {
-                    $file = rtrim(self::$baseDir, DIRECTORY_SEPARATOR) . rtrim($namespace, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $className . '.php';
+        /* First we check for static paths */
+        if (is_array($this->_classes) === true &&
+            isset($this->_classes[$className]) === true) {
+            $filePath = $this->_classes[$className];
+            if (is_object($eventsManager) === true) {
+                $this->_foundPath = $filePath;
+                $eventsManager->fire('loader:pathFound', $this, $filePath);
+            }
+
+            require_once($filePath);
+            return true;
+        }
+
+        $extensions = $this->_extensions;
+
+        /* Checking in namespaces */
+        if (is_array($this->_namespaces) === true) {
+            foreach ($this->_namespaces as $nsPrefix => $directory) {
+                //The class name must start with the current namespace
+                if (Text::startsWith($className, $nsPrefix) === true) {
+                    //Get the possible file path
+                    $fileName = self::possibleAutoloadFilePath($nsPrefix, $className, \DIRECTORY_SEPARATOR, null);
+                    if ($fileName !== false) {
+                        //Add a trailing directory separator is the user forgot to do that
+                        $fixedDirectory = self::fixPath($directory, \DIRECTORY_SEPARATOR);
+
+                        foreach ($extensions as $extension) {
+                            $filePath = $fixedDirectory.$fileName.'.'.$extension;
+
+                            //Check if an events manager is available
+                            if (is_object($eventsManager) === true) {
+                                $this->_checkedPath = $filePath;
+                                $eventsManager->fire('loader:beforeCheckPath', $this);
+                            }
+
+                            //This is probably a good path, let's check if the file exists
+                            if (file_exists($filePath) === true) {
+                                if (is_object($eventsManager) === true) {
+                                    $this->_foundPath = $filePath;
+
+                                    $eventsManager->fire('loader:pathFound', $this, $filePath);
+                                }
+
+                                require_once($filePath);
+
+                                //Return true means success
+                                return true;
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        if (!\file_exists($file)) {
-            throw new Exception('Class not found "' . $file . '"');
+        /* Checking in prefixes */
+        $prefixes = $this->_prefixes;
+        if (is_array($prefixes) === true) {
+            foreach ($prefixes as $prefix => $directory) {
+                //The class name starts with the prefix?
+                if (Text::startsWith($className, $prefix) === true) {
+                    //Get the possible file path
+                    $fileName = self::possibleAutoloadFilePath($prefix, $className, \DIRECTORY_SEPARATOR, '_');
+                    if ($fileName !== false) {
+                        //Add a trailing directory separator is the user forgot to do that
+                        $fixedDirectory = self::fixPath($directory, \DIRECTORY_SEPARATOR);
+
+                        foreach ($extensions as $extension) {
+                            $filePath = $fixedDirectory.$fileName.'.'.$extension;
+
+                            if (is_object($eventsManager) === true) {
+                                $this->_checkedPath = $filePath;
+                                $eventsManager->fire('loader:beforeCheckPath', $this, $filePath);
+                            }
+
+                            if (file_exists($filePath) === true) {
+                                //Call 'pathFound' event
+                                if (is_object($eventsManager) === true) {
+                                    $this->_foundPath = $filePath;
+                                    $eventsManager->fire('loader:pathFound', $this, $filePath);
+                                }
+
+                                require_once($filePath);
+
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        require $file;
+        //Change the pseudo-separator by the directory separator in the class name
+        $dsClassName = str_replace('_', \DIRECTORY_SEPARATOR, $className);
+
+        //And change the namespace separator by directory separator too
+        $nsClassName = str_replace('\\', \DIRECTORY_SEPARATOR, $dsClassName);
+
+        /* Checking in directories */
+        $directories = $this->_directories;
+        if (is_array($directories) === true) {
+            foreach ($directories as $directory) {
+                //Add a trailing directory separator if the user forgot to do that
+                $fixedDirectory = self::fixPath($directory, \DIRECTORY_SEPARATOR);
+
+                foreach ($extensions as $extension) {
+                    //Create a possible path for the file
+                    $filePath = $fixedDirectory.$nsClassName.'.'.$extension;
+
+                    if (is_object($eventsManager) === true) {
+                        $this->_checkedPath = $filePath;
+                        $eventsManager->fire('loader:beforeCheckPath', $this, $filePath);
+                    }
+
+                    //Check in every directory if the class exists here
+                    if (file_exists($filePath) === true) {
+                        //Call 'pathFound' event
+                        if (is_object($eventsManager) === true) {
+                            $this->_foundPath = $filePath;
+                            $eventsManager->fire('loader:pathFound', $this, $filePath);
+                        }
+
+                        require_once($filePath);
+
+                        //Returning true means success
+                        return true;
+                    }
+                }
+            }
+        }
+
+        //Call 'afterCheckClass' event
+        if (is_object($eventsManager) === true) {
+            $eventsManager->fire('loader:afterCheckClass', $this, $className);
+        }
+
+        //Cannot find the class - return false
+        return false;
     }
 
     /**
-     * Registers this instance as an autoloader.
+     * Get the path when a class was found
      *
-     * @param bool $prepend Whether to prepend the autoloader or not
-     * @return void
+     * @return string|null
      */
-    public function register($prepend = false)
+    public function getFoundPath()
     {
-        \spl_autoload_register([Loader::class, 'loadClass'], true, $prepend);
+        return $this->_foundPath;
     }
 
     /**
-     * Unregisters this instance as an autoloader.
+     * Get the path the loader is checking for a path
      *
-     * @return void
+     * @return string|null
      */
-    public function unregister()
+    public function getCheckedPath()
     {
-        \spl_autoload_unregister([Loader::class, 'loadClass']);
+        return $this->_checkedPath;
     }
 }

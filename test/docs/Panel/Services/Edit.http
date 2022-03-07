@@ -1,0 +1,31 @@
+POST {{panel_api_url}}/services/edit HTTP/1.1
+Content-Type: application/json
+
+{
+  "token": "{{panel_token}}",
+  "app_id": "{{panel_app_id}}",
+  "lang": "{{lang}}",
+  "source": "{{source}}",
+  "env": "{{env}}",
+  "v": "{{version}}",
+  "data": {
+    "id": "621285f19011e54433352a19",
+    "category_id": "6213d8519011e56cc70fa67d",
+    "title": "updated title",
+    "description": "updated description",
+    "translations": {
+      "title": {
+        "en": "title en",
+        "ru": "title ru"
+      },
+      "description": {
+        "en": "description en",
+        "ru": "description ru"
+      }
+    },
+    "slug": "",
+    "avatar_id": "6213e3759011e57290192d9f",
+    "index": 123,
+    "status": 1
+  }
+}

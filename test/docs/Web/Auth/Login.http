@@ -1,0 +1,15 @@
+POST {{api_url}}/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "app_id": "{{web_app_id}}",
+  "lang": "{{lang}}",
+  "source": "{{source}}",
+  "env": "{{env}}",
+  "v": "{{version}}",
+  "data": {
+    "username": "demouser",
+    "password": "123456",
+    "remember": true
+  }
+}

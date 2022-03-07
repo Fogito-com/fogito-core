@@ -1,0 +1,14 @@
+POST {{panel_api_url}}/data/translations/set HTTP/1.1
+Content-Type: application/json
+
+{
+  "app_id": "{{panel_app_id}}",
+  "lang": "{{lang}}",
+  "source": "{{source}}",
+  "env": "{{env}}",
+  "v": "{{version}}",
+  "data": {
+    "Test": "A 1 _-+?@!)(}{*%# =/.,;:\"'|",
+    "Test3": "A 1 _-+?@!)(}{*%# =/.,;:\"'|>"
+  }
+}

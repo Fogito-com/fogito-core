@@ -2,7 +2,7 @@
 namespace Categories;
 
 use Fogito\Loader;
-use Middlewares\Auth;
+use Middlewares\Api;
 
 class Module extends \Fogito\Module
 {
@@ -15,6 +15,6 @@ class Module extends \Fogito\Module
         $loader->register();
 
         $app->setDefaultNamespace(__NAMESPACE__ . '\Controllers');
-        $app->addEvent(new Auth);
+        $app->addMiddleware(new Api);
     }
 }
