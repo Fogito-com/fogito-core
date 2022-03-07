@@ -1,6 +1,6 @@
 {
     "name": "fogito/core",
-    "description": "",
+    "description": "composer require fogito/core",
     "type": "library",
     "license": "MIT",
     "autoload": {
