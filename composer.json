@@ -1,8 +1,8 @@
 {
-    "name": "fogito-core/framework",
+    "name": "fogito/core",
     "description": "",
     "type": "library",
-    "license": "Fogito LLC",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Fogito\\": "src/"
@@ -12,8 +12,14 @@
         {
             "name": "Fogito LLC",
             "email": "info@fogito.com"
+        },,
+        {
+            "name": "Tural Ilyasov",
+            "email": "reactural@gmail.com"
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "php": ">=5.6"
+    }
 }
