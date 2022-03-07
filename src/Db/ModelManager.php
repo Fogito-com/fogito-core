@@ -243,6 +243,16 @@ abstract class ModelManager implements ModelManagerInterface
 
     /**
      * renameColumns
+     * 
+     * <code>
+     *      Model::renameColumns([
+     *          'is_deleted' => [
+     *              '$ne' => 1
+     *          ]
+     *      ],[
+     *          '<column name>' => true
+     *      ]);
+     * </code>
      *
      * @param  mixed $filter
      * @param  mixed $rename
@@ -266,7 +276,20 @@ abstract class ModelManager implements ModelManagerInterface
 
     /**
      * createIndexes
-     *
+     * 
+     * <code>
+     *      Model::createIndexes([
+     *          [
+     *              'name' => 'company_id',
+     *              'key'  => [ 
+     *                  'company_id' => 1
+     *              ],
+     *              'unique' => true,
+     *              'expireAfterSeconds' => 300
+     *          ]
+     *      ]);
+     * </code>
+     * 
      * @param  mixed $indexes
      * @return bool
      */
