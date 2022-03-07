@@ -16,6 +16,10 @@
         {
             "name": "Tural Ilyasov",
             "email": "reactural@gmail.com"
+        },
+        {
+            "name": "Shahmar Shukurov",
+            "email": "seniorshahmar@gmail.com"
         }
     ],
     "minimum-stability": "stable",
