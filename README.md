@@ -33,7 +33,7 @@ SOFTWARE.
 
 
 ## Authors
-<div><img src="https://avatars.githubusercontent.com/u/67363720?s=200&v=4" style="vertical-align:middle;width:50px;height:50px;border-radius:25px;margin-right:10px"/><a href="https://github.com/fogito-com">Fogito LLC</a></div>
-<div><img src="https://avatars.githubusercontent.com/u/49871657?s=200&v=4" style="vertical-align:middle;width:50px;height:50px;border-radius:25px;margin-right:10px"/><a href="https://github.com/reactural">Tural Ilyasov</a></div>
-<div><img src="https://avatars.githubusercontent.com/u/26191748?s=2007v=4" style="vertical-align:middle;width:50px;height:50px;border-radius:25px;margin-right:10px"/><a href="https://github.com/seniorshahmar">Shahmar Shukurov</a></div>
+- <a href="https://github.com/fogito-com">Fogito LLC</a><br/>
+- <a href="https://github.com/reactural">Tural Ilyasov</a><br/>
+- <a href="https://github.com/seniorshahmar">Shahmar Shukurov</a><br/>
 
