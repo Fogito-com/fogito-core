@@ -15,13 +15,17 @@ This a multi-module [MVC][mvc-pattern] structure.
 app/
 ├── config
 │   └── config.php
+│
 ├── lib
 │   └── Auth.php
+│
 ├── middlewares
 │   └── Api.php
+│
 ├── models
 │   ├── Products.php
 │   └── Users.php
+│
 └── sites
     └── api
         ├── config
