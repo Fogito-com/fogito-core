@@ -13,28 +13,40 @@ This a multi-module [MVC][mvc-pattern] structure. This example implements two mo
 By default frontend is served if no route to backend is asked. You can define which routes
 use one module or another in `public/index.php`:
 
-`
-project/
-├── apps
-│   ├── backend
-│   │   ├── Module.php
-│   │   ├── controllers
-│   │   │   ├── IndexController.php
-│   │   │   ├── LoginController.php
-│   │   │   └── ProductsController.php
-│   │   └── models
-│   │       └── Products.php
-│   └── frontend
-│       ├── Module.php
-│       ├── controllers
-│       │   ├── IndexController.php
-│       │   ├── ProductsController.php
-│       │   └── UsersController.php
-│       └── models
-│           └── Products.php
-└── public
-    └── index.php
-`
+```
+app/
+├── config
+│   └── config.php
+├── lib
+│   └── Auth.php
+├── middlewares
+│   └── Api.php
+├── models
+│   ├── Products.php
+│   └── Users.php
+└── sites
+    └── api
+        ├── config
+        │   ├── modules.php
+        │   ├── routes.php
+        │   └── config.php
+        │   
+        ├── modules
+        │   ├── auth
+        │   │   ├── controllers
+        │   │   │   ├── LoginController.php
+        │   │   │   └── RegisterController.php
+        │   │   └── Module.php
+        │   │   
+        │   └── products
+        │       ├── controllers
+        │       │   ├── CreateController.php
+        │       │   ├── ListController.php
+        │       │   └── DeleteController.php
+        │       └── Module.php
+        │      
+        └── index.php
+```
 
 ## Team
 
