@@ -3,7 +3,9 @@ Fogito Core - MVC structure
 
 ## Installation
 
-```composer require fogito/core```
+```
+composer require fogito/core
+```
 
 ## Structure
 
