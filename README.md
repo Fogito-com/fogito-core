@@ -34,5 +34,6 @@ SOFTWARE.
 
 ## Authors
 [Tural Ilyasov](https://github.com/reactural)
+
 [Shahmar Shukurov](https://github.com/seniorshahmar)
 
