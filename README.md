@@ -1,11 +1,40 @@
 # Fogito Core
 Fogito Core - MVC structure
 
-**Website**: <a href="https://fogito.com">https://fogito.com</a>
-----
+<a href="https://fogito.com">https://fogito.com</a>
+
 ## Installation
 
 - `composer require fogito/core`
+
+## Structure
+
+This a multi-module [MVC][mvc-pattern] structure. This example implements two modules: frontend and backend.
+By default frontend is served if no route to backend is asked. You can define which routes
+use one module or another in `public/index.php`:
+
+```
+project/
+├── apps
+│   ├── backend
+│   │   ├── Module.php
+│   │   ├── controllers
+│   │   │   ├── IndexController.php
+│   │   │   ├── LoginController.php
+│   │   │   └── ProductsController.php
+│   │   └── models
+│   │       └── Products.php
+│   └── frontend
+│       ├── Module.php
+│       ├── controllers
+│       │   ├── IndexController.php
+│       │   ├── ProductsController.php
+│       │   └── UsersController.php
+│       └── models
+│           └── Products.php
+└── public
+    └── index.php
+```
 
 ## Authors
 
@@ -13,7 +42,6 @@ Fogito Core - MVC structure
 - <a href="https://github.com/senior2ral">Tural Ilyasov</a><br/>
 - <a href="https://github.com/seniorshahmar">Shahmar Shukurov</a><br/>
 
-----
 ## License info
 
 Fogito Core License
