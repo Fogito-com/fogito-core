@@ -2,7 +2,7 @@
     "name": "fogito/core",
     "description": "composer require fogito/core",
     "type": "library",
-    "license": "MIT",
+    "license": "Fogito LLC",
     "autoload": {
         "psr-4": {
             "Fogito\\": "src/"
