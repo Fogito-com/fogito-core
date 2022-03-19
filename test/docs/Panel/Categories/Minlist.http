@@ -1,8 +1,0 @@
-GET {{panel_api_url}}/categories/minlist
-  ?token={{panel_token}}
-  &app_id={{panel_app_id}}
-  &lang={{lang}}
-  &source={{source}}
-  &env={{env}}
-  &v={{version}}
-  &keyword=

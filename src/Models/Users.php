@@ -11,6 +11,20 @@ use Fogito\Lib\Auth;
 
 class Users extends \Fogito\Db\RemoteModelManager
 {
+    const STATUS_MODERATE = 1;
+    const STATUS_ACTIVE   = 2;
+    const STATUS_INACTIVE = 3;
+
+    const TYPE_USER      = 'user';
+    const TYPE_MODERATOR = 'moderator';
+
+    const LEVEL_OPERATOR       = 'operator';
+    const LEVEL_SUPERVISOR     = 'supervisor';
+    const LEVEL_ADMINISTRATION = 'administration';
+
+    const GENDER_MALE   = 'male';
+    const GENDER_FEMALE = 'female';
+    
     /**
      * __construct
      *
