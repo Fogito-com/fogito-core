@@ -1,17 +1,21 @@
 # Fogito Core
 Fogito Core - MVC structure
+
 **Website**: <a href="https://fogito.com">https://fogito.com</a>
 ----
 ## Installation
+
 - `composer require fogito/core`
 
 ## Authors
+
 - <a href="https://github.com/fogito-com">Fogito LLC</a><br/>
 - <a href="https://github.com/senior2ral">Tural Ilyasov</a><br/>
 - <a href="https://github.com/seniorshahmar">Shahmar Shukurov</a><br/>
 
 ----
 ## License info
+
 Fogito Core License
 
 Copyright (c) 2022 Fogito
