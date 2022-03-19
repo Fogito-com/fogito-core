@@ -8,6 +8,11 @@ Fogito Core - MVC structure
 
 - `composer require fogito/core`
 
+## Authors
+- <a href="https://github.com/fogito-com">Fogito LLC</a><br/>
+- <a href="https://github.com/senior2ral">Tural Ilyasov</a><br/>
+- <a href="https://github.com/seniorshahmar">Shahmar Shukurov</a><br/>
+
 ## License info
 Fogito Core License
 
@@ -30,10 +35,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
-## Authors
-- <a href="https://github.com/fogito-com">Fogito LLC</a><br/>
-- <a href="https://github.com/reactural">Tural Ilyasov</a><br/>
-- <a href="https://github.com/seniorshahmar">Shahmar Shukurov</a><br/>
-
