@@ -13,7 +13,7 @@ This a multi-module [MVC][mvc-pattern] structure. This example implements two mo
 By default frontend is served if no route to backend is asked. You can define which routes
 use one module or another in `public/index.php`:
 
-```
+`
 project/
 ├── apps
 │   ├── backend
@@ -34,7 +34,7 @@ project/
 │           └── Products.php
 └── public
     └── index.php
-```
+`
 
 ## Team
 
