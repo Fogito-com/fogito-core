@@ -9,9 +9,7 @@ composer require fogito/core
 
 ## Structure
 
-This a multi-module [MVC][mvc-pattern] structure. This example implements two modules: frontend and backend.
-By default frontend is served if no route to backend is asked. You can define which routes
-use one module or another in `public/index.php`:
+This a multi-module [MVC][mvc-pattern] structure.
 
 ```
 app/
