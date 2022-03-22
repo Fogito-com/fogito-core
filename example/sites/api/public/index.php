@@ -1,10 +1,10 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', false);
-define('APP_PATH', __DIR__);
+error_reporting(1);
+ini_set('display_errors', true);
+define('APP_PATH', __DIR__."/..");
 
-require __DIR__ . '/../../core.php';
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../../core.php';
+require __DIR__ . '/../../../vendor/autoload.php';
 
 use Fogito\App;
 use Fogito\Config;

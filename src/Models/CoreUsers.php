@@ -9,8 +9,22 @@ namespace Fogito\Models;
 
 use Fogito\Lib\Auth;
 
-class Companies extends \Fogito\Db\RemoteModelManager
+class CoreUsers extends \Fogito\Db\RemoteModelManager
 {
+    const STATUS_MODERATE = 1;
+    const STATUS_ACTIVE   = 2;
+    const STATUS_INACTIVE = 3;
+
+    const TYPE_USER      = 'user';
+    const TYPE_MODERATOR = 'moderator';
+
+    const LEVEL_OPERATOR       = 'operator';
+    const LEVEL_SUPERVISOR     = 'supervisor';
+    const LEVEL_ADMINISTRATION = 'administration';
+
+    const GENDER_MALE   = 'male';
+    const GENDER_FEMALE = 'female';
+    
     /**
      * __construct
      *
@@ -31,7 +45,39 @@ class Companies extends \Fogito\Db\RemoteModelManager
      */
     public static function getSource()
     {
-        return 'companies';
+        return 'users';
+    }
+
+    /**
+     * filterInsertData
+     *
+     * @param  mixed $properties
+     * @return void
+     */
+    public static function filterInsertData($properties = [])
+    {
+        $allows = [
+            'id',
+            'type',
+            'username',
+            'phone',
+            'firstname',
+            'lastname',
+            'fullname',
+            'email',
+            'password',
+            'gender',
+            'tax_id',
+            'address',
+        ];
+
+        foreach ($properties as $key => $value) {
+            if (!in_array($key, $allows)) {
+                unset($properties[$key]);
+            }
+        }
+
+        return $properties;
     }
 
     /**
@@ -44,22 +90,23 @@ class Companies extends \Fogito\Db\RemoteModelManager
     {
         $allows = [
             'id',
-            'title',
-            'address',
-            'currencies',
-            'languages',
-            'timezones',
-            'phones',
-            'emails',
-            'vat',
-            'invoice_days',
-            'next_invoice_number',
+            'type',
+            'username',
+            'phone',
+            'firstname',
+            'lastname',
+            'fullname',
+            'email',
+            'password',
+            'gender',
             'tax_id',
-            'reg_id',
-            'account_id',
+            'address',
+            'salary',
+            'monthly',
             'weekly',
-            'status',
-            'permissions',
+            'currency',
+            'is_deleted',
+            'is_blocked',
         ];
 
         foreach ($properties as $key => $value) {

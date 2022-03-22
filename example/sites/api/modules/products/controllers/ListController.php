@@ -1,6 +1,7 @@
 <?php
 namespace Products\Controllers;
 
+use Fogito\Models\CoreUsers;
 use Lib\Lang;
 use Lib\Request;
 use Lib\Response;

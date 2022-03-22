@@ -22,18 +22,18 @@ class Auth
      */
     public static function isAuth()
     {
-        return self::$_data instanceof \Fogito\Models\Users;
+        return self::$_data instanceof \Fogito\Models\CoreUsers;
     }
 
     /**
      * setData
      *
-     * @param  \Fogito\Models\Users $data
+     * @param  \Fogito\Models\CoreUsers $data
      * @return void
      */
     public static function setData($data)
     {
-        if (!$data instanceof \Fogito\Models\Users) {
+        if (!$data instanceof \Fogito\Models\CoreUsers) {
             throw new \Exception('Invalid parameter type: ' . get_called_class());
         }
         self::$_data = $data;
@@ -42,7 +42,7 @@ class Auth
     /**
      * getData
      *
-     * @return \Fogito\Models\Users
+     * @return \Fogito\Models\CoreUsers
      */
     public static function getData()
     {

@@ -19,7 +19,7 @@ namespace Fogito\Models;
  * * ]);
  * * $res = Notifications::send();
  */
-class Notifications extends \Fogito\Db\RemoteModelManager
+class CoreNotifications extends \Fogito\Db\RemoteModelManager
 {
     protected static $application_id;
     protected static $data = [];

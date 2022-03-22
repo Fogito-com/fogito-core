@@ -2,7 +2,7 @@
 namespace Models;
 
 use Fogito\Lib\Lang;
-use Fogito\Models\Users;
+use Fogito\Models\CoreUsers;
 
 class Files extends \Lib\ModelManager
 {
@@ -69,7 +69,7 @@ class Files extends \Lib\ModelManager
             }
         } else {
             if ($data->parent_type == 'users') {
-                $filename = $data->gender == Users::GENDER_FEMALE ? 'no-avatar-female.svg' : 'no-avatar.svg';
+                $filename = $data->gender == CoreUsers::GENDER_FEMALE ? 'no-avatar-female.svg' : 'no-avatar.svg';
             } else {
                 $filename = 'no-image.svg';
             }

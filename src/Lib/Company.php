@@ -16,12 +16,12 @@ class Company
     /**
      * Set data
      *
-     * @param \Fogito\Models\Companies $data
+     * @param \Fogito\Models\CoreCompanies $data
      * @return void
      */
     public static function setData($data)
     {
-        if (!$data instanceof \Fogito\Models\Companies) {
+        if (!$data instanceof \Fogito\Models\CoreCompanies) {
             throw new \Exception('Invalid parameter type: ' . get_called_class());
         }
         
@@ -31,7 +31,7 @@ class Company
     /**
      * Get data
      *
-     * @return \Fogito\Models\Companies
+     * @return \Fogito\Models\CoreCompanies
      */
     public static function getData()
     {

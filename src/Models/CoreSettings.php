@@ -7,7 +7,7 @@
 */
 namespace Fogito\Models;
 
-class Settings extends \Fogito\Db\RemoteModelManager
+class CoreSettings extends \Fogito\Db\RemoteModelManager
 {
     protected static $_data = [];
 

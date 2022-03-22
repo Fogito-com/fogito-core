@@ -14,9 +14,9 @@ use Fogito\Http\Request;
 use Fogito\Lib\Auth as UserAuth;
 use Fogito\Lib\Company;
 use Fogito\Lib\Lang;
-use Fogito\Models\Companies;
-use Fogito\Models\Settings;
-use Fogito\Models\Users;
+use Fogito\Models\CoreCompanies;
+use Fogito\Models\CoreSettings;
+use Fogito\Models\CoreUsers;
 
 class Auth extends \Fogito\Middleware
 {
@@ -37,9 +37,9 @@ class Auth extends \Fogito\Middleware
         $token = isset($_COOKIE['ut']) ? (string) trim($_COOKIE['ut']) : (string) trim(Request::get('token'));
         UserAuth::setToken($token);
 
-        $data = Settings::init();
+        $data = CoreSettings::init();
         if (is_array($data)) {
-            Settings::setData($data);
+            CoreSettings::setData($data);
             foreach ($data as $key => $value) {
                 switch ($key) {
                     case 'account_error':
@@ -47,7 +47,7 @@ class Auth extends \Fogito\Middleware
 
                     case 'account':
                         if ($value['id']) {
-                            UserAuth::setData(new Users($value));
+                            UserAuth::setData(new CoreUsers($value));
                         }
                         break;
 
@@ -57,7 +57,7 @@ class Auth extends \Fogito\Middleware
 
                     case 'company':
                         if ($value['id']) {
-                            Company::setData(new Companies($value));
+                            Company::setData(new CoreCompanies($value));
                         }
                         break;
 
