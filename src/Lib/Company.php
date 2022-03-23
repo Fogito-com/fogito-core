@@ -1,69 +1,26 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Lib;
-
-use Fogito\Lib\Helpers;
 
 class Company
 {
     protected static $_data;
 
-    /**
-     * Set data
-     *
-     * @param \Fogito\Models\CoreCompanies $data
-     * @return void
-     */
     public static function setData($data)
     {
-        if (!$data instanceof \Fogito\Models\CoreCompanies) {
-            throw new \Exception('Invalid parameter type: ' . get_called_class());
-        }
-        
+        $data = json_decode(json_encode($data));
         self::$_data = $data;
     }
 
-    /**
-     * Get data
-     *
-     * @return \Fogito\Models\CoreCompanies
-     */
     public static function getData()
     {
         return self::$_data;
     }
 
-    /**
-     * Get ID
-     *
-     * @return null|string
-     */
     public static function getId()
     {
-        if (isset(self::$_data)) {
-            return self::$_data->getId();
-        }
+        if (self::$_data && self::$_data->id)
+            return self::$_data->id;
 
-        return null;
-    }
-    
-    /**
-     * get
-     *
-     * @param  string $key
-     * @return null|mixed
-     */
-    public static function get($key)
-    {
-        if (\is_string(trim($key))) {
-            return Helpers::getArrayByKey($key, (array) self::$_data, (array) self::$_data);
-        }
-        
         return null;
     }
 }

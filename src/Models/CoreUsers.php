@@ -56,27 +56,6 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
      */
     public static function filterInsertData($properties = [])
     {
-        $allows = [
-            'id',
-            'type',
-            'username',
-            'phone',
-            'firstname',
-            'lastname',
-            'fullname',
-            'email',
-            'password',
-            'gender',
-            'tax_id',
-            'address',
-        ];
-
-        foreach ($properties as $key => $value) {
-            if (!in_array($key, $allows)) {
-                unset($properties[$key]);
-            }
-        }
-
         return $properties;
     }
 
@@ -88,32 +67,6 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
      */
     public static function filterUpdateData($properties = [])
     {
-        $allows = [
-            'id',
-            'type',
-            'username',
-            'phone',
-            'firstname',
-            'lastname',
-            'fullname',
-            'email',
-            'password',
-            'gender',
-            'tax_id',
-            'address',
-            'salary',
-            'monthly',
-            'weekly',
-            'currency',
-            'is_deleted',
-            'is_blocked',
-        ];
-
-        foreach ($properties as $key => $value) {
-            if (!in_array($key, $allows)) {
-                unset($properties[$key]);
-            }
-        }
         return $properties;
     }
 

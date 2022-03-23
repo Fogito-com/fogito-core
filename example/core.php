@@ -9,7 +9,7 @@ define('CLOUD_URL', 'https://cloud.example.com');
 define('STATIC_URL', 'https://static.example.com');
 
 define('ROOT_PATH', __DIR__);
-define('STORAGE_PATH', __DIR__ . '/storage');
+define('STORAGE_PATH', __DIR__ . '/app/storage');
 
 define('ENV', 'development');
 

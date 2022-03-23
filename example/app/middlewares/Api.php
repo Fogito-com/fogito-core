@@ -26,17 +26,22 @@ class Api extends \Fogito\Middleware
             $controller = $app->router->getControllerName();
             $action     = $app->router->getActionName();
 
-            if (!\in_array($module, ['auth'])) {
-                $i = new LogsAccess();
-                if (Auth::isAuth()) {
-                    $i->user_id = Auth::getId();
-                }
-                $i->query = \array_slice(Request::get(), 0, 100, true);
-                $i->set($i);
+            Auth::init();
+            if (!\in_array($module, ['auth']) && !Auth::getData())
+            {
+                //Response::error(Auth::$)
             }
+
+
+            $i = new LogsAccess();
+            if (Auth::isAuth())
+                $i->user_id = Auth::getId();
+            $i->query = \array_slice(Request::get(), 0, 100, true);
+            $i->set($i);
         } catch (\Exception $e) {
             Response::error($e->getMessage(), $e->getCode());
         }
+
     }
 
     /**

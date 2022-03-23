@@ -1,60 +1,90 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Lib;
 
-use Fogito\Lib\Helpers;
+use Fogito\Exception;
+use Fogito\Http\Request;
+use Fogito\Lib\Cache;
+use Fogito\Models\CoreSettings;
+use Fogito\Lib\Lang;
 
 class Auth
 {
     protected static $_token;
+    protected static $_tokenUser;
     protected static $_data;
     protected static $_permissions = [];
+    protected static $_cacheDuration = 60; // Seconds
 
-    /**
-     * isAuth
-     *
-     * @return bool
-     */
+    public function __construct()
+    {
+        Auth::init();
+    }
+
+    public static function init()
+    {
+        $lang = isset($_COOKIE['lang']) ? (string) trim($_COOKIE['lang']) : (string) trim(Request::get('lang'));
+        if (preg_match('/[a-z]{2}/i', trim($lang)))
+            Lang::setLang($lang);
+
+        list($_token, $_tokenUser) = Auth::getParams();
+        Auth::setToken($_token);
+        Auth::setTokenUser($_tokenUser);
+
+        $response       = false;
+        if($_token && strlen($_token) > 0)
+            $response       = Cache::get(Auth::getCacheKey());
+        if(!$response)
+            $response = CoreSettings::request(null, []);
+        if (is_object($response) && $_data=$response->data)
+        {
+            CoreSettings::setData($_data);
+
+            if($_data->account_error)
+                throw new Exception($_data->account_error->description, $_data->account_error->error_code);
+
+            if($_data->account)
+                Auth::setData($_data->account);
+            if($_data->permissions)
+                Auth::setPermissions($_data->permissions);
+            if($_data->company)
+                Company::setData($_data->company);
+            if($_data->translations)
+                Lang::setData($_data->translations);
+
+            Cache::set(Auth::getCacheKey(), $response, Auth::getCacheDuration());
+        }
+        else
+        {
+            throw new Exception(Lang::get("AuthExpired", "Authentication expired"), 1001);
+        }
+
+        if(Auth::getData())
+        {
+            define("TOKEN", (string) Auth::getToken());
+            define("BUSINESS_TYPE", (int) @Company::getData()->business_model);
+            define("COMPANY_ID", (string) @Company::getId());
+        }
+        else
+        {
+            define("TOKEN", false);
+        }
+    }
+
     public static function isAuth()
     {
-        return self::$_data instanceof \Fogito\Models\CoreUsers;
+        return self::$_data;
     }
 
-    /**
-     * setData
-     *
-     * @param  \Fogito\Models\CoreUsers $data
-     * @return void
-     */
-    public static function setData($data)
+    public static function setData($_data)
     {
-        if (!$data instanceof \Fogito\Models\CoreUsers) {
-            throw new \Exception('Invalid parameter type: ' . get_called_class());
-        }
-        self::$_data = $data;
+        self::$_data = $_data;
     }
 
-    /**
-     * getData
-     *
-     * @return \Fogito\Models\CoreUsers
-     */
     public static function getData()
     {
         return self::$_data;
     }
 
-    /**
-     * get
-     *
-     * @param  string $key
-     * @return null|mixed
-     */
     public static function get($key)
     {
         if (\is_string(trim($key))) {
@@ -63,24 +93,14 @@ class Auth
         return null;
     }
 
-    /**
-     * getId
-     *
-     * @return null|string
-     */
     public static function getId()
     {
         if (isset(self::$_data)) {
-            return self::$_data->getId();
+            return self::$_data->id;
         }
         return null;
     }
 
-    /**
-     * Get user type
-     *
-     * @return null|string
-     */
     public static function getType()
     {
         if (isset(self::$_data)) {
@@ -89,11 +109,6 @@ class Auth
         return null;
     }
 
-    /**
-     * Get moderator level
-     *
-     * @return null|string
-     */
     public static function getLevel()
     {
         if (isset(self::$_data)) {
@@ -102,92 +117,75 @@ class Auth
         return null;
     }
 
-    /**
-     * getToken
-     *
-     * @return null|string
-     */
     public static function getToken()
     {
         return self::$_token;
     }
 
-    /**
-     * setToken
-     *
-     * @param  null|string $token
-     * @return void
-     */
-    public static function setToken($token)
+    public static function setToken($_token)
     {
-        self::$_token = $token;
+        self::$_token = $_token;
     }
 
-    /**
-     * getPermissions
-     *
-     * @return array
-     */
+    public static function getTokenUser()
+    {
+        return self::$_tokenUser;
+    }
+
+    public static function setTokenUser($_tokenUser)
+    {
+        self::$_tokenUser = $_tokenUser;
+    }
+
     public static function getPermissions()
     {
         return self::$_permissions;
     }
 
-    /**
-     * setPermissions
-     *
-     * @param  array $permissions
-     * @return void
-     */
-    public static function setPermissions($permissions = [])
+    public static function setPermissions($_permissions = [])
     {
-        self::$_permissions = $permissions;
+        self::$_permissions = $_permissions;
     }
 
+
     /**
-     * isPermitted
-     *
-     * @param  string $key
-     * @return bool
+     * start CACHING
      */
-    public static function isPermitted($key)
+    public static function setCacheDuration($seconds=60)
     {
-        if ($key) {
-            if ($key !== null) {
-                $permission = Helpers::getArrayByKey($key, self::$_permissions, self::$_permissions);
-                if ($permission) {
-                    if (\is_array($permission) && $permission['allow']) {
-                        return true;
-                    } else {
-                        return !!$permission;
-                    }
-                }
-            }
+        Auth::$_cacheDuration = $seconds;
+    }
+
+    public static function getCacheDuration()
+    {
+        return Auth::$_cacheDuration;
+    }
+
+    public static function getParams()
+    {
+        $_token = false;
+        $_tokenUser = false;
+        if(strlen(@$_COOKIE["ut"]) > 0){
+            $_token      = (string)@$_COOKIE["ut"];
+            $_tokenUser  = (string)@$_COOKIE["token_user"];
+        }else if(Request::get('token')){
+            $_token      = (string)trim(Request::get('token'));
+            $_tokenUser  = (string)trim(Request::get('token_user'));
         }
-
-        return false;
+        return [$_token, $_tokenUser];
     }
 
-    /**
-     * generatePassword
-     *
-     * @param  string $password
-     * @return string
-     */
-    public static function passwordHash($password)
+    public static function getCacheKey()
     {
-        return \password_hash($password, PASSWORD_BCRYPT);
+        list($_token, $_tokenUser) = Auth::getParams();
+        return md5($_tokenUser."-". Lang::getLang()."-".$_token."-".Request::getServer("HTTP_ORIGIN"));
     }
 
-    /**
-     * verifyPassword
-     *
-     * @param  string $password
-     * @param  string $hash
-     * @return bool
-     */
-    public static function verifyPassword($password, $hash)
+    public static function clearCache()
     {
-        return \password_verify($password, $hash);
+        Cache::set(Auth::getCacheKey(), false, 0);
     }
+    /**
+     * end CACHING
+     */
 }

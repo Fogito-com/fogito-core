@@ -10,12 +10,6 @@ use Models\Products;
 
 class CreateController
 {
-    /**
-     * __construct
-     *
-     * @param  \Fogito\App $app
-     * @return void
-     */
     public function __construct($app)
     {
         if (!Request::isPost()) {
@@ -23,11 +17,7 @@ class CreateController
         }
     }
 
-    /**
-     * index
-     *
-     * @return void
-     */
+
     public function index()
     {
         $req          = Request::get('data');

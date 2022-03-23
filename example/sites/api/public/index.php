@@ -15,15 +15,15 @@ use Lib\Response;
 try {
     $loader = new Loader();
     $loader->registerNamespaces([
-        'Lib'         => ROOT_PATH . '/lib',
-        'Models'      => ROOT_PATH . '/models',
-        'Middlewares' => ROOT_PATH . '/middlewares',
+        'Lib'         => ROOT_PATH . '/app/lib',
+        'Models'      => ROOT_PATH . '/app/models',
+        'Middlewares' => ROOT_PATH . '/app/middlewares',
     ]);
     $loader->register();
 
     $app = new App();
     $app->set('config', function () {
-        $rootConfig = require ROOT_PATH . '/config/config.php';
+        $rootConfig = require ROOT_PATH . '/app/config/config.php';
         $appConfig  = require APP_PATH . '/config/config.php';
         $config     = new Config($rootConfig);
         $config->merge($appConfig);

@@ -21,36 +21,16 @@ class CoreSettings extends \Fogito\Db\RemoteModelManager
         return 'settings';
     }
 
-    /**
-     * init
-     *
-     * @return void
-     */
-    public static function init()
+    public static function fetch()
     {
-        $response = self::request(null, []);
-        if ($response['status'] == self::STATUS_SUCCESS) {
-            return $response['data'];
-        }
-        return false;
+        return self::request(null, []);
     }
 
-    /**
-     * getData
-     *
-     * @return void
-     */
     public static function getData()
     {
         return self::$_data;
     }
 
-    /**
-     * setData
-     *
-     * @param  mixed $data
-     * @return void
-     */
     public static function setData($data)
     {
         self::$_data = $data;

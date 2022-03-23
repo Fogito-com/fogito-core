@@ -3,7 +3,8 @@ namespace Products;
 
 use Fogito\Events\Manager as EventsManager;
 use Fogito\Loader;
-use Fogito\Middlewares\Auth;
+use Fogito\Lib\Auth;
+use Middlewares\Api;
 
 class Module extends \Fogito\Module
 {
@@ -19,6 +20,7 @@ class Module extends \Fogito\Module
 
         $eventsManager = new EventsManager();
         $eventsManager->attach('dispatch', new Auth);
+        $eventsManager->attach('dispatch', new Api);
         $app->setEventsManager($eventsManager);
     }
 }
