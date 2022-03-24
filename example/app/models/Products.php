@@ -4,7 +4,7 @@ namespace Models;
 use Fogito\Lib\Lang;
 use Models\Files;
 
-class Products extends \Lib\ModelManager
+class Products extends \Fogito\Db\ModelManager
 {
     const STATUS_ACTIVE   = 1;
     const STATUS_INACTIVE = 2;

@@ -11,7 +11,7 @@ return [
     ],
     's2s'   => [
         'app_id'       => 205,
-        'server_token' => 'SERVER_TOKEN',
+        'server_token' => 'F0G1tOPlusMq3qw9kKj32hs9l2lkK90dMhzBN7cbmKL2lJ3223kdkPAaQ3RGVX3fqd23klMk93Hd9We3Lk4',
         'timezone'     => 101,
     ],
 ];

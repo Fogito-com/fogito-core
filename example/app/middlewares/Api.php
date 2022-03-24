@@ -6,8 +6,8 @@ use Fogito\Events\Event;
 use Fogito\Exception;
 use Fogito\Lib\Auth;
 use Fogito\Lib\Lang;
-use Lib\Request;
-use Lib\Response;
+use Fogito\Http\Request;
+use Fogito\Http\Response;
 use Models\LogsAccess;
 
 class Api extends \Fogito\Middleware

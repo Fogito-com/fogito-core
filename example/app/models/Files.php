@@ -4,7 +4,7 @@ namespace Models;
 use Fogito\Lib\Lang;
 use Fogito\Models\CoreUsers;
 
-class Files extends \Lib\ModelManager
+class Files extends \Fogito\Db\ModelManager
 {
     const PARENT_TYPE_USERS = 'users';
     const PARENT_TYPE_PRODUCTS = 'products';

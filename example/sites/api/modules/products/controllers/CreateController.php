@@ -3,8 +3,8 @@ namespace Products\Controllers;
 
 use Fogito\Lib\Lang;
 use Lib\Helpers;
-use Lib\Request;
-use Lib\Response;
+use Fogito\Http\Request;
+use Fogito\Lib\Response;
 use Models\Files;
 use Models\Products;
 

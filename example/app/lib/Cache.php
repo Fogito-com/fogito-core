@@ -2,7 +2,7 @@
 namespace Lib;
 
 use Fogito\Lib\Auth;
-use Lib\Request;
+use Fogito\Http\Request;
 use Models\LogsAttack;
 
 class Cache

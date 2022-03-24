@@ -1,7 +1,7 @@
 <?php
 namespace Models;
 
-class FilesTemp extends \Lib\ModelManager
+class FilesTemp extends \Fogito\Db\ModelManager
 {
     public $_id;
     public $user_id;

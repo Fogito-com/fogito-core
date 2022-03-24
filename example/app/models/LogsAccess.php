@@ -1,9 +1,9 @@
 <?php
 namespace Models;
 
-use Lib\Request;
+use Fogito\Http\Request;
 
-class LogsAccess extends \Lib\ModelManager
+class LogsAccess extends \Fogito\Db\ModelManager
 {
     public $_id;
     public $user_id;

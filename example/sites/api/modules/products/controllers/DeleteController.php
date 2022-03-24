@@ -2,8 +2,8 @@
 namespace Products\Controllers;
 
 use Lib\Lang;
-use Lib\Request;
-use Lib\Response;
+use Fogito\Http\Request;
+use Fogito\Lib\Response;
 use Models\Products;
 
 class DeleteController
