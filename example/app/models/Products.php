@@ -1,6 +1,7 @@
 <?php
 namespace Models;
 
+use Fogito\App;
 use Fogito\Lib\Lang;
 use Models\Files;
 
@@ -49,6 +50,13 @@ class Products extends \Fogito\Db\ModelManager
             ],
         ];
     }
+
+
+    public static function getConfig()
+    {
+        return App::$di->config->databases->default->toArray();
+    }
+
 
     /**
      * setIndex

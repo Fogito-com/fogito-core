@@ -43,8 +43,7 @@ try {
         return $router;
     });
 
-    $modules = require APP_PATH . '/config/modules.php';
-    $app->registerModules($modules);
+    $app->setModulesPath(APP_PATH.'/modules');
     $app->setControllerSuffix('Controller');
     $app->setActionSuffix(null);
     $app->handle();

@@ -36,6 +36,8 @@ class Response implements ResponseInterface
     const KEY_STATUS  = 'status';
     const KEY_CODE    = 'code';
     const KEY_MESSAGE = 'message';
+    const KEY_DATA    = 'data';
+    const KEY_COUNT   = 'count';
 
     const STATUS_SUCCESS = 'success';
     const STATUS_ERROR   = 'error';
@@ -458,4 +460,29 @@ class Response implements ResponseInterface
 
         throw $exception;
     }
+
+    public static function success($data = [], $message = null, $count = null)
+    {
+        $content = [
+            self::KEY_STATUS => self::STATUS_SUCCESS,
+            self::KEY_CODE   => self::CODE_SUCCESS,
+        ];
+
+        if (isset($message)) {
+            $content[self::KEY_MESSAGE] = $message;
+        }
+
+        if (isset($data)) {
+            $content[self::KEY_DATA] = $data;
+        }
+
+        if (is_numeric($count)) {
+            $content[self::KEY_COUNT] = $count;
+        }
+
+        self::setJsonContent($content);
+        self::send();
+    }
+
+
 }

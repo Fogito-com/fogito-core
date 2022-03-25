@@ -1,6 +1,8 @@
 <?php
 namespace Models;
 
+use Fogito\App;
+
 class FilesTemp extends \Fogito\Db\ModelManager
 {
     public $_id;
@@ -23,4 +25,10 @@ class FilesTemp extends \Fogito\Db\ModelManager
     {
         return 'files_temp';
     }
+
+    public static function getConfig()
+    {
+        return App::$di->config->databases->default->toArray();
+    }
+
 }

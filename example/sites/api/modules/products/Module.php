@@ -1,5 +1,5 @@
 <?php
-namespace Products;
+namespace Modules;
 
 use Fogito\Events\Manager as EventsManager;
 use Fogito\Loader;
@@ -12,11 +12,11 @@ class Module extends \Fogito\Module
     {
         $loader = new Loader();
         $loader->registerNamespaces([
-            __NAMESPACE__ . '\Controllers' => __DIR__ . '/controllers',
+            'Controllers' => __DIR__ . '/controllers',
         ]);
         $loader->register();
 
-        $app->setDefaultNamespace(__NAMESPACE__ . '\Controllers');
+        $app->setDefaultNamespace('Controllers');
 
         $eventsManager = new EventsManager();
         $eventsManager->attach('dispatch', new Auth);

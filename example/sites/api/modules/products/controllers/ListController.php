@@ -1,5 +1,5 @@
 <?php
-namespace Products\Controllers;
+namespace Controllers;
 
 use Fogito\Models\CoreUsers;
 use Fogito\Lib\Lang;
@@ -49,7 +49,7 @@ class ListController
             $binds['status'] = $status;
         }
 
-        list($limit, $skip) = Products::filterLimitSkip($req['limit'], $req['skip'], 100);
+        list($limit, $skip) = [10, 0]; //Products::filterLimitSkip($req['limit'], $req['skip'], 100);
         $conditions         = [
             $binds,
             'limit' => $limit,

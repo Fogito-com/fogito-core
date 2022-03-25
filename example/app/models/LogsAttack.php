@@ -1,6 +1,7 @@
 <?php
 namespace Models;
 
+use Fogito\App;
 use Fogito\Http\Request;
 
 class LogsAttack extends \Fogito\Db\ModelManager
@@ -24,6 +25,12 @@ class LogsAttack extends \Fogito\Db\ModelManager
     public static function getSource()
     {
         return 'logs_attack';
+    }
+
+
+    public static function getConfig()
+    {
+        return App::$di->config->databases->default->toArray();
     }
 
     /**

@@ -4,7 +4,7 @@
  * @link https://github.com/Fogito-com/fogito-core
  * @version 1.0.2
  * @package Fogito-Core
-*/
+ */
 namespace Fogito;
 
 use Fogito\AppInterface;
@@ -74,6 +74,13 @@ class App implements AppInterface
     /**
      * __construct
      *
+     * @return null
+     */
+    protected $modulesPath;
+
+    /**
+     * __construct
+     *
      * @return void
      */
     public function __construct()
@@ -125,6 +132,12 @@ class App implements AppInterface
     public function setControllerSuffix($value)
     {
         $this->controllerSuffix = (string) $value;
+        return $this;
+    }
+
+    public function setModulesPath($value)
+    {
+        $this->modulesPath = (string) $value;
         return $this;
     }
 
@@ -275,52 +288,48 @@ class App implements AppInterface
         $router->handle($uri);
         $this->set('router', $router);
 
-        if ($this->modules) {
-            if (isset($this->modules[$router->getModuleName()])) {
-                $module = $this->modules[$router->getModuleName()];
-                if (!\file_exists($module['path'])) {
-                    $exception = new Exception('Module "' . $module['path'] . '" not found', Exception::ERROR_NOT_FOUND_MODULE);
+        $this->modulesPath .= "/".$router->getModuleName();
+        if (!\file_exists($this->modulesPath."/Module.php")) {
+            $exception = new Exception('Module.php in "' . $this->modulesPath . '" not found', Exception::ERROR_NOT_FOUND_MODULE);
 
-                    if (is_object($this->eventsManager)) {
-                        if ($this->eventsManager->fire('dispatch:beforeException', $this, $exception) === false) {
-                            return false;
-                        }
-                    }
-
-                    throw $exception;
+            if (is_object($this->eventsManager)) {
+                if ($this->eventsManager->fire('dispatch:beforeException', $this, $exception) === false) {
+                    return false;
                 }
-
-                include $module['path'];
-                $moduleNamespace = "\\" . $module['className'];
-
-                if (!\class_exists($moduleNamespace)) {
-                    $exception = new Exception('"' . $moduleNamespace . '" class not found in ' . $module['path'] . '', Exception::ERROR_NOT_FOUND_MODULE);
-
-                    if (is_object($this->eventsManager)) {
-                        if ($this->eventsManager->fire('dispatch:beforeException', $this, $exception) === false) {
-                            return false;
-                        }
-                    }
-
-                    throw $exception;
-                }
-
-                $moduleClass = new $moduleNamespace();
-                if (!\method_exists($moduleClass, 'register')) {
-                    $exception = new Exception('"register" method not found in ' . $moduleNamespace . ' class');
-
-                    if (is_object($this->eventsManager)) {
-                        if ($this->eventsManager->fire('dispatch:beforeException', $this, $exception) === false) {
-                            return false;
-                        }
-                    }
-
-                    throw $exception;
-                }
-
-                $moduleClass->register($this);
             }
+
+            throw $exception;
         }
+
+        include $this->modulesPath."/Module.php";
+        $moduleNamespace = "\\Modules\\Module";
+
+        if (!\class_exists($moduleNamespace)) {
+            $exception = new Exception('"' . $moduleNamespace . '" class not found in ' . $this->modulesPath . '/Module.php', Exception::ERROR_NOT_FOUND_MODULE);
+
+            if (is_object($this->eventsManager)) {
+                if ($this->eventsManager->fire('dispatch:beforeException', $this, $exception) === false) {
+                    return false;
+                }
+            }
+
+            throw $exception;
+        }
+
+        $moduleClass = new $moduleNamespace();
+        if (!\method_exists($moduleClass, 'register')) {
+            $exception = new Exception('"register" method not found in ' . $moduleNamespace . ' class');
+
+            if (is_object($this->eventsManager)) {
+                if ($this->eventsManager->fire('dispatch:beforeException', $this, $exception) === false) {
+                    return false;
+                }
+            }
+
+            throw $exception;
+        }
+
+        $moduleClass->register($this);
 
         $controllerName      = \ucfirst($router->getControllerName()) . $this->controllerSuffix;
         $controllerNamespace = "\\" . $this->defaultNamespace . "\\" . $controllerName;

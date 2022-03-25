@@ -1,6 +1,7 @@
 <?php
 namespace Models;
 
+use Fogito\App;
 use Fogito\Lib\Lang;
 use Fogito\Models\CoreUsers;
 
@@ -51,6 +52,11 @@ class Files extends \Fogito\Db\ModelManager
     public static function getSource()
     {
         return "files";
+    }
+
+    public static function getConfig()
+    {
+        return App::$di->config->databases->default->toArray();
     }
 
     /**
