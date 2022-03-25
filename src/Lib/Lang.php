@@ -23,7 +23,7 @@ class Lang
      */
     public static function setData($data = [])
     {
-        self::$_data = $data;
+        self::$_data = (array)$data;
     }
 
     /**
@@ -87,10 +87,8 @@ class Lang
      */
     public static function get($key, $default = null)
     {
-        if (!array_key_exists($key, self::$_data)) {
+        if (!array_key_exists($key, self::$_data))
             self::$_data[$key] = $default ? $default : $key;
-        }
-
         return self::$_data[$key];
     }
 }

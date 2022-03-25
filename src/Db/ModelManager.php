@@ -685,7 +685,7 @@ abstract class ModelManager implements ModelManagerInterface
      */
     public static function filter($binds = [], $callback = false)
     {
-        if ($callback) {
+        if (is_callable($callback)) {
             return $callback($binds);
         }
         return $binds;
@@ -741,23 +741,19 @@ abstract class ModelManager implements ModelManagerInterface
      */
     public static function execute()
     {
-        $db = static::getDB();
-        if (!$db) {
+        $config = static::getConfig();
+        if (!$config["dbname"])
             throw new Exception('Database not found');
-        }
 
-        $server = static::getServer();
-        if (!$server) {
+        if (!$config)
             throw new Exception('MongoDB server not found');
-        }
 
         $source = static::getSource();
-        if (!$source) {
+        if (!$source)
             throw new Exception('Collection not found');
-        }
 
-        self::setServer($server);
-        self::setDb($db);
+        self::setServer($config);
+        self::setDb($config["dbname"]);
         self::setSource($source);
 
         if (!isset($_connection)) {

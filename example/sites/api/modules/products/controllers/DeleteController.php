@@ -1,9 +1,9 @@
 <?php
 namespace Products\Controllers;
 
-use Lib\Lang;
+use Fogito\Lib\Lang;
 use Fogito\Http\Request;
-use Fogito\Lib\Response;
+use Fogito\Http\Response;
 use Models\Products;
 
 class DeleteController

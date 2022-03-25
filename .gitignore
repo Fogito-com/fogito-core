@@ -1,4 +1,4 @@
-vendor
+example/vendor
 composer.lock
 nginx_confs
 .idea

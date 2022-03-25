@@ -10,7 +10,7 @@ use Fogito\App;
 use Fogito\Config;
 use Fogito\Loader;
 use Fogito\Router;
-use Fogit\Http\Response;
+use Fogito\Http\Response;
 
 try {
     $loader = new Loader();

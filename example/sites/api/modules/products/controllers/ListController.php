@@ -2,9 +2,9 @@
 namespace Products\Controllers;
 
 use Fogito\Models\CoreUsers;
-use Lib\Lang;
+use Fogito\Lib\Lang;
 use Fogito\Http\Request;
-use Fogito\Lib\Response;
+use Fogito\Http\Response;
 use Models\Products;
 use Models\Files;
 

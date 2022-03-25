@@ -4,7 +4,7 @@ namespace Products\Controllers;
 use Fogito\Lib\Lang;
 use Lib\Helpers;
 use Fogito\Http\Request;
-use Fogito\Lib\Response;
+use Fogito\Http\Response;
 use Models\Files;
 use Models\Products;
 
