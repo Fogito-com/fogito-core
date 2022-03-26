@@ -1,10 +1,4 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Http;
 
 use DateTime;
@@ -388,7 +382,7 @@ class Response implements ResponseInterface
         if (is_array($content) === false) {
             throw new Exception('Invalid parameter type.');
         }
-        
+
         self::$_content = json_encode($content, true);
     }
 
@@ -437,7 +431,7 @@ class Response implements ResponseInterface
         echo self::$_content;
         exit;
     }
-    
+
     /**
      * error
      *
@@ -483,6 +477,13 @@ class Response implements ResponseInterface
         self::setJsonContent($content);
         self::send();
     }
+
+    public static function custom($data = [])
+    {
+        self::setJsonContent($data);
+        self::send();
+    }
+
 
 
 }

@@ -147,6 +147,18 @@ class Auth
         self::$_permissions = $_permissions;
     }
 
+    /**
+     * @return false || true || array
+     */
+    public static function isAllowed($permission, $selected=false)
+    {
+        if(!self::$_permissions->{$permission} || !self::$_permissions->{$permission}->allow)
+            return false;
+        if($selected && !in_array($selected, !self::$_permissions->{$permission}->selected))
+            return false;
+        return self::$_permissions->{$permission};
+    }
+
 
     /**
      * start CACHING
