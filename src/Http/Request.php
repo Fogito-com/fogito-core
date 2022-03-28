@@ -1,15 +1,7 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Http;
 
 use Fogito\Filter;
-use Fogito\FilterInterface;
-use Fogito\Http\RequestInterface;
 use Fogito\Exception;
 use Fogito\Http\Request\File;
 use Fogito\Text;
@@ -31,7 +23,7 @@ use Fogito\Text;
  *  }
  *</code>
  */
-class Request implements RequestInterface
+class Request
 {
     /**
      * Filter

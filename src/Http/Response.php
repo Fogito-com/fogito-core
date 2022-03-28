@@ -1,10 +1,7 @@
 <?php
 namespace Fogito\Http;
 
-use DateTime;
-use DateTimeZone;
 use Fogito\Exception;
-use Fogito\Http\ResponseInterface;
 use Fogito\Http\Response\CookiesInterface;
 use Fogito\Http\Response\Headers;
 use Fogito\Http\Response\HeadersInterface;
@@ -12,10 +9,6 @@ use Fogito\Url;
 
 /**
  * Fogito\Http\Response
- *
- * Part of the HTTP cycle is return responses to the clients.
- * Fogito\HTTP\Response is the Fogito component responsible to achieve this task.
- * HTTP responses are usually composed by headers and body.
  *
  *<code>
  *  $response = new Fogito\Http\Response();
@@ -25,11 +18,11 @@ use Fogito\Url;
  *</code>
  *
  */
-class Response implements ResponseInterface
+class Response
 {
     const KEY_STATUS  = 'status';
     const KEY_CODE    = 'code';
-    const KEY_MESSAGE = 'message';
+    const KEY_MESSAGE = 'description';
     const KEY_DATA    = 'data';
     const KEY_COUNT   = 'count';
 
@@ -37,12 +30,12 @@ class Response implements ResponseInterface
     const STATUS_ERROR   = 'error';
 
     const CODE_SUCCESS = 200;
-    const CODE_ERROR   = 400;
+    const CODE_ERROR   = 2001;
 
     /**
      * Content
      *
-     * @var array
+     * @var STRING
      * @access protected
      */
     protected static $_content = [];
@@ -201,40 +194,6 @@ class Response implements ResponseInterface
         self::getHeaders()->reset();
     }
 
-    /**
-     * Sets a Expires header to use HTTP cache
-     *
-     *<code>
-     *  self::response->setExpires(new DateTime());
-     *</code>
-     *
-     * @param DateTime $datetime
-     * @throws Exception
-     */
-    public static function setExpires($datetime)
-    {
-        if (is_object($datetime) === false ||
-            $datetime instanceof DateTime === false) {
-            throw new Exception('datetime parameter must be an instance of DateTime');
-        }
-
-        $headers = self::getHeaders();
-        try {
-            $date = clone $datetime;
-        } catch (\Exception $e) {
-            return;
-        }
-
-        //All the expiration times are sent in UTC
-        $timezone = new DateTimeZone('UTC');
-
-        //Change the timezone to UTC
-        $date->setTimezone($timezone);
-        $utcDate = $date->format('D, d M Y H:i:s') . ' GMT';
-
-        //The 'Expires' header set this info
-        self::setHeader('Expires', $utcDate);
-    }
 
     /**
      * Sends a Not-Modified response
@@ -285,9 +244,8 @@ class Response implements ResponseInterface
      */
     public static function setEtag($etag)
     {
-        if (is_string($etag) === false) {
+        if (is_string($etag) === false)
             throw new Exception('Invalid parameter type.');
-        }
 
         self::getHeaders()->set('Etag', $etag);
     }
@@ -330,9 +288,8 @@ class Response implements ResponseInterface
 
         /* Type check */
         if (is_string($location) === false &&
-            is_null($location) === false) {
+            is_null($location) === false)
             throw new Exception('Invalid parameter type.');
-        }
 
         if (is_null($externalRedirect) === true) {
             $externalRedirect = false;
@@ -379,9 +336,8 @@ class Response implements ResponseInterface
      */
     public static function setJsonContent($content = [])
     {
-        if (is_array($content) === false) {
+        if (is_array($content) === false)
             throw new Exception('Invalid parameter type.');
-        }
 
         self::$_content = json_encode($content, true);
     }
@@ -389,7 +345,7 @@ class Response implements ResponseInterface
     /**
      * Gets the HTTP response body
      *
-     * @return string|null
+     * @return array|null
      */
     public static function getContent()
     {
@@ -401,9 +357,8 @@ class Response implements ResponseInterface
      */
     public static function sendHeaders()
     {
-        if (is_object(self::$_headers) === true) {
+        if (is_object(self::$_headers) === true)
             self::$_headers->send();
-        }
     }
 
     /**
@@ -411,15 +366,14 @@ class Response implements ResponseInterface
      */
     public static function sendCookies()
     {
-        if (is_object(self::$_cookies) === true) {
+        if (is_object(self::$_cookies) === true)
             self::$_cookies->send();
-        }
     }
 
     /**
      * Prints out HTTP response to the client
      *
-     * @throws Exception
+     * @throws String
      */
     public static function send()
     {
@@ -440,19 +394,17 @@ class Response implements ResponseInterface
      * @param  mixed $details
      * @return void
      */
-    public static function error($message, $code = false, $details = [])
+    public static function error($message=false, $code = false, $details = [])
     {
-        if (!$code) {
+        if (!$code)
             $code = self::CODE_ERROR;
-        }
-        $exception = new Exception($message, $code);
-        if ($details) {
-            $exception->setData([
-                'details' => $details,
-            ]);
-        }
-
-        throw $exception;
+        $content = [
+            self::KEY_STATUS    => self::STATUS_ERROR,
+            self::KEY_CODE      => $code,
+            self::KEY_MESSAGE   => $message,
+        ];
+        self::setJsonContent($content);
+        self::send();
     }
 
     public static function success($data = [], $message = null, $count = null)
@@ -462,17 +414,14 @@ class Response implements ResponseInterface
             self::KEY_CODE   => self::CODE_SUCCESS,
         ];
 
-        if (isset($message)) {
-            $content[self::KEY_MESSAGE] = $message;
-        }
-
-        if (isset($data)) {
+        if (isset($data))
             $content[self::KEY_DATA] = $data;
-        }
 
-        if (is_numeric($count)) {
+        if (is_numeric($count))
             $content[self::KEY_COUNT] = $count;
-        }
+
+        if (isset($message))
+            $content[self::KEY_MESSAGE] = $message;
 
         self::setJsonContent($content);
         self::send();
