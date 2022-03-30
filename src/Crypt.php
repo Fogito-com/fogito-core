@@ -1,14 +1,5 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito;
-
-use Fogito\CryptInterface;
-use Fogito\Exception;
 
 /**
  * Fogito\Crypt
@@ -22,7 +13,7 @@ use Fogito\Exception;
  * * echo $crypt->decrypt($encrypted, $key);
  *
  */
-class Crypt implements CryptInterface
+class Crypt
 {
     /**
      * Padding: Default

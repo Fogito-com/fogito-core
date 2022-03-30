@@ -84,14 +84,13 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
      * updateAvatar
      *
      * @param  mixed $parameters
-     * @return void
+     * @return boolean || object
      */
-    public static function updateAvatar($parameters = [])
+    public static function avatarUpdate($parameters = [])
     {
         $response = self::request('avatarupdate', $parameters);
-        if ($response['status'] == self::STATUS_SUCCESS) {
-            return $response['data'];
-        }
+        if ($response->status == self::STATUS_SUCCESS)
+            return $response->data;
         return false;
     }
 
@@ -99,14 +98,13 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
      * deleteAvatar
      *
      * @param  mixed $parameters
-     * @return void
+     * @return boolean || object
      */
-    public static function deleteAvatar($parameters = [])
+    public static function avatarDelete($parameters = [])
     {
         $response = self::request('avatardelete', $parameters);
-        if ($response['status'] == self::STATUS_SUCCESS) {
-            return $response['data'];
-        }
+        if ($response->status == self::STATUS_SUCCESS)
+            return $response->data;
         return false;
     }
 }

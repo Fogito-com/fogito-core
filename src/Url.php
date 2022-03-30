@@ -1,17 +1,7 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito;
 
-use Fogito\App;
-use Fogito\Exception;
-use Fogito\UrlInterface;
-
-class Url implements UrlInterface
+class Url
 {
     /**
      * Base URI

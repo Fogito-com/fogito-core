@@ -1,10 +1,4 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito;
 
 use Closure;
@@ -26,7 +20,7 @@ use Fogito\Exception;
  *  $filter->sanitize("!100a019.01a", "float"); // returns "100019.01"
  *</code>
  */
-class Filter implements FilterInterface
+class Filter
 {
     /**
      * Filters

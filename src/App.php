@@ -1,18 +1,7 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
- */
 namespace Fogito;
 
-use Fogito\AppInterface;
-use Fogito\Exception;
-use Fogito\MiddlewareInterface;
-use Fogito\Router;
-
-class App implements AppInterface
+class App
 {
     /**
      * di

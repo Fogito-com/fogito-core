@@ -1,17 +1,9 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Http\Response;
 
 use Fogito\App;
 use Fogito\Exception;
 use Fogito\Http\Cookie;
-use Fogito\Http\ResponseInterface;
-use Fogito\Http\Response\CookiesInterface;
 
 /**
  * Fogito\Http\Response\Cookies
@@ -19,7 +11,7 @@ use Fogito\Http\Response\CookiesInterface;
  * This class is a bag to manage the cookies
  * A cookies bag is automatically registered as part of the 'response' service in the DI
  */
-class Cookies implements CookiesInterface
+class Cookies
 {
     /**
      * Registered
@@ -147,8 +139,7 @@ class Cookies implements CookiesInterface
         //Register the cookies bag in the response
         if ($this->_registered === false) {
             $response = App::$di->get('response');
-            if (is_object($response) === false ||
-                $response instanceof ResponseInterface === false) {
+            if (is_object($response) === false) {
                 throw new Exception('Wrong response service.');
             }
 

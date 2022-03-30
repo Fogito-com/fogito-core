@@ -1,19 +1,10 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito;
 
-use Fogito\App;
-use Fogito\RouterInterface;
-use Fogito\Exception;
 use Fogito\Router\Group;
 use Fogito\Router\Route;
 
-class Router implements RouterInterface
+class Router
 {
     /**
      * URI source: _url

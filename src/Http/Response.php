@@ -370,6 +370,14 @@ class Response
             self::$_cookies->send();
     }
 
+    public static function setAllowOrigins()
+    {
+        header("Access-Control-Allow-Origin: ".Request::getServer("HTTP_ORIGIN"));
+        header("Access-Control-Allow-Headers: Content-Type, Accept");
+        header("Access-Control-Allow-Methods: GET, POST");
+        header("Access-Control-Allow-Credentials: true");
+    }
+
     /**
      * Prints out HTTP response to the client
      *
@@ -378,6 +386,7 @@ class Response
     public static function send()
     {
         //Send headers
+        self::setAllowOrigins();
         self::sendHeaders();
         self::sendCookies();
 

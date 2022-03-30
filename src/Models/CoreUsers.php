@@ -86,12 +86,11 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
      * @param  mixed $parameters
      * @return void
      */
-    public static function updateAvatar($parameters = [])
+    public static function avatarUpdate($parameters = [])
     {
         $response = self::request('avatarupdate', $parameters);
-        if ($response['status'] == self::STATUS_SUCCESS) {
-            return $response['data'];
-        }
+        if ($response->status == self::STATUS_SUCCESS)
+            return $response->data;
         return false;
     }
 
@@ -101,12 +100,11 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
      * @param  mixed $parameters
      * @return void
      */
-    public static function deleteAvatar($parameters = [])
+    public static function avatarDelete($parameters = [])
     {
         $response = self::request('avatardelete', $parameters);
-        if ($response['status'] == self::STATUS_SUCCESS) {
-            return $response['data'];
-        }
+        if ($response->status == self::STATUS_SUCCESS)
+            return $response->data;
         return false;
     }
 }
