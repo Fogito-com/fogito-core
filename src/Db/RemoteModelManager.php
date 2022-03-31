@@ -84,9 +84,9 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
             'data' => $data,
         ]);
 
-        if ($response->status == self::STATUS_SUCCESS) {
+        if ($response["status"] == self::STATUS_SUCCESS) {
             $documents = [];
-            foreach ($response->data as $i => $document) {
+            foreach ($response["data"] as $i => $document) {
                 $documents[$i] = new static();
                 foreach ($document as $key => $value) {
                     $documents[$i]->{$key} = $value;
@@ -130,9 +130,9 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
             'data' => $data,
         ]);
 
-        if ($response->status == self::STATUS_SUCCESS) {
+        if ($response["status"] == self::STATUS_SUCCESS) {
             $document = new static();
-            foreach ($response->data as $key => $value) {
+            foreach ($response["data"] as $key => $value) {
                 $document->{$key} = $value;
             }
             return $document;
@@ -174,7 +174,7 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
             ],
         ]);
 
-        return $response->status == self::STATUS_SUCCESS;
+        return $response["status"] == self::STATUS_SUCCESS;
     }
 
     /**
@@ -192,7 +192,7 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
             ],
         ]);
 
-        return $response->status == self::STATUS_SUCCESS ? $response->data->id : false;
+        return $response["status"] == self::STATUS_SUCCESS ? $response["data"]->id : false;
     }
 
     /**
@@ -210,7 +210,7 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
             ],
         ]);
 
-        return $response->status == self::STATUS_SUCCESS;
+        return $response["status"] == self::STATUS_SUCCESS;
     }
 
     /**
@@ -307,8 +307,8 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
         self::$_data[$curlOptions[CURLOPT_URL]]['request']  = $request;
         self::$_data[$curlOptions[CURLOPT_URL]]['response'] = $response;
 
-        if ($response->status == self::STATUS_ERROR) {
-            self::$_exception = new \Exception($response->description, $response->error_code);
+        if ($response["status"] == self::STATUS_ERROR) {
+            self::$_exception = new \Exception($response["description"], $response["error_code"]);
         }
 
         return $response;
@@ -446,7 +446,7 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
      */
     public static function filterResponseData($response = [])
     {
-        return \json_decode($response);
+        return \json_decode($response, true);
     }
 
     /**
@@ -773,9 +773,8 @@ abstract class RemoteModelManager implements RemoteModelManagerInterface
      */
     public static function filter($binds = [], $callback = false)
     {
-        if ($callback) {
+        if (is_callable($callback))
             return $callback($binds);
-        }
         return $binds;
     }
 

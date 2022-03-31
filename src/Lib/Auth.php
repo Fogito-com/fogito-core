@@ -35,21 +35,21 @@ class Auth
             $response       = Cache::get(Auth::getCacheKey());
         if(!$response)
             $response = CoreSettings::request(null, []);
-        if (is_object($response) && $_data=$response->data)
+        if (is_array($response) && $_data=$response["data"])
         {
             CoreSettings::setData($_data);
 
-            if($_data->account_error)
-                throw new Exception($_data->account_error->description, $_data->account_error->error_code);
+            if($_data["account_error"])
+                throw new Exception($_data["account_error"]["description"], $_data["account_error"]["error_code"]);
 
-            if($_data->account)
-                Auth::setData($_data->account);
-            if($_data->permissions)
-                Auth::setPermissions($_data->permissions);
-            if($_data->company)
-                Company::setData($_data->company);
-            if($_data->translations)
-                Lang::setData($_data->translations);
+            if($_data["account"])
+                Auth::setData($_data["account"]);
+            if($_data["permissions"])
+                Auth::setPermissions($_data["permissions"]);
+            if($_data["company"])
+                Company::setData($_data["company"]);
+            if($_data["translations"])
+                Lang::setData($_data["translations"]);
 
             Cache::set(Auth::getCacheKey(), $response, Auth::getCacheDuration());
         }
@@ -77,7 +77,7 @@ class Auth
 
     public static function setData($_data)
     {
-        self::$_data = $_data;
+        self::$_data = \json_decode(\json_encode($_data));
     }
 
     public static function getData()
@@ -152,11 +152,11 @@ class Auth
      */
     public static function isAllowed($permission, $selected=false)
     {
-        if(!self::$_permissions->{$permission} || !self::$_permissions->{$permission}->allow)
+        if(!self::$_permissions[$permission] || !self::$_permissions[$permission]["allow"])
             return false;
-        if($selected && !in_array($selected, !self::$_permissions->{$permission}->selected))
+        if($selected && !in_array($selected, !self::$_permissions[$permission]["selected"]))
             return false;
-        return self::$_permissions->{$permission};
+        return self::$_permissions[$permission];
     }
 
 
