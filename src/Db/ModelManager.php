@@ -1,6 +1,7 @@
 <?php
 namespace Fogito\Db;
 
+use Fogito\App;
 use Fogito\Exception;
 use ReflectionClass;
 
@@ -734,7 +735,9 @@ abstract class ModelManager
      */
     public static function execute()
     {
-        $config = static::getConfig();
+        $config = App::$di->config->databases->default->toArray();
+        if(method_exists(get_class(new static()), 'getConfig'))
+            $config = static::getConfig();
         if (!$config["dbname"])
             throw new Exception('Database not found');
 

@@ -174,10 +174,6 @@ class App
      */
     public function addMiddleware($callback)
     {
-        if (!$callback instanceof MiddlewareInterface) {
-            throw new Exception('Invalid middleware type.');
-        }
-
         $this->addEvent($callback);
         return $this;
     }

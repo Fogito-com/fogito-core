@@ -28,11 +28,6 @@ class LogsAttack extends \Fogito\Db\ModelManager
     }
 
 
-    public static function getConfig()
-    {
-        return App::$di->config->databases->default->toArray();
-    }
-
     /**
      * beforeSave
      *

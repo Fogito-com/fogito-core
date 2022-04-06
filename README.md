@@ -12,24 +12,22 @@ composer require fogito/core
 This a multi-module [MVC][mvc-pattern] structure.
 
 ```
-app/
-├── config
-│   └── config.php
-│
-├── lib
-│   └── Auth.php
-│
-├── middlewares
-│   └── Api.php
-│
-├── models
-│   ├── Products.php
-│   └── Users.php
-│
-└── sites
+app
+    ├── config
+    │   └── config.php
+    │
+    ├── lib
+    │   └── Auth.php
+    │
+    ├── middlewares
+    │   └── Api.php
+    │
+    ├── models
+    │   ├── Products.php
+    │   └── Users.php
+sites
     └── api
         ├── config
-        │   ├── modules.php
         │   ├── routes.php
         │   └── config.php
         │   
@@ -47,16 +45,12 @@ app/
         │       │   └── DeleteController.php
         │       └── Module.php
         │      
-        └── index.php
+        └── public
+            ├── index.php
 ```
 
-## Team
-
-- <a href="https://github.com/senior2ral">Tural Ilyasov</a><br/>
-- <a href="https://github.com/seniorshahmar">Shahmar Shukurov</a><br/>
-
-## Links
-- <a href="https://fogito.com">Website</a><br/>
+## Models
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreUsers.md">Core Users</a><br/>
 
 ## License info
 

@@ -10,7 +10,7 @@ use Fogito\Http\Request;
 use Fogito\Http\Response;
 use Models\LogsAccess;
 
-class Api extends \Fogito\Middleware
+class Api
 {
     /**
      * beforeExecuteRoute

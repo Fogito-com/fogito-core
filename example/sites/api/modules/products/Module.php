@@ -6,7 +6,7 @@ use Fogito\Loader;
 use Fogito\Lib\Auth;
 use Middlewares\Api;
 
-class Module extends \Fogito\Module
+class Module
 {
     public function register($app)
     {

@@ -26,9 +26,5 @@ class FilesTemp extends \Fogito\Db\ModelManager
         return 'files_temp';
     }
 
-    public static function getConfig()
-    {
-        return App::$di->config->databases->default->toArray();
-    }
 
 }

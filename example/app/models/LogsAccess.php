@@ -26,10 +26,6 @@ class LogsAccess extends \Fogito\Db\ModelManager
         return 'logs_access';
     }
 
-    public static function getConfig()
-    {
-        return App::$di->config->databases->default->toArray();
-    }
 
 
     /**

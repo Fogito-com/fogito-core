@@ -90,14 +90,6 @@ class Auth
         return self::$_data;
     }
 
-    public static function get($key)
-    {
-        if (\is_string(trim($key))) {
-            return Helpers::getArrayByKey($key, (array) self::$_data, (array) self::$_data);
-        }
-        return null;
-    }
-
     public static function getId()
     {
         if (isset(self::$_data)) {

@@ -3,7 +3,6 @@ namespace Fogito\Http;
 
 use Fogito\Filter;
 use Fogito\Exception;
-use Fogito\Http\Request\File;
 use Fogito\Text;
 
 /**
@@ -707,46 +706,6 @@ class Request
         return $count;
     }
 
-    /**
-     * Gets attached files as \Fogito\Http\Request\File instances
-     *
-     * @param boolean|null $notErrored
-     * @return \Fogito\Http\Request\File[]|null
-     * @throws Exception
-     */
-    public static function getUploadedFiles($notErrored = null)
-    {
-        if (is_null($notErrored) === true) {
-            $notErrored = true;
-        } elseif (is_bool($notErrored) === false) {
-            throw new Exception('Invalid parameter type.');
-        }
-
-        if (is_array($_FILES) === false ||
-            count($_FILES) === 0) {
-            return;
-        }
-
-        $result = array();
-
-        foreach ($_FILES as $name => $file) {
-            //Skip if upload failed
-            if ($notErrored === true) {
-                if (isset($file['error']) === true) {
-                    foreach ($file['error'] as $error) {
-                        if ($error !== \UPLOAD_ERR_OK) {
-                            continue 2;
-                        }
-                    }
-                }
-            }
-
-            //Create object
-            $result[] = new File($file, $name);
-        }
-
-        return $result;
-    }
 
     /**
      * Returns the available headers in the request

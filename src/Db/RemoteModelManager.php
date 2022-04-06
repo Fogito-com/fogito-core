@@ -64,16 +64,13 @@ class RemoteModelManager
                 "error_code"    => 1004
             ];
         }
-        if($error)
-            Response::error($error["description"].", ".self::$url, $error["error_code"]);
-
 
         if($error && $options && $options["debug"] == true)
             Response::error($error["description"], $error["error_code"]);
         if($error && $options && $options["result"] == true)
             return  $error;
         return false;
-    }
+    } 
 
     public static function  curl($url, $data)
     {
