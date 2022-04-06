@@ -1,14 +1,11 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Models;
+
+use Fogito\Config;
 
 class CoreSettings extends \Fogito\Db\RemoteModelManager
 {
+
     protected static $_data = [];
 
     /**
@@ -16,14 +13,19 @@ class CoreSettings extends \Fogito\Db\RemoteModelManager
      *
      * @return void
      */
+    public static function getServer()
+    {
+        return Config::$_serverUrls["s2s"];
+    }
+
     public static function getSource()
     {
-        return 'settings';
+        return "users";
     }
 
     public static function fetch()
     {
-        return self::request(null, []);
+        return self::curl(null, []);
     }
 
     public static function getData()

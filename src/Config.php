@@ -43,6 +43,11 @@ class Config implements ArrayAccess, Countable
      * @var array
      * @access private
     */
+    public static $_serverUrls = [
+        "s2s"       => "https://s2s.fogito.com",
+        "files"     => "https://files.fogito.com",
+    ];
+
     private $_storage = array();
 
     /**

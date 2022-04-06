@@ -34,7 +34,12 @@ class Auth
         if($_token && strlen($_token) > 0)
             $response       = Cache::get(Auth::getCacheKey());
         if(!$response)
-            $response = CoreSettings::request(null, []);
+        {
+            $response = CoreSettings::curl(CoreSettings::getServer()."/settings", [
+                "token"         => $_token
+            ]);
+            $response = json_decode($response, true);
+        }
         if (is_array($response) && $_data=$response["data"])
         {
             CoreSettings::setData($_data);
@@ -145,6 +150,33 @@ class Auth
     public static function setPermissions($_permissions = [])
     {
         self::$_permissions = $_permissions;
+    }
+
+
+    public static function getAvatar($data, $type=false)
+    {
+        $avatars = [];
+        $url = "https://crm.fogito.com";
+        if ($data && $data->avatar && $data->avatar->avatars){
+            $avatars = (array)$data->avatar->avatars;
+        }else{
+            $avatars = [
+                "tiny"    => $url . "/assets/images/noavatar.png",
+                "small"   => $url . "/assets/images/noavatar.png",
+                "medium"  => $url . "/assets/images/noavatar.png",
+                "large"   => $url . "/assets/images/noavatar.png",
+                "nophoto" => true,
+                "id"      => false,
+            ];
+        }
+
+        if($type){
+            if($avatars[$type])
+                return $avatars[$type];
+            return $url . "/assets/images/noavatar.png";
+        }else{
+            return $avatars;
+        }
     }
 
     /**

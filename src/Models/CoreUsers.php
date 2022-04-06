@@ -1,13 +1,7 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Models;
 
-use Fogito\Lib\Auth;
+use Fogito\Config;
 
 class CoreUsers extends \Fogito\Db\RemoteModelManager
 {
@@ -38,14 +32,14 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
         }
     }
 
-    /**
-     * getSource
-     *
-     * @return void
-     */
+    public static function getServer()
+    {
+        return Config::$_serverUrls["s2s"];
+    }
+
     public static function getSource()
     {
-        return 'users';
+        return "users";
     }
 
     /**
@@ -59,52 +53,76 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
         return $properties;
     }
 
-    /**
-     * filterUpdateData
-     *
-     * @param  mixed $properties
-     * @return void
-     */
     public static function filterUpdateData($properties = [])
     {
         return $properties;
     }
 
-    public function delete()
+
+
+    public static function createToken($userId, $expiration=0)
     {
-        $this->is_deleted = 1;
-        if (Auth::isAuth()) {
-            $this->deleter_id = Auth::getId();
+        $data = [
+            "data" => [
+                "user_id"         => $userId,
+                "expiration"      => $expiration,
+            ]
+        ];
+
+        $result = self::curl(Config::$_serverUrls["s2s"] . "/createtoken", $data);
+
+        if ($result)
+            return json_decode($result);
+        return false;
+    }
+
+
+
+
+    public static function findFirstAndSet($user, $params=[])
+    {
+        $data = self::findAndSet([$user], $params);
+        return $data[0];
+    }
+
+    public static function findAndSet($list, $params=[])
+    {
+        $keyFrom    = $params["key_from"] ? $params["key_from"]: "user";
+        $keyTo      = $params["key_to"] ? $params["key_to"]: "user";
+        $columns    = $params["columns"] && count($params["columns"]) > 0 ? $params["columns"]: ["id", "fullname", "avatar_tiny"];
+
+        $ids = [];
+        foreach ($list as $value)
+            $ids[] = (string)$value[$keyFrom];
+
+
+        // ########## start Fetch ############
+        $dataById = [];
+        if(count($ids) > 0)
+        {
+
+            $query = CoreUsers::find([
+                [
+                    '$id'    => [
+                        'in'   => $ids,
+                    ]
+                ],
+                "columns" => $columns,
+            ]);
+            foreach ($query as $value)
+                $dataById[(string)$value["id"]] = $value;
         }
-        $this->deleted_at = self::getDate();
-        return !!$this->save();
+        // ########## end Fetch ############
+
+
+        $data = [];
+        foreach ($list as $value)
+        {
+            $value[$keyTo] = $dataById[$value[$keyFrom]] ? $dataById[$value[$keyFrom]] : false;
+            $data[] = $value;
+        }
+
+        return $data;
     }
 
-    /**
-     * updateAvatar
-     *
-     * @param  mixed $parameters
-     * @return void
-     */
-    public static function avatarUpdate($parameters = [])
-    {
-        $response = self::request('avatarupdate', $parameters);
-        if ($response["status"] == self::STATUS_SUCCESS)
-            return $response["data"];
-        return false;
-    }
-
-    /**
-     * deleteAvatar
-     *
-     * @param  mixed $parameters
-     * @return void
-     */
-    public static function avatarDelete($parameters = [])
-    {
-        $response = self::request('avatardelete', $parameters);
-        if ($response["status"] == self::STATUS_SUCCESS)
-            return $response["data"];
-        return false;
-    }
 }

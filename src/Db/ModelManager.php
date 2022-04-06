@@ -1,17 +1,10 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito\Db;
 
 use Fogito\Exception;
-use Fogito\Db\ModelManagerInterface;
 use ReflectionClass;
 
-abstract class ModelManager implements ModelManagerInterface
+abstract class ModelManager
 {
     protected static $_server;
     protected static $_db;

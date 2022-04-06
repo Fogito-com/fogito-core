@@ -7,6 +7,7 @@
 */
 namespace Fogito\Models;
 
+use Fogito\Config;
 use Fogito\Lib\Auth;
 
 class CoreCompanies extends \Fogito\Db\RemoteModelManager
@@ -24,14 +25,14 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
         }
     }
 
-    /**
-     * getSource
-     *
-     * @return void
-     */
+    public static function getServer()
+    {
+        return Config::$_serverUrls["s2s"];
+    }
+
     public static function getSource()
     {
-        return 'companies';
+        return "companies";
     }
 
     /**
