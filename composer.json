@@ -8,20 +8,7 @@
             "Fogito\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "Fogito LLC",
-            "email": "info@fogito.com"
-        },
-        {
-            "name": "Tural Ilyasov",
-            "email": "senior2ral@gmail.com"
-        },
-        {
-            "name": "Shahmar Shukurov",
-            "email": "seniorshahmar@gmail.com"
-        }
-    ],
+    "authors": [],
     "minimum-stability": "stable",
     "require": {
         "php": ">=5.6"
