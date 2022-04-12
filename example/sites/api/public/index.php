@@ -49,17 +49,7 @@ try {
     $app->handle();
 
 } catch (\Fogito\Exception $e) {
-    Response::setJsonContent(\array_merge([
-        Response::KEY_STATUS  => Response::STATUS_ERROR,
-        Response::KEY_CODE    => $e->getCode(),
-        Response::KEY_MESSAGE => $e->getMessage(),
-    ], $e->getData()));
-    Response::send();
+    Response::error($e->getMessage(), $e->getCode());
 } catch (\Exception $e) {
-    Response::setJsonContent([
-        Response::KEY_STATUS  => Response::STATUS_ERROR,
-        Response::KEY_CODE    => $e->getCode(),
-        Response::KEY_MESSAGE => $e->getMessage(),
-    ]);
-    Response::send();
+    Response::error($e->getMessage(), $e->getCode());
 }
