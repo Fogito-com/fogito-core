@@ -27,9 +27,10 @@ class Api
             $action     = $app->router->getActionName();
 
             Auth::init();
-            if (!\in_array($module, ['auth']) && !Auth::getData())
+            if (!\in_array($module, ['auth']))
             {
-                //Response::error(Auth::$)
+                if(Auth::getError())
+                    Response::error(Auth::getError()["description"], Auth::getError()["code"]);
             }
 
 

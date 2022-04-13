@@ -1,9 +1,7 @@
 <?php
 namespace Fogito\Lib;
 
-use Fogito\Exception;
 use Fogito\Http\Request;
-use Fogito\Lib\Cache;
 use Fogito\Models\CoreSettings;
 use Fogito\Lib\Lang;
 
@@ -14,6 +12,7 @@ class Auth
     protected static $_data;
     protected static $_permissions = [];
     protected static $_cacheDuration = 60; // Seconds
+    protected static $_error = false; // ["description" => "", "code" => 1001]
 
     public function __construct()
     {
@@ -42,17 +41,25 @@ class Auth
         }
         if (is_array($response) && $_data=$response["data"])
         {
-            CoreSettings::setData($_data);
+            if($response["status"] == "success")
+            {
+                CoreSettings::setData($_data);
 
-            if($_data["account_error"])
-                throw new Exception($_data["account_error"]["description"], $_data["account_error"]["error_code"]);
+                if($_data["account_error"])
+                    Auth::setError($_data["account_error"]["error_code"], $_data["account_error"]["description"]);
 
-            if($_data["account"])
-                Auth::setData($_data["account"]);
-            if($_data["permissions"])
-                Auth::setPermissions($_data["permissions"]);
-            if($_data["company"])
-                Company::setData($_data["company"]);
+                if($_data["account"])
+                    Auth::setData($_data["account"]);
+                if($_data["permissions"])
+                    Auth::setPermissions($_data["permissions"]);
+                if($_data["company"])
+                    Company::setData($_data["company"]);
+            }
+            else
+            {
+                Auth::setError((int)$response["error_code"], (string)$response["description"]);
+            }
+
             if($_data["translations"])
                 Lang::setData($_data["translations"]);
 
@@ -60,7 +67,7 @@ class Auth
         }
         else
         {
-            throw new Exception(Lang::get("AuthExpired", "Authentication expired"), 1001);
+            Auth::setError(1000, Lang::get("ConnectionError", "Connection Error"));
         }
 
         if(Auth::getData())
@@ -78,6 +85,16 @@ class Auth
     public static function isAuth()
     {
         return self::$_data;
+    }
+
+    public static function setError($code=1001, $description="")
+    {
+        return Auth::$_error = ["code" => $code, "description" => $description];
+    }
+
+    public static function getError()
+    {
+        return Auth::$_error;
     }
 
     public static function setData($_data)
