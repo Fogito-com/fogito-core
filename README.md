@@ -51,6 +51,7 @@ sites
 
 ## Models
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreUsers.md">Core Users</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreFiles.md">Core Files</a><br/>
 
 ## License info
 

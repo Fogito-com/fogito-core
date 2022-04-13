@@ -193,7 +193,7 @@ abstract class ModelManager
         $insertId = $query->insert($parameters);
         $result   = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
 
-        return $result ? $result : false;
+        return $insertId ? $insertId : false;
     }
 
     /**
