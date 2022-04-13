@@ -9,6 +9,9 @@ return [
             'dbname'   => 'fogito',
         ],
     ],
+    'skipped_filtering_collections' => [ // Will skip filtering collection in DBManager
+        "companies", "logs_access"
+    ],
     's2s'   => [
         'app_id'       => 205,
         'server_token' => 'F0G1tOPlusMq3qw9kKj32hs9l2lkK90dMhzBN7cbmKL2lJ3223kdkPAaQ3RGVX3fqd23klMk93Hd9We3Lk4',

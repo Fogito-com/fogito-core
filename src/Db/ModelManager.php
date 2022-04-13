@@ -858,6 +858,15 @@ abstract class ModelManager
      */
     public static function filterBinds($filter = [])
     {
+        if (in_array(self::$_source, App::$di->config->skipped_filtering_collections))
+            return $filter;
+
+        if (!isset($filter['business_type']) && BUSINESS_TYPE !== 0)
+            $filter["business_type"] = BUSINESS_TYPE;
+
+        if (!isset($filter['company_id']) && strlen(COMPANY_ID) > 0)
+            $filter["company_id"] = COMPANY_ID;
+
         return $filter;
     }
 }
