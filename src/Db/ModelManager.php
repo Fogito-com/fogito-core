@@ -219,6 +219,35 @@ abstract class ModelManager
         return !!$result;
     }
 
+
+
+    public static function updateAndIncrement($filter, $update, $increment)
+    {
+        self::execute();
+        $filter  = self::filterBinds((array) $filter);
+        if(is_array($increment['is_deleted']) && array_key_exists('$ne', $increment['is_deleted'])){
+            $increment['is_deleted'] = ((int)$increment['is_deleted']['$ne'] == 1 ? 0 : 1);
+        }
+
+        $options = ['multi' => true, 'upsert' => false];
+        $query  = new \MongoDB\Driver\BulkWrite;
+        $query->update(
+            $filter,
+            [
+                '$set' => $update,
+                '$inc' => $increment,
+            ],
+            $options
+        );
+        $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
+
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * removeColumns
      *
