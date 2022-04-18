@@ -380,6 +380,32 @@ abstract class ModelManager
         return !!$res;
     }
 
+
+
+    public static function sum($field, $filter = [])
+    {
+        self::execute();
+
+        $pipleLine = [];
+        $filter    = self::filterBinds((array) $filter);
+        if (count($filter) > 0) {
+            $pipleLine[] = ['$match' => $filter];
+        }
+
+        $pipleLine[] = [
+            '$group' => ['_id' => '$asdak', 'total' => ['$sum' => '$' . $field], 'count' => ['$sum' => 1]],
+        ];
+        $Command = new \MongoDB\Driver\Command([
+            'aggregate' => self::$_source,
+            'pipeline'  => $pipleLine,
+            "cursor" => [ "batchSize" => 1 ]
+        ]);
+
+        $Result = self::$_connection->executeCommand(self::$_db, $Command);
+        return $Result->toArray()[0]->total;
+    }
+
+
     /**
      * save
      *
