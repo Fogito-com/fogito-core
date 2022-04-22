@@ -103,8 +103,8 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
 
             $query = CoreUsers::find([
                 [
-                    '$id'    => [
-                        'in'   => $ids,
+                    'id'    => [
+                        '$in'   => $ids,
                     ]
                 ],
                 "columns" => $columns,

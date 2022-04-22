@@ -1,5 +1,15 @@
 <?php
 return [
+    '/testcontroller'                 => [
+        'module'     => 'default',
+        'controller' => 'testcontroller',
+    ],
+    '/testaction'                 => [
+        'module'     => 'main',
+        'controller' => 'data',
+        'action'     => 'testaction',
+    ],
+
     '/:module/:controller/:action/:params' => [
         'module'     => 1,
         'controller' => 2,
