@@ -5,23 +5,6 @@ use Fogito\Filter;
 use Fogito\Exception;
 use Fogito\Text;
 
-/**
- * Fogito\Http\Request
- *
- * <p>Encapsulates request information for easy and secure access from application controllers.</p>
- *
- * <p>The request object is a simple value object that is passed between the dispatcher and controller classes.
- * It packages the HTTP request environment.</p>
- *
- *<code>
- *  $request = new Fogito\Http\Request();
- *  if ($request->isPost() == true) {
- *      if ($request->isAjax() == true) {
- *          echo 'Request was made using POST and AJAX';
- *      }
- *  }
- *</code>
- */
 class Request
 {
     /**
@@ -99,21 +82,7 @@ class Request
         return $raw;
     }
 
-    /**
-     * Gets a variable from the $_POST superglobal applying filters if needed
-     * If no parameters are given the $_POST superglobal is returned
-     *
-     *<code>
-     *  $userEmail = $request->getPost("user_email");
-     *  $userEmail = $request->getPost("user_email", "email");
-     *</code>
-     *
-     * @param string|null $name
-     * @param string|array|null $filters
-     * @param mixed $defaultValue
-     * @return mixed
-     * @throws Exception
-     */
+
     public static function getPost($name = null, $filters = null, $defaultValue = null)
     {
         if (is_string($name) === false && is_null($name) === false) {
@@ -146,22 +115,6 @@ class Request
         return $_POST;
     }
 
-    /**
-     * Gets variable from $_GET superglobal applying filters if needed
-     * If no parameters are given the $_GET superglobal is returned
-     *
-     *<code>
-     *  $id = $request->getQuery("id");
-     *  $id = $request->getQuery("id", "int");
-     *  $id = $request->getQuery("id", null, 150);
-     *</code>
-     *
-     * @param string|null $name
-     * @param string|array|null $filters
-     * @param mixed $defaultValue
-     * @return mixed
-     * @throws Exception
-     */
     public static function getQuery($name = null, $filters = null, $defaultValue = null)
     {
         if (is_string($name) === false && is_null($name) === false) {
@@ -194,13 +147,7 @@ class Request
         return $_GET;
     }
 
-    /**
-     * Gets variable from $_SERVER superglobal
-     *
-     * @param string $name
-     * @return mixed
-     * @throws Exception
-     */
+
     public static function getServer($name)
     {
         if (is_string($name) === false) {
@@ -212,6 +159,13 @@ class Request
         }
 
         return null;
+    }
+
+
+    public static function setServer($name, $value=false)
+    {
+        $_SERVER[$name] = $value;
+        return true;
     }
 
     /**
@@ -302,11 +256,7 @@ class Request
         return '';
     }
 
-    /**
-     * Gets HTTP schema (http/https)
-     *
-     * @return string
-     */
+
     public static function getScheme()
     {
         $https = self::getServer('HTTPS');
@@ -323,21 +273,13 @@ class Request
         return $scheme;
     }
 
-    /**
-     * Checks whether request has been made using ajax. Checks if $_SERVER['HTTP_X_REQUESTED_WITH']=='XMLHttpRequest'
-     *
-     * @return boolean
-     */
+
     public static function isAjax()
     {
         return (self::getHeader('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest' ? true : false);
     }
 
-    /**
-     * Checks whether request has been made using SOAP
-     *
-     * @return boolean
-     */
+
     public static function isSoapRequested()
     {
         if (isset($_SERVER['HTTP_SOAPACTION']) === true) {
@@ -438,11 +380,7 @@ class Request
         return $raw;
     }
 
-    /**
-     * Gets active server address IP
-     *
-     * @return string
-     */
+
     public static function getServerAddress()
     {
         if (isset($_SERVER['SERVER_ADDR']) === true) {
