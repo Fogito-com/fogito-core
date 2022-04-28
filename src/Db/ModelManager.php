@@ -387,7 +387,7 @@ abstract class ModelManager
         self::execute();
 
         $pipleLine = [];
-        $filter    = self::filterBinds((array) $filter);
+        $filter    = self::filterBinds((array) $filter[0]);
         if (count($filter) > 0) {
             $pipleLine[] = ['$match' => $filter];
         }
