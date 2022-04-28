@@ -2,7 +2,6 @@
 namespace Fogito;
 
 use Closure;
-use Fogito\FilterInterface;
 use Fogito\Exception;
 
 /**
