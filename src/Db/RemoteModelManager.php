@@ -29,7 +29,8 @@ class RemoteModelManager
         $mergeData = [
             "lang"          => Lang::getLang(),
             "token_user"    => Auth::getData() ? (string)Auth::getId(): "",
-            "http_origin"   => Request::getServer("HTTP_ORIGIN")
+            "http_origin"   => Request::getServer("HTTP_ORIGIN"),
+            "request_uri"   => Request::getServer("REQUEST_URI")
         ];
         if(strlen(Auth::getToken()) > 10)
             $mergeData["token"] = Auth::getToken();
@@ -100,7 +101,10 @@ class RemoteModelManager
     {
         self::init("find");
         if((!$filter["filter"] || count($filter["filter"])) && count($filter[0]) > 0)
+        {
             $filter["filter"] = $filter[0];
+            unset($filter[0]);
+        }
         return self::request($filter, $options);
     }
 
