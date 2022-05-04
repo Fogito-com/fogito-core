@@ -79,6 +79,8 @@ class Auth
         else
         {
             define("TOKEN", false);
+            define("BUSINESS_TYPE", false);
+            define("COMPANY_ID", false);
         }
     }
 

@@ -916,12 +916,19 @@ abstract class ModelManager
         if (in_array(self::$_source, App::$di->config->skipped_filtering_collections))
             return $filter;
 
-        if (!isset($filter['business_type']) && BUSINESS_TYPE !== 0)
+        if (!isset($filter['business_type']) && BUSINESS_TYPE)
             $filter["business_type"] = BUSINESS_TYPE;
 
-        if (!isset($filter['company_id']) && strlen(COMPANY_ID) > 0)
+        if (!isset($filter['company_id']) && COMPANY_ID)
             $filter["company_id"] = COMPANY_ID;
 
         return $filter;
+    }
+
+    public static function toMilliSeconds($date)
+    {
+        if ($date && method_exists($date, "toDateTime"))
+            return  round(@$date->toDateTime()->format("U.u")*1000, 0);
+        return 0;
     }
 }
