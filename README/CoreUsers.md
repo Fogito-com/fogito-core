@@ -16,7 +16,8 @@
             ],
             "columns"   => ["id", "avatar", "fullname", "firstname", "lastname"],
             "skip"      => 0,
-            "limit"     => 2
+            "limit"     => 2,
+            "version"   => 2 // Different responses for versions 
         ]);
     ?>
 

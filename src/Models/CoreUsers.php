@@ -125,4 +125,15 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
         return $data;
     }
 
+    public static function mergePositions($list)
+    {
+        $data = [];
+        foreach ($list as $value)
+        {
+            $value["position"] = implode(", ", array_map(function ($position){ return $position["title"];}, $value["positions"]));
+            $data[] = $value;
+        }
+        return $data;
+    }
+
 }
