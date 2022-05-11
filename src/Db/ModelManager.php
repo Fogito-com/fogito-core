@@ -746,7 +746,7 @@ abstract class ModelManager
      * @return integer|false $time
      * @return \MongoDB\BSON\UTCDatetime
      */
-    public static function getDate($time = false, $round=false)
+    public static function getDate($time = false, $round=true)
     {
         if (!$time) {
             $time = round(microtime(true) * 1000);
