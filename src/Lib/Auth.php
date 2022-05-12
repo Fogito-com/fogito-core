@@ -9,6 +9,7 @@ class Auth
 {
     protected static $_token;
     protected static $_tokenUser;
+    protected static $_tokenDisabled=false;
     protected static $_data;
     protected static $_permissions = [];
     protected static $_cacheDuration = 60; // Seconds
@@ -141,6 +142,21 @@ class Auth
     public static function setToken($_token)
     {
         self::$_token = $_token;
+    }
+
+    public static function disableToken()
+    {
+        return self::$_tokenDisabled=true;
+    }
+
+    public static function enableToken()
+    {
+        return self::$_tokenDisabled=false;
+    }
+
+    public static function tokenAllowed()
+    {
+        return self::$_tokenDisabled ? false: true;
     }
 
     public static function getTokenUser()

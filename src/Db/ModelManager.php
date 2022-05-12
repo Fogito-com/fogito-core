@@ -3,6 +3,7 @@ namespace Fogito\Db;
 
 use Fogito\App;
 use Fogito\Exception;
+use Fogito\Lib\Lang;
 use ReflectionClass;
 
 abstract class ModelManager
@@ -678,7 +679,7 @@ abstract class ModelManager
         } elseif (preg_match('/^[a-f\d]{24}$/i', $id)) {
             return new \MongoDB\BSON\ObjectID($id);
         }
-        return false;
+        throw new \Exception("Object ID is wrong");
     }
 
     /**
