@@ -1,13 +1,18 @@
-# Fogito Core
-Fogito Core - MVC structure
+<p align="center">
+  <a href="https://app.fogito.com" rel="noopener noreferrer nofollow" target="blank">
+   <img width="200" src="https://app.fogito.com/assets/images/logos/logo.svg" alt="Fogito Core MVC">
+  </a>
+</p>
 
-## Installation
+<h1 align="center">Fogito Core MVC</h1>
+
+## 📦 Installation
 
 ```
 composer require fogito/core
 ```
 
-## Structure
+## 🔨 Structure
 
 This a multi-module [MVC][mvc-pattern] structure.
 
@@ -27,7 +32,7 @@ app
     │   └── Users.php
 sites
     └── api
-        ├── config
+        ├── config (OPTIONAL)
         │   ├── routes.php
         │   └── config.php
         │   
@@ -47,13 +52,16 @@ sites
         │      
         └── public
             ├── index.php
+            ├── assets
 ```
 
-## Models
-- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreUsers.md">Core Users</a><br/>
-- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreFiles.md">Core Files</a><br/>
+## ⚙️ Models
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreUsers.md">🙍‍ Core Users</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreFiles.md">📦 Core Files</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreNotifications.md">⏰ Core Notifications</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreEmails.md">✉️ Core Emails</a><br/>
 
-## License info
+## 🌍 License 
 
 Fogito Core License
 
