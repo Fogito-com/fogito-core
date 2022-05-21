@@ -2,7 +2,7 @@
     "name": "fogito/corepro",
     "description": "composer require fogito/core",
     "type": "library",
-    "license": "Fogito LLC",
+    "license": "proprietary",
     "autoload": {
         "psr-4": {
             "Fogito\\": "src/"
