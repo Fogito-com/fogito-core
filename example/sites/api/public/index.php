@@ -33,8 +33,8 @@ try {
     $app->set('router', function () {
         $router = new Router(false);
         $router->removeExtraSlashes(true);
-        $router->setDefaultModule('auth');
-        $router->setDefaultController('login');
+        $router->setDefaultModule('default');
+        $router->setDefaultController('index');
         $router->setDefaultAction('index');
         $routes = require APP_PATH . '/config/routes.php';
         foreach ($routes as $key => $value) {

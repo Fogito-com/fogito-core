@@ -1,5 +1,5 @@
 <?php
-namespace Products\Controllers;
+namespace Controllers;
 
 use Fogito\Lib\Lang;
 use Lib\Helpers;

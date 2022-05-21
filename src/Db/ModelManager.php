@@ -825,12 +825,7 @@ abstract class ModelManager
         if (!self::$_server['username'] || !self::$_server['password']) {
             $dsn = 'mongodb://' . self::$_server['host'] . ':' . self::$_server['port'];
         } else {
-            $dsn = sprintf(
-                'mongodb://%s:%s@%s',
-                self::$_server['username'],
-                self::$_server['password'],
-                self::$_server['host']
-            );
+            $dsn = 'mongodb://' .self::$_server["username"]. ':' .self::$_server["password"]. '@' .self::$_server["host"]. ':' . self::$_server["port"] . '/' .self::$_server["dbname"];
         }
         self::$_connection = new \MongoDB\Driver\Manager($dsn);
     }
