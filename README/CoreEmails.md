@@ -8,7 +8,7 @@
         $data = CoreEmails::insert([
             "user_id"             => "2i23u4i23ui2i12uiu2nm", // OPTIONAL
             "subject"             => "Test subject",
-            "from"                => "fromEmail@fromdomain.com",
+            "from"                => "fromEmail@fromdomain.com", // OPTIONAL, default: noprely@fogito.com
             "from_title"          => "From Email Title", // OPTIONAL
             "to"                  => "toEmail@todomain.com",
             "reply_to"            => "noreply@fogito.com", // OPTIONAL

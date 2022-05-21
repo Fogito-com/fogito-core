@@ -674,7 +674,9 @@ abstract class ModelManager
      */
     public static function objectId($id)
     {
-        if ($id instanceof \MongoDB\BSON\ObjectID) {
+        if(strlen($id)<5){
+            return false;
+        }elseif ($id instanceof \MongoDB\BSON\ObjectID) {
             return $id;
         } elseif (preg_match('/^[a-f\d]{24}$/i', $id)) {
             return new \MongoDB\BSON\ObjectID($id);
