@@ -12,12 +12,13 @@ class Auth
     protected static $_tokenDisabled=false;
     protected static $_data;
     protected static $_permissions = [];
+    protected static $_pricing = [];
     protected static $_cacheDuration = 60; // Seconds
     protected static $_error = false; // ["description" => "", "code" => 1001]
 
     public function __construct()
     {
-        Auth::init();
+        self::init();
     }
 
     public static function init()
@@ -26,13 +27,13 @@ class Auth
         if (preg_match('/[a-z]{2}/i', trim($lang)))
             Lang::setLang($lang);
 
-        list($_token, $_tokenUser) = Auth::getParams();
-        Auth::setToken($_token);
-        Auth::setTokenUser($_tokenUser);
+        list($_token, $_tokenUser) = self::getParams();
+        self::setToken($_token);
+        self::setTokenUser($_tokenUser);
 
         $response       = false;
         if($_token && strlen($_token) > 0)
-            $response       = Cache::get(Auth::getCacheKey());
+            $response       = Cache::get(self::getCacheKey());
         if(!$response)
         {
             $response = CoreSettings::curl(CoreSettings::getServer()."/settings", [
@@ -47,33 +48,35 @@ class Auth
                 CoreSettings::setData($_data);
 
                 if($_data["account_error"])
-                    Auth::setError($_data["account_error"]["error_code"], $_data["account_error"]["description"]);
+                    self::setError($_data["account_error"]["error_code"], $_data["account_error"]["description"]);
 
                 if($_data["account"])
-                    Auth::setData($_data["account"]);
+                    self::setData($_data["account"]);
                 if($_data["permissions"])
-                    Auth::setPermissions($_data["permissions"]);
+                    self::setPermissions($_data["permissions"]);
                 if($_data["company"])
                     Company::setData($_data["company"]);
+                if($_data["pricing"])
+                    self::setPricing($_data["pricing"]);
             }
             else
             {
-                Auth::setError((int)$response["error_code"], (string)$response["description"]);
+                self::setError((int)$response["error_code"], (string)$response["description"]);
             }
 
             if($_data["translations"])
                 Lang::setData($_data["translations"]);
 
-            Cache::set(Auth::getCacheKey(), $response, Auth::getCacheDuration());
+            Cache::set(self::getCacheKey(), $response, self::getCacheDuration());
         }
         else
         {
-            Auth::setError(1000, Lang::get("ConnectionError", "Connection Error"));
+            self::setError(1000, Lang::get("ConnectionError", "Connection Error"));
         }
 
-        if(Auth::getData())
+        if(self::getData())
         {
-            define("TOKEN", (string) Auth::getToken());
+            define("TOKEN", (string) self::getToken());
             define("BUSINESS_TYPE", (int) @Company::getData()->business_model);
             define("COMPANY_ID", (string) @Company::getId());
         }
@@ -92,12 +95,12 @@ class Auth
 
     public static function setError($code=1001, $description="")
     {
-        return Auth::$_error = ["code" => $code, "description" => $description];
+        return self::$_error = ["code" => $code, "description" => $description];
     }
 
     public static function getError()
     {
-        return Auth::$_error;
+        return self::$_error;
     }
 
     public static function setData($_data)
@@ -134,6 +137,8 @@ class Auth
         return null;
     }
 
+
+
     public static function getToken()
     {
         return self::$_token;
@@ -159,6 +164,8 @@ class Auth
         return self::$_tokenDisabled ? false: true;
     }
 
+
+
     public static function getTokenUser()
     {
         return self::$_tokenUser;
@@ -169,6 +176,8 @@ class Auth
         self::$_tokenUser = $_tokenUser;
     }
 
+
+
     public static function getPermissions()
     {
         return self::$_permissions;
@@ -178,6 +187,18 @@ class Auth
     {
         self::$_permissions = $_permissions;
     }
+
+
+    public static function setPricing($pricing=[])
+    {
+        return self::$_pricing = $pricing;
+    }
+
+    public static function getPricing()
+    {
+        return self::$_pricing;
+    }
+
 
 
     public static function getAvatar($data, $type=false)
@@ -224,12 +245,12 @@ class Auth
      */
     public static function setCacheDuration($seconds=60)
     {
-        Auth::$_cacheDuration = $seconds;
+        self::$_cacheDuration = $seconds;
     }
 
     public static function getCacheDuration()
     {
-        return Auth::$_cacheDuration;
+        return self::$_cacheDuration;
     }
 
     public static function getParams()
@@ -248,13 +269,13 @@ class Auth
 
     public static function getCacheKey()
     {
-        list($_token, $_tokenUser) = Auth::getParams();
+        list($_token, $_tokenUser) = self::getParams();
         return md5($_tokenUser."-". Lang::getLang()."-".$_token."-".Request::getServer("HTTP_ORIGIN"));
     }
 
     public static function clearCache()
     {
-        Cache::set(Auth::getCacheKey(), false, 0);
+        Cache::set(self::getCacheKey(), false, 0);
     }
     /**
      * end CACHING
