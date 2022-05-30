@@ -10,6 +10,7 @@ namespace Fogito;
 use ArrayAccess;
 use Countable;
 use Fogito\Exception;
+use Fogito\Http\Request;
 
 /**
  * Fogito\Config
@@ -43,10 +44,21 @@ class Config implements ArrayAccess, Countable
      * @var array
      * @access private
     */
-    public static $_serverUrls = [
+    public static $_prodServerUrls = [
         "s2s"       => "https://s2s.fogito.com",
         "files"     => "https://files.fogito.com",
     ];
+    public static $_devServerUrls = [
+        "s2s"       => "https://tests2s.fogito.com",
+        "files"     => "https://testfiles.fogito.com",
+    ];
+
+    public static function getUrl($server="s2s")
+    {
+        if(Request::isDevMode())
+            return self::$_devServerUrls[$server];
+        return self::$_prodServerUrls[$server];
+    }
 
     private $_storage = array();
 

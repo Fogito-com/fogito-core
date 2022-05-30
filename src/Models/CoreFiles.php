@@ -12,7 +12,7 @@ class CoreFiles extends \Fogito\Db\RemoteModelManager
      */
     public static function getServer()
     {
-        return Config::$_serverUrls["files"];
+        return Config::getUrl("files");
     }
 
     public static function getSource()
@@ -33,7 +33,7 @@ class CoreFiles extends \Fogito\Db\RemoteModelManager
             ]
         ];
 
-        $result = self::curl(Config::$_serverUrls["files"] . "/s2s/checktempfile", $data);
+        $result = self::curl(Config::getUrl("files") . "/s2s/checktempfile", $data);
 
         if ($result)
             return \json_decode($result, true);
@@ -48,7 +48,7 @@ class CoreFiles extends \Fogito\Db\RemoteModelManager
             ]
         ];
 
-        $result = self::curl(Config::$_serverUrls["files"] . "/s2s/checktempfile/multiple", $data);
+        $result = self::curl(Config::getUrl("files") . "/s2s/checktempfile/multiple", $data);
 
         if ($result)
             return \json_decode($result, true);
@@ -68,7 +68,7 @@ class CoreFiles extends \Fogito\Db\RemoteModelManager
             ]
         ];
 
-        $result = self::curl(Config::$_serverUrls["files"] . "/s2s/move", $data);
+        $result = self::curl(Config::getUrl("files") . "/s2s/move", $data);
 
         if ($result)
             return \json_decode($result, true);
@@ -84,7 +84,7 @@ class CoreFiles extends \Fogito\Db\RemoteModelManager
             ]
         ];
 
-        $result = self::curl(Config::$_serverUrls["files"] . "/s2s/move/multiple", $data);
+        $result = self::curl(Config::getUrl("files") . "/s2s/move/multiple", $data);
 
         if ($result)
             return \json_decode($result, true);

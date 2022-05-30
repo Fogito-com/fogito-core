@@ -34,7 +34,7 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
 
     public static function getServer()
     {
-        return Config::$_serverUrls["s2s"];
+        return Config::getUrl("s2s");
     }
 
     public static function getSource()
@@ -69,7 +69,7 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
             ]
         ];
 
-        $result = self::curl(Config::$_serverUrls["s2s"] . "/createtoken", $data);
+        $result = self::curl(Config::getUrl("s2s") . "/createtoken", $data);
 
         if ($result)
             return json_decode($result);

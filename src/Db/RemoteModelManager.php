@@ -9,7 +9,7 @@ use Fogito\Lib\Lang;
 
 class RemoteModelManager
 {
-    public static $url = "https://s2s.fogito.com";
+    public static $url = "";
 
     public static $action = "";
 

@@ -681,39 +681,6 @@ class Request
     }
 
     /**
-     * Process a request header and return an array of values with their qualities
-     *
-     * @param string $serverIndex
-     * @param string $name
-     * @return array
-     * @throws Exception
-     */
-    protected static function _getQualityHeader($serverIndex, $name)
-    {
-        if (is_string($serverIndex) === false ||
-            is_string($name) === false) {
-            throw new Exception('Invalid parameter type.');
-        }
-
-        $return = array();
-
-        $parts = preg_split('/,\\s*/', self::getServer($serverIndex));
-
-        foreach ($parts as $part) {
-            $headerParts = explode(';', $part);
-            if (isset($headerParts[1]) === true) {
-                $quality = substr($headerParts[1], 2);
-            } else {
-                $quality = 1;
-            }
-
-            $return[] = array($name => $headerParts[0], 'quality' => $quality);
-        }
-
-        return $return;
-    }
-
-    /**
      * Process a request header and return the one with best quality
      *
      * @param array $qualityParts
@@ -749,46 +716,6 @@ class Request
     }
 
     /**
-     * Gets array with mime/types and their quality accepted by the browser/client from $_SERVER['HTTP_ACCEPT']
-     *
-     * @return array
-     */
-    public static function getAcceptableContent()
-    {
-        return self::_getQualityHeader('HTTP_ACCEPT', 'accept');
-    }
-
-    /**
-     * Gets best mime/type accepted by the browser/client from $_SERVER['HTTP_ACCEPT']
-     *
-     * @return array
-     */
-    public static function getBestAccept()
-    {
-        return self::_getBestQuality(self::getAcceptableContent(), 'accept');
-    }
-
-    /**
-     * Gets charsets array and their quality accepted by the browser/client from $_SERVER['HTTP_ACCEPT_CHARSET']
-     *
-     * @return array
-     */
-    public static function getClientCharsets()
-    {
-        return self::_getQualityHeader('HTTP_ACCEPT_CHARSET', 'charset');
-    }
-
-    /**
-     * Gets best charset accepted by the browser/client from $_SERVER['HTTP_ACCEPT_CHARSET']
-     *
-     * @return string
-     */
-    public static function getBestCharset()
-    {
-        return self::_getBestQuality(self::getClientCharsets(), 'charset');
-    }
-
-    /**
      * Gets languages array and their quality accepted by the browser/client from $_SERVER['HTTP_ACCEPT_LANGUAGE']
      *
      * @return array
@@ -806,5 +733,12 @@ class Request
     public static function getBestLanguage()
     {
         return self::_getBestQuality(self::getLanguages(), 'language');
+    }
+
+    public static function isDevMode()
+    {
+        if(self::getServer("HTTP_ENV_MODE") === "development")
+            return true;
+        return false;
     }
 }
