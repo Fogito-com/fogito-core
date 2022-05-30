@@ -11,6 +11,8 @@
             "message"      => "Hello, dear user",
             "expire"       => 60, // OPTIONAL, if cannot be sent during 60 seconds, will be deleted. default: 0, no expiration
             "silent"       => false, // default: false
+            "activity_id"  => false, // default: false, if this notification is sent for activity, please assign activity_id
+            "priority"     => false, // default: 5, range: 1/10, 1-3 = Low, 4-7 = Medium, 8-10 Critic
             "app_ids"      => [601],
         ]);
     ?>
