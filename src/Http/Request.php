@@ -737,7 +737,7 @@ class Request
 
     public static function isDevMode()
     {
-        if(self::getServer("HTTP_ENV_MODE") === "development")
+        if(self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
             return true;
         return false;
     }

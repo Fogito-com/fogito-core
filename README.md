@@ -60,6 +60,7 @@ sites
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreFiles.md">📦 Core Files</a><br/>
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreNotifications.md">⏰ Core Notifications</a><br/>
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreEmails.md">✉️ Core Emails</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreActivities.md">🔍 Core Activities</a><br/>
 
 ## 🌍 License 
 
