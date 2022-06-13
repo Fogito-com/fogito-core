@@ -6,7 +6,7 @@
 > Lang description example: "{who} uploaded file {filename} on card {card}" \
 > {who} - is default replacement and will be replaced by executor (user_id). No need add to replacements key
 
-*Code:*
+*Code example 1:*
 
     <?php
         $data = CoreActivities::insert([
@@ -33,6 +33,31 @@
             "filters" => [
                 "card"          => "52k3i42u3i4u3i24mw2g",
                 "file_id"       => "352k3i42u3i4u3i24mi92"
+            ], 
+            "priority"     => 4 // default: 5, range: 1/10, range: 1/10, 1-3 = Low, 4-7 = Medium, 8-10 Critic
+        ]);
+    ?>
+
+
+
+*Code example 2:*
+
+    <?php
+        $data = CoreActivities::insert([
+            "user_id"      => "2i23u4i23ui2i12uiu2nm", // Executed by Whom
+            "user_ids"     => ["2i23u4i23ui2i12uiu2nm", "14i23u4i23ui2i12uiu29o"], // Assigned users to activity
+            "operation"    => "card_create",
+            "lang_key"     => "Act-UserEdit", // "{who} edited information of {whose}"
+            "replacements" => [
+                [
+                    "key"       => "whose",
+                    "type"      => "user",
+                    "id"        => "6218e1e4dd93085d646017de",
+                    "title"     => "Firstname Lastname",
+                    "is_link"   => 1
+                ]
+            ], // default: false
+            "filters" => [
             ], 
             "priority"     => 4 // default: 5, range: 1/10, range: 1/10, 1-3 = Low, 4-7 = Medium, 8-10 Critic
         ]);
