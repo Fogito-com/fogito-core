@@ -22,7 +22,8 @@ app
     │   └── config.php
     │
     ├── lib
-    │   └── Auth.php
+    │   └── Cache.php
+    │   └── Helpers.php
     │
     ├── middlewares
     │   └── Api.php
