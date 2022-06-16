@@ -929,4 +929,14 @@ abstract class ModelManager
             return  round(@$date->toDateTime()->format("U.u")*1000, 0);
         return 0;
     }
+
+
+    public static function dateFiltered($date, $format = "Y-m-d H:i:s")
+    {
+        if ($date && method_exists($date, "toDateTime")) {
+            return date($format, self::toSeconds($date));
+        }
+
+        return 0;
+    }
 }
