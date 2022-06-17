@@ -923,6 +923,11 @@ abstract class ModelManager
         return $filter;
     }
 
+    public static function getSchemeByColumn($column)
+    {
+        return static::getScheme()[$column];
+    }
+
     public static function toMilliSeconds($date)
     {
         if ($date && method_exists($date, "toDateTime"))
