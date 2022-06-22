@@ -14,6 +14,7 @@
             "user_ids"     => ["2i23u4i23ui2i12uiu2nm", "14i23u4i23ui2i12uiu29o"], // Assigned users to activity
             "operation"    => "card_create",
             "lang_key"     => "lang_key", // {who} uploaded file {filename} on card {card}
+            "default_description"     => "{who} uploaded file {filename} on card {card}", // if lang is not registered on core, this desciprtion will be used
             "replacements" => [
                 [
                     "key"       => "filename",
@@ -34,7 +35,8 @@
                 "card"          => "52k3i42u3i4u3i24mw2g",
                 "file_id"       => "352k3i42u3i4u3i24mi92"
             ], 
-            "priority"     => 4 // default: 5, range: 1/10, range: 1/10, 1-3 = Low, 4-7 = Medium, 8-10 Critic
+            "priority"     => 4, // default: 5, range: 1/10, range: 1/10, 1-3 = Low, 4-7 = Medium, 8-10 Critic
+            "created_at"     => 14928832983, // Unixtime
         ]);
     ?>
 
