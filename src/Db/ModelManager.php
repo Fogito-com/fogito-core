@@ -441,7 +441,7 @@ abstract class ModelManager
             $this->_id = self::objectId($result);
             $this->afterUpdate();
         }
-        return !!$result;
+        return $result;
     }
 
     /**
