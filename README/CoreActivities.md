@@ -1,8 +1,7 @@
 
 ## Create
 
-*lang_key notes:*
-> You have to register lang_keys on core. \
+*lang description notes:*
 > Lang description example: "{who} uploaded file {filename} on card {card}" \
 > {who} - is default replacement and will be replaced by executor (user_id). No need add to replacements key
 
@@ -13,7 +12,6 @@
             "user_id"      => "2i23u4i23ui2i12uiu2nm", // Executed by Whom
             "user_ids"     => ["2i23u4i23ui2i12uiu2nm", "14i23u4i23ui2i12uiu29o"], // Assigned users to activity
             "operation"    => "card_create",
-            "lang_key"     => "lang_key", // {who} uploaded file {filename} on card {card}
             "default_description"     => "{who} uploaded file {filename} on card {card}", // if lang is not registered on core, this desciprtion will be used
             "replacements" => [
                 [
@@ -49,7 +47,6 @@
             "user_id"      => "2i23u4i23ui2i12uiu2nm", // Executed by Whom
             "user_ids"     => ["2i23u4i23ui2i12uiu2nm", "14i23u4i23ui2i12uiu29o"], // Assigned users to activity
             "operation"    => "card_create",
-            "lang_key"     => "Act-UserEdit", // "{who} edited information of {whose}"
             "replacements" => [
                 [
                     "key"       => "whose",
