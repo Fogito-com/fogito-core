@@ -11,6 +11,7 @@
         $data = CoreActivities::insert([
             "user_id"      => "2i23u4i23ui2i12uiu2nm", // Executed by Whom
             "user_ids"     => ["2i23u4i23ui2i12uiu2nm", "14i23u4i23ui2i12uiu29o"], // Assigned users to activity
+            "company_id"   => "5k324i23ui2i12uim94l3", // If user is empty, company_id is required
             "operation"    => "card_create",
             "default_description"     => "{who} uploaded file {filename} on card {card}", // if lang is not registered on core, this desciprtion will be used
             "replacements" => [
