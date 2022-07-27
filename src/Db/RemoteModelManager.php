@@ -163,7 +163,7 @@ class RemoteModelManager
     public static function delete($filter, $options=false)
     {
         self::init("delete");
-        return self::request(["filter" => $filter], $options);
+        return self::request(["filter" => $filter], $options ? $options: ["result" => true]);
     }
 
     /**
