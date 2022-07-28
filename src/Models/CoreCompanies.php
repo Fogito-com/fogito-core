@@ -2,7 +2,9 @@
 namespace Fogito\Models;
 
 use Fogito\Config;
+use Fogito\Http\Response;
 use Fogito\Lib\Company;
+use Fogito\Lib\Lang;
 
 class CoreCompanies extends \Fogito\Db\RemoteModelManager
 {
@@ -32,5 +34,20 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
                 "parent_ids"    => $parentId
             ]
         ]);
+    }
+
+    public static function validateCompanyFilter($companyId, $parentId=false, $stop=true)
+    {
+        if(trim($companyId) !== Company::getId() && !self::isBranch($companyId, $parentId))
+            if($stop)
+            {
+                Response::error(Lang::get("CompanyNotFound", "Company was not found"));
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+        return true;
     }
 }
