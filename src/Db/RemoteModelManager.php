@@ -134,7 +134,10 @@ class RemoteModelManager
     {
         self::init("findfirst");
         if((!$filter["filter"] || count($filter["filter"])) && count($filter[0]) > 0)
+        {
             $filter["filter"] = $filter[0];
+            unset($filter[0]);
+        }
         return self::request($filter, $options);
     }
 

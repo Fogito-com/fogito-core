@@ -47,10 +47,12 @@ class Config implements ArrayAccess, Countable
     public static $_prodServerUrls = [
         "s2s"       => "https://s2s.fogito.com",
         "files"     => "https://files.fogito.com",
+        "core"      => "https://core.fogito.com",
     ];
     public static $_devServerUrls = [
         "s2s"       => "https://tests2s.fogito.com",
         "files"     => "https://testfiles.fogito.com",
+        "core"      => "https://testcore.fogito.com",
     ];
 
     public static function getUrl($server="s2s")
