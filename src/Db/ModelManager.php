@@ -661,9 +661,10 @@ abstract class ModelManager
      */
     public static function convertIds($ids = [])
     {
-        return (array) array_map(function ($id) {
-            return self::objectId($id);
-        }, $ids);
+        $objIds = [];
+        foreach ($ids as $id)
+            $objIds[] = self::objectId($id);
+        return $objIds;
     }
 
     /**
