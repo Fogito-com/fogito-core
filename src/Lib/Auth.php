@@ -2,8 +2,8 @@
 namespace Fogito\Lib;
 
 use Fogito\Http\Request;
-use Fogito\Models\CoreSettings;
 use Fogito\Lib\Lang;
+use Fogito\Models\CoreSettings;
 
 class Auth
 {
@@ -41,9 +41,9 @@ class Auth
             ]);
             $response = json_decode($response, true);
         }
-        if (is_array($response) && $_data=$response["data"])
+        if (is_array($response))
         {
-            if($response["status"] == "success")
+            if($response["status"] == "success" && $_data=$response["data"])
             {
                 CoreSettings::setData($_data);
 
@@ -58,14 +58,13 @@ class Auth
                     Company::setData($_data["company"]);
                 if($_data["pricing"])
                     self::setPricing($_data["pricing"]);
+                if($_data["translations"])
+                    Lang::setData($_data["translations"]);
             }
             else
             {
                 self::setError((int)$response["error_code"], (string)$response["description"]);
             }
-
-            if($_data["translations"])
-                Lang::setData($_data["translations"]);
 
             Cache::set(self::getCacheKey(), $response, self::getCacheDuration());
         }

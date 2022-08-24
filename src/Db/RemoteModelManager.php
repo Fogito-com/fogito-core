@@ -32,10 +32,12 @@ class RemoteModelManager
             "http_origin"   => Request::getServer("HTTP_ORIGIN"),
             "request_uri"   => Request::getServer("REQUEST_URI")
         ];
-        if(strlen(Auth::getToken()) > 10 && Auth::tokenAllowed())
+        if(strlen(Auth::getToken()) > 0 && Auth::tokenAllowed())
             $mergeData["token"] = Auth::getToken();
-        if(strlen(Auth::getTokenUser()) > 10 && Auth::tokenAllowed())
+        if(strlen(Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
             $mergeData["token_user"] = Auth::getTokenUser();
+        if(strlen(Request::get("server_token")) > 0)
+            $mergeData["remote_server_token"] = Request::get("server_token");
         return array_merge($data, $mergeData);
     }
 
