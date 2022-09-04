@@ -25,10 +25,10 @@ try {
     $app->set('config', function () {
         $prodRootConfig = require ROOT_PATH . '/app/config/prodConfig.php';
         $prodAppConfig  = require APP_PATH . '/config/prodConfig.php';
-        $devRootConfig = require ROOT_PATH . '/app/config/devConfig.php';
-        $devAppConfig  = require APP_PATH . '/config/devConfig.php';
+        $devRootConfig  = require ROOT_PATH . '/app/config/devConfig.php';
+        $devAppConfig   = require APP_PATH . '/config/devConfig.php';
         $config         = new Config($prodRootConfig);
-        $config->merge($prodAppConfig);
+        $config->merge($prodAppConfig, $devAppConfig);
         return $config;
     });
 
