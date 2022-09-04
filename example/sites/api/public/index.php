@@ -27,7 +27,7 @@ try {
         $prodAppConfig  = require APP_PATH . '/config/prodConfig.php';
         $devRootConfig  = require ROOT_PATH . '/app/config/devConfig.php';
         $devAppConfig   = require APP_PATH . '/config/devConfig.php';
-        $config         = new Config($prodRootConfig, $devAppConfig);
+        $config         = new Config($prodRootConfig, $devRootConfig);
         $config->merge($prodAppConfig, $devAppConfig);
         return $config;
     });

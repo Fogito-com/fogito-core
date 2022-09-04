@@ -1,10 +1,4 @@
 <?php
-/**
- * @author Tural Ilyasov <senior2ral@gmail.com>
- * @link https://github.com/Fogito-com/fogito-core
- * @version 1.0.2
- * @package Fogito-Core
-*/
 namespace Fogito;
 
 use ArrayAccess;
@@ -43,7 +37,7 @@ class Config implements ArrayAccess, Countable
      *
      * @var array
      * @access private
-    */
+     */
     public static $_prodServerUrls = [
         "s2s"       => "https://s2s.fogito.com",
         "files"     => "https://files.fogito.com",
@@ -72,10 +66,8 @@ class Config implements ArrayAccess, Countable
      */
     public function __construct($prodConfig, $devConfig=false)
     {
-        $config = $prodConfig;
-        if(Request::isDevMode() && $devConfig)
-            $config = $devConfig;
-        if (is_array($prodConfig) === false)
+        $config = Request::isDevMode() && $devConfig ? $devConfig: $prodConfig;
+        if (is_array($config) === false)
             throw new Exception('The configuration must be an Array');
 
         foreach ($config as $key => $value)
@@ -255,7 +247,7 @@ class Config implements ArrayAccess, Countable
      * Counts configuration elements
      *
      * @return int
-    */
+     */
     public function count()
     {
         return count($this->_storage);
@@ -263,7 +255,7 @@ class Config implements ArrayAccess, Countable
 
     /**
      * Restore data after unserialize()
-    */
+     */
     public function __wakeup()
     {
     }
@@ -286,7 +278,7 @@ class Config implements ArrayAccess, Countable
      * @param scalar $index
      * @return mixed
      * @throws Exception
-    */
+     */
     public function __get($index)
     {
         return $this->get($index);
@@ -298,7 +290,7 @@ class Config implements ArrayAccess, Countable
      * @param scalar $index
      * @param mixed $value
      * @throws Exception
-    */
+     */
     public function __set($index, $value)
     {
         $this->offsetSet($index, $value);
@@ -310,7 +302,7 @@ class Config implements ArrayAccess, Countable
      * @param scalar $index
      * @return boolean
      * @throws Exception
-    */
+     */
     public function __isset($index)
     {
         return $this->offsetExists($index);
@@ -324,7 +316,7 @@ class Config implements ArrayAccess, Countable
      *
      * @param scalar $index
      * @throws Exception
-    */
+     */
     public function __unset($index)
     {
         $this->offsetUnset($index);
