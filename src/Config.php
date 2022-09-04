@@ -70,19 +70,20 @@ class Config implements ArrayAccess, Countable
      * @param array $arrayConfig
      * @throws Exception
      */
-    public function __construct($arrayConfig)
+    public function __construct($prodConfig, $devConfig=false)
     {
-        if (is_array($arrayConfig) === false) {
+        $config = $prodConfig;
+        if(Request::isDevMode() && $devConfig)
+            $config = $devConfig;
+        if (is_array($prodConfig) === false)
             throw new Exception('The configuration must be an Array');
-        }
 
-        foreach ($arrayConfig as $key => $value) {
+        foreach ($config as $key => $value)
             if (is_array($value) === true) {
                 $this->_storage[$key] = new self($value);
             } else {
                 $this->_storage[$key] = $value;
             }
-        }
     }
 
     /**
@@ -193,8 +194,9 @@ class Config implements ArrayAccess, Countable
      * @param \Fogito\Config|array $config
      * @throws Exception Exception
      */
-    public function merge($config)
+    public function merge($prodConfig, $devConfig=false)
     {
+        $config = Request::isDevMode() && $devConfig ? $devConfig: $prodConfig;
         if (is_object($config) === true && $config instanceof Config === true) {
             $config = $config->toArray(false);
         } elseif (is_array($config) === false) {

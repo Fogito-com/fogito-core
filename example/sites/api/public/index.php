@@ -23,10 +23,12 @@ try {
 
     $app = new App();
     $app->set('config', function () {
-        $rootConfig = require ROOT_PATH . '/app/config/config.php';
-        $appConfig  = require APP_PATH . '/config/config.php';
-        $config     = new Config($rootConfig);
-        $config->merge($appConfig);
+        $prodRootConfig = require ROOT_PATH . '/app/config/prodConfig.php';
+        $prodAppConfig  = require APP_PATH . '/config/prodConfig.php';
+        $devRootConfig = require ROOT_PATH . '/app/config/devConfig.php';
+        $devAppConfig  = require APP_PATH . '/config/devConfig.php';
+        $config         = new Config($prodRootConfig);
+        $config->merge($prodAppConfig);
         return $config;
     });
 
