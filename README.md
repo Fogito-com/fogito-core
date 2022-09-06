@@ -19,7 +19,8 @@ This a multi-module [MVC][mvc-pattern] structure.
 ```
 app
     ├── config
-    │   └── config.php
+    │   │── prodConfig.php
+    │   └── devConfig.php
     │
     ├── lib
     │   └── Cache.php
@@ -35,7 +36,8 @@ sites
     └── api
         ├── config (OPTIONAL)
         │   ├── routes.php
-        │   └── config.php
+        │   │── prodConfig.php
+        │   └── devConfig.php
         │   
         ├── modules
         │   ├── auth
