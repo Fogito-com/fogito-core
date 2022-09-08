@@ -35,8 +35,11 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
             $result = json_decode($result, true);
         if($result && $result["status"] === "success")
         {
-            self::setCache($result["data"]);
-            return $result["data"];
+            $list = [];
+            foreach ($result["data"] as $value)
+                $list[$value["id"]] = $value;
+            self::setCache($list);
+            return $list;
         }
         return false;
     }

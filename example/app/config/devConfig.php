@@ -12,7 +12,7 @@ return [
     'skipped_filtering_collections' => [ // Will skip filtering collection in DBManager
         "companies", "logs_access"
     ],
-    'skip_filter_business_type' => true, // boolean
+    'skip_filter_business_type' => false, // boolean
     's2s'   => [
         'app_id'       => 215,
         'server_token' => 'TestServerKey',
