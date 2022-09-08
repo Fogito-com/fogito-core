@@ -3,7 +3,7 @@ namespace Fogito\Models;
 
 use Fogito\Config;
 
-class CoreTranslations extends \Fogito\Db\RemoteModelManager
+class CoreTimezones extends \Fogito\Db\RemoteModelManager
 {
     public static function getServer()
     {
@@ -11,15 +11,13 @@ class CoreTranslations extends \Fogito\Db\RemoteModelManager
     }
 
 
-    public static function fetch($lang)
+    public static function fetch()
     {
         $data = [
-            "data" => [
-                "lang"         => $lang,
-            ]
+            "data" => []
         ];
 
-        $result = self::curl(Config::getUrl("s2s") . "/default/translations", $data);
+        $result = self::curl(Config::getUrl("s2s") . "/default/timezones", $data);
 
         if ($result)
             $result = json_decode($result, true);
