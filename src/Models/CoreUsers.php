@@ -77,6 +77,30 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
     }
 
 
+    public static function singatureUpdate($id, $fileId, $options=[])
+    {
+        self::init("signatureupdate");
+        return self::request(
+            [
+                "id"        => $id,
+                "file_id"   => $fileId,
+            ],
+            $options
+        );
+    }
+
+    public static function singatureDelete($id, $options=[])
+    {
+        self::init("signaturedelete");
+        return self::request(
+            [
+                "id"        => $id,
+            ],
+            $options
+        );
+    }
+
+
 
 
     public static function findFirstAndSet($user, $params=[])
