@@ -680,6 +680,15 @@ class Request
         return '';
     }
 
+    public static function getIP() 
+    {
+        if (isset($_SERVER['REMOTE_ADDR']) === true) {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+
+        return '';
+    }
+
     /**
      * Process a request header and return the one with best quality
      *
