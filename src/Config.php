@@ -56,6 +56,13 @@ class Config implements ArrayAccess, Countable
         return self::$_prodServerUrls[$server];
     }
 
+    public static function getData($key=false)
+    {
+        if($key && App::$di->config->{$key})
+            return App::$di->config->{$key};
+        return App::$di->config;
+    }
+
     private $_storage = array();
 
     /**
