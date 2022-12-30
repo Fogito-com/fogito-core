@@ -187,18 +187,17 @@ class Auth
         self::$_permissions = $_permissions;
     }
 
-
     public static function setPricing($pricing=[])
     {
         return self::$_pricing = $pricing;
     }
 
-    public static function getPricing()
+    public static function getPricing($key=false)
     {
+        if($key)
+            return self::$_pricing[$key] ?? false;
         return self::$_pricing;
     }
-
-
 
     public static function getAvatar($data, $type=false)
     {
