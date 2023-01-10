@@ -255,7 +255,7 @@ class Auth
     {
         $_token = false;
         $_tokenUser = false;
-        if(strlen(@$_COOKIE["ut"]) > 0){
+        if(strlen(@$_COOKIE["ut"]) > 1){
             $_token      = (string)@$_COOKIE["ut"];
             $_tokenUser  = (string)@$_COOKIE["token_user"];
         }else if(Request::get('token')){
