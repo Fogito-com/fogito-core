@@ -132,6 +132,26 @@ class RemoteModelManager
         );
     }
 
+    /**
+    UsersRemote::validate(
+    $insertData,
+    [
+    “debug”: true/false, // true olanda error olan kimi dayandirir skripti ozu response qaytarir apide,
+    “result”: true/false, // true olanda serverde qayidan erroru qaytarir. false olanda serverde error qayitsa response sadece false olur. esas find, findFirst ucun ele qurulub
+    ]
+    )
+     */
+    public static function validate($params, $options=["result" => true])
+    {
+        self::init("validate");
+        return self::request(
+            [
+                "validate"    => $params
+            ],
+            $options
+        );
+    }
+
     public static function findFirst($filter, $options=false)
     {
         self::init("findfirst");
