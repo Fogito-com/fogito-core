@@ -42,7 +42,7 @@ class Config implements ArrayAccess, Countable
         "s2s"           => "http://s2s.fogito.com",
         "files"         => "http://files.fogito.com",
         "core"          => "http://core.fogito.com",
-        "accounting"    => "http://testinvoices.fogito.com",
+        "accounting"    => "http://invoices.fogito.com",
     ];
     public static $_devServerUrls = [
         "s2s"           => "http://tests2s.fogito.com",
