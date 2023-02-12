@@ -69,6 +69,8 @@ class Auth
             else
             {
                 self::setError((int)$response["error_code"], (string)$response["description"]);
+
+                Cache::set(self::getCacheKey(), $response, 4);
             }
         }
         else
