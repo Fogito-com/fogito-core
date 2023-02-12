@@ -13,7 +13,7 @@ class Auth
     protected static $_data;
     protected static $_permissions = [];
     protected static $_pricing = [];
-    protected static $_cacheDuration = 60; // Seconds
+    protected static $_cacheDuration = 30; // Seconds
     protected static $_error = false; // ["description" => "", "code" => 1001]
 
     public function __construct()
@@ -37,7 +37,10 @@ class Auth
         if(!$response)
         {
             $response = CoreSettings::curl(CoreSettings::getServer()."/settings", [
-                "token"         => $_token
+                "token"         => $_token,
+                "parameters"    => [
+                    "account", "permissions", "company", "pricing", "translations"
+                ]
             ]);
             $response = json_decode($response, true);
         }
@@ -60,13 +63,13 @@ class Auth
                     self::setPricing($_data["pricing"]);
                 if($_data["translations"])
                     Lang::setData($_data["translations"]);
+
+                Cache::set(self::getCacheKey(), $response, self::getCacheDuration());
             }
             else
             {
                 self::setError((int)$response["error_code"], (string)$response["description"]);
             }
-
-            Cache::set(self::getCacheKey(), $response, self::getCacheDuration());
         }
         else
         {
