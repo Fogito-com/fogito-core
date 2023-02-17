@@ -52,7 +52,7 @@ abstract class ModelManager
             $filter = $parameters[0];
         }
 
-        $filter = static::filterBinds($filter);
+        $filter = static::filterBinds($filter, ["shared" => (bool)$parameters["shared"]]);
 
         $query     = self::$_connection->executeQuery(self::$_db . '.' . self::$_source, new \MongoDB\Driver\Query($filter, $options));
         $documents = [];
@@ -96,7 +96,7 @@ abstract class ModelManager
             $filter = $parameters[0];
         }
 
-        $filter = static::filterBinds($filter);
+        $filter = static::filterBinds($filter, ["shared" => (bool)$parameters["shared"]]);
 
         $query = self::$_connection->executeQuery(self::$_db . '.' . self::$_source, new \MongoDB\Driver\Query($filter, $options));
         foreach ($query as $document) {
@@ -116,12 +116,15 @@ abstract class ModelManager
      * @param  mixed $id
      * @return false|\Fogito\Db\ModelManager
      */
-    public static function findById($id)
+    public static function findById($id, $parameters=[])
     {
         self::execute();
-        $filter = static::filterBinds([
-            '_id' => self::objectId($id),
-        ]);
+        $filter = static::filterBinds(
+            [
+                '_id' => self::objectId($id),
+            ],
+            ["shared" => (bool)$parameters["shared"]]
+        );
 
         $query = self::$_connection->executeQuery(self::$_db . '.' . self::$_source, new \MongoDB\Driver\Query($filter, []));
         foreach ($query as $document) {
@@ -150,7 +153,7 @@ abstract class ModelManager
             $filter = $parameters[0];
         }
 
-        $filter = static::filterBinds($filter);
+        $filter = static::filterBinds($filter, ["shared" => (bool)$parameters["shared"]]);
 
         $query = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command(['count' => self::$_source, 'query' => $filter]));
         return $query->toArray()[0]->n;
@@ -164,16 +167,21 @@ abstract class ModelManager
      * @param  mixed $options
      * @return bool
      */
-    public static function update($filter = [], $set = [], $options = ['multi' => true, 'upsert' => false])
+    public static function update($filter = [], $set = [], $options = [])
     {
         self::execute();
-        $filter = static::filterBinds($filter);
+
+        $queryOptions = [
+            'multi'     => $options['multi'] === false ? false: true,
+            'upsert'    => $options['upsert'] === true ? true: false,
+        ];
+        $filter = static::filterBinds($filter, ["shared" => (bool)$options["shared"]]);
 
         $query = new \MongoDB\Driver\BulkWrite;
         $query->update(
             $filter,
             ['$set' => $set],
-            $options
+            $queryOptions
         );
         $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
         return !!$result;
@@ -205,16 +213,21 @@ abstract class ModelManager
      * @param  mixed $options
      * @return bool
      */
-    public static function increment($filter = [], $inc = [], $options = ['multi' => true, 'upsert' => false])
+    public static function increment($filter = [], $inc = [], $options = [])
     {
         self::execute();
-        $filter = static::filterBinds($filter);
+
+        $queryOptions = [
+            'multi'     => $options['multi'] === false ? false: true,
+            'upsert'    => $options['upsert'] === true ? true: false,
+        ];
+        $filter = static::filterBinds($filter, ["shared" => (bool)$options["shared"]]);
 
         $query = new \MongoDB\Driver\BulkWrite;
         $query->update(
             $filter,
             ['$inc' => $inc],
-            $options
+            $queryOptions
         );
         $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
         return !!$result;
@@ -222,15 +235,18 @@ abstract class ModelManager
 
 
 
-    public static function updateAndIncrement($filter, $update, $increment)
+    public static function updateAndIncrement($filter, $update, $increment, $options=[])
     {
         self::execute();
-        $filter  = self::filterBinds((array) $filter);
+        $filter  = self::filterBinds((array) $filter, ["shared" => (bool)$options["shared"]]);
         if(is_array($increment['is_deleted']) && array_key_exists('$ne', $increment['is_deleted'])){
             $increment['is_deleted'] = ((int)$increment['is_deleted']['$ne'] == 1 ? 0 : 1);
         }
 
-        $options = ['multi' => true, 'upsert' => false];
+        $queryOptions = [
+            'multi'     => $options['multi'] === false ? false: true,
+            'upsert'    => $options['upsert'] === true ? true: false,
+        ];
         $query  = new \MongoDB\Driver\BulkWrite;
         $query->update(
             $filter,
@@ -238,7 +254,7 @@ abstract class ModelManager
                 '$set' => $update,
                 '$inc' => $increment,
             ],
-            $options
+            $queryOptions
         );
         $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
 
@@ -351,12 +367,16 @@ abstract class ModelManager
     public static function deleteRaw($filter = [], $options = ['limit' => 0])
     {
         self::execute();
-        $filter = static::filterBinds($filter);
+
+        $queryOptions = [
+            "limit" => (int)$options["limit"]
+        ];
+        $filter = static::filterBinds($filter, ["shared" => (bool)$options["shared"]]);
 
         $query = new \MongoDB\Driver\BulkWrite;
         $query->delete(
             $filter,
-            $options
+            $queryOptions
         );
         $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
         return !!$result;
@@ -388,7 +408,7 @@ abstract class ModelManager
         self::execute();
 
         $pipleLine = [];
-        $filter    = self::filterBinds((array) $filter[0]);
+        $filter    = self::filterBinds((array) $filter[0], ["shared" => (bool)$filter["shared"]]);
         if (count($filter) > 0) {
             $pipleLine[] = ['$match' => $filter];
         }
@@ -910,7 +930,7 @@ abstract class ModelManager
      * @param  mixed $filter
      * @return array
      */
-    public static function filterBinds($filter = [])
+    public static function filterBinds($filter = [], $options=[])
     {
         if (in_array(self::$_source, App::$di->config->skipped_filtering_collections->toArray()))
             return $filter;
@@ -920,6 +940,15 @@ abstract class ModelManager
 
         if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
             $filter["company_id"] = COMPANY_ID;
+
+        if($options["shared"])
+        {
+            if (!isset($filter['company_ids']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
+                $filter["company_ids"] = COMPANY_ID;
+        }else{
+            if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
+                $filter["company_id"] = COMPANY_ID;
+        }
 
         return $filter;
     }
