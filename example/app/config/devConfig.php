@@ -13,6 +13,7 @@ return [
         "companies", "logs_access"
     ],
     'skip_filter_business_type' => false, // boolean
+    'skip_filter_company_id' => false, // boolean
     's2s'   => [
         'app_id'       => 215,
         'server_token' => 'TestServerKey',

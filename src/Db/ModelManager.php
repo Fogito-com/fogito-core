@@ -918,7 +918,7 @@ abstract class ModelManager
         if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && BUSINESS_TYPE)
             $filter["business_type"] = BUSINESS_TYPE;
 
-        if (!isset($filter['company_id']) && COMPANY_ID)
+        if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
             $filter["company_id"] = COMPANY_ID;
 
         return $filter;
