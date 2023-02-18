@@ -51,11 +51,15 @@ class Config implements ArrayAccess, Countable
         "accounting"    => "http://testinvoices.fogito.com",
     ];
 
-    public static function getUrl($server="s2s")
+
+    public static function getUrl($server="s2s", $options=[])
     {
+        $url = self::$_prodServerUrls[$server];
         if(Request::isDevMode())
-            return self::$_devServerUrls[$server];
-        return self::$_prodServerUrls[$server];
+            $url = self::$_devServerUrls[$server];
+        if($options["protocol"] === "https")
+            $url = str_replace("http://", "https://", $url);
+        return $url;
     }
 
     public static function getData($key=false)
