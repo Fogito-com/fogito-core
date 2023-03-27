@@ -3,6 +3,7 @@ namespace Fogito\Db;
 
 use Fogito\App;
 use Fogito\Exception;
+use Fogito\Lib\Company;
 use Fogito\Lib\Lang;
 use ReflectionClass;
 
@@ -12,6 +13,7 @@ abstract class ModelManager
     protected static $_db;
     protected static $_source;
     protected static $_connection;
+    protected static $_shared = false;
 
     /**
      * _id
@@ -52,7 +54,7 @@ abstract class ModelManager
             $filter = $parameters[0];
         }
 
-        $filter = static::filterBinds($filter, ["shared" => (bool)$parameters["shared"]]);
+        $filter = static::filterBinds($filter);
 
         $query     = self::$_connection->executeQuery(self::$_db . '.' . self::$_source, new \MongoDB\Driver\Query($filter, $options));
         $documents = [];
@@ -96,7 +98,7 @@ abstract class ModelManager
             $filter = $parameters[0];
         }
 
-        $filter = static::filterBinds($filter, ["shared" => (bool)$parameters["shared"]]);
+        $filter = static::filterBinds($filter);
 
         $query = self::$_connection->executeQuery(self::$_db . '.' . self::$_source, new \MongoDB\Driver\Query($filter, $options));
         foreach ($query as $document) {
@@ -119,12 +121,7 @@ abstract class ModelManager
     public static function findById($id, $parameters=[])
     {
         self::execute();
-        $filter = static::filterBinds(
-            [
-                '_id' => self::objectId($id),
-            ],
-            ["shared" => (bool)$parameters["shared"]]
-        );
+        $filter = static::filterBinds(['_id' => self::objectId($id)]);
 
         $query = self::$_connection->executeQuery(self::$_db . '.' . self::$_source, new \MongoDB\Driver\Query($filter, []));
         foreach ($query as $document) {
@@ -153,7 +150,7 @@ abstract class ModelManager
             $filter = $parameters[0];
         }
 
-        $filter = static::filterBinds($filter, ["shared" => (bool)$parameters["shared"]]);
+        $filter = static::filterBinds($filter);
 
         $query = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command(['count' => self::$_source, 'query' => $filter]));
         return $query->toArray()[0]->n;
@@ -175,7 +172,7 @@ abstract class ModelManager
             'multi'     => $options['multi'] === false ? false: true,
             'upsert'    => $options['upsert'] === true ? true: false,
         ];
-        $filter = static::filterBinds($filter, ["shared" => (bool)$options["shared"]]);
+        $filter = static::filterBinds($filter);
 
         $query = new \MongoDB\Driver\BulkWrite;
         $query->update(
@@ -196,7 +193,7 @@ abstract class ModelManager
     public static function insert($parameters = [])
     {
         self::execute();
-        $parameters = static::filterBinds($parameters);
+        $parameters = static::filterInsertBinds($parameters);
 
         $query    = new \MongoDB\Driver\BulkWrite;
         $insertId = $query->insert($parameters);
@@ -221,7 +218,7 @@ abstract class ModelManager
             'multi'     => $options['multi'] === false ? false: true,
             'upsert'    => $options['upsert'] === true ? true: false,
         ];
-        $filter = static::filterBinds($filter, ["shared" => (bool)$options["shared"]]);
+        $filter = static::filterBinds($filter);
 
         $query = new \MongoDB\Driver\BulkWrite;
         $query->update(
@@ -238,7 +235,7 @@ abstract class ModelManager
     public static function updateAndIncrement($filter, $update, $increment, $options=[])
     {
         self::execute();
-        $filter  = self::filterBinds((array) $filter, ["shared" => (bool)$options["shared"]]);
+        $filter  = self::filterBinds((array) $filter);
         if(is_array($increment['is_deleted']) && array_key_exists('$ne', $increment['is_deleted'])){
             $increment['is_deleted'] = ((int)$increment['is_deleted']['$ne'] == 1 ? 0 : 1);
         }
@@ -290,7 +287,7 @@ abstract class ModelManager
 
     /**
      * renameColumns
-     * 
+     *
      * <code>
      *      Model::renameColumns([
      *          'is_deleted' => [
@@ -323,12 +320,12 @@ abstract class ModelManager
 
     /**
      * createIndexes
-     * 
+     *
      * <code>
      *      Model::createIndexes([
      *          [
      *              'name' => 'company_id',
-     *              'key'  => [ 
+     *              'key'  => [
      *                  'company_id' => 1
      *              ],
      *              'unique' => true,
@@ -336,7 +333,7 @@ abstract class ModelManager
      *          ]
      *      ]);
      * </code>
-     * 
+     *
      * @param  mixed $indexes
      * @return bool
      */
@@ -371,7 +368,7 @@ abstract class ModelManager
         $queryOptions = [
             "limit" => (int)$options["limit"]
         ];
-        $filter = static::filterBinds($filter, ["shared" => (bool)$options["shared"]]);
+        $filter = static::filterBinds($filter);
 
         $query = new \MongoDB\Driver\BulkWrite;
         $query->delete(
@@ -408,7 +405,7 @@ abstract class ModelManager
         self::execute();
 
         $pipleLine = [];
-        $filter    = self::filterBinds((array) $filter[0], ["shared" => (bool)$filter["shared"]]);
+        $filter    = self::filterBinds((array) $filter[0]);
         if (count($filter) > 0) {
             $pipleLine[] = ['$match' => $filter];
         }
@@ -451,7 +448,7 @@ abstract class ModelManager
             unset($properties['_id']);
         }
 
-        $properties = static::filterBinds($properties);
+        $properties = static::filterInsertBinds($properties);
 
         if ($this->_id && !$forceInsert) {
             $result = self::update(['_id' => $this->_id], $properties);
@@ -938,17 +935,32 @@ abstract class ModelManager
         if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && BUSINESS_TYPE)
             $filter["business_type"] = BUSINESS_TYPE;
 
-        if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
-            $filter["company_id"] = COMPANY_ID;
-
-        if($options["shared"])
+        if(static::$_shared)
         {
-            if (!isset($filter['company_ids']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
-                $filter["company_ids"] = COMPANY_ID;
+            if (count($filter['company_ids']) == 0 && Company::getId())
+                $filter["company_ids"] = ['$in' => array_merge(Company::getData()->branch_ids,[Company::getId()])];
         }else{
             if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
                 $filter["company_id"] = COMPANY_ID;
         }
+
+        return $filter;
+    }
+
+    public static function filterInsertBinds($filter = [], $options=[])
+    {
+        if (in_array(self::$_source, App::$di->config->skipped_filtering_collections->toArray()))
+            return $filter;
+
+        if (!isset($filter['business_type']) && Company::getData()->business_model)
+            $filter["business_type"] = Company::getData()->business_model;
+
+        if (!isset($filter['company_id']) && Company::getId())
+            $filter["company_id"] = Company::getId();
+
+        if(static::$_shared)
+            if (count($filter['company_ids']) == 0 && Company::getId())
+                $filter["company_ids"] = [Company::getId()];
 
         return $filter;
     }

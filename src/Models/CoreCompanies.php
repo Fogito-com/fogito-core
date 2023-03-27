@@ -38,7 +38,24 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
 
     public static function validateCompanyFilter($companyId, $parentId=false, $stop=true)
     {
-        if(trim($companyId) !== Company::getId() && !self::isBranch($companyId, $parentId))
+        if(trim($companyId) === Company::getId())
+        {
+            return true;
+        }
+        else if(in_array(trim($companyId), Company::getData()->branch_ids))
+        {
+            return true;
+        }
+        else if(in_array(trim($companyId), Company::getData()->parent_ids))
+        {
+            return false;
+        }
+        else if(trim($companyId) === Company::getData()->parent_super_id)
+        {
+            return false;
+        }
+        else if(!self::isBranch($companyId, $parentId))
+        {
             if($stop)
             {
                 Response::error(Lang::get("CompanyNotFound", "Company was not found"));
@@ -48,6 +65,40 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
             {
                 return false;
             }
+        }
         return true;
+    }
+
+    public static function canShareWithCompany($companyId)
+    {
+        if(trim($companyId) === Company::getId())
+        {
+            return true;
+        }
+        else if(in_array(trim($companyId), Company::getData()->branch_ids))
+        {
+            return true;
+        }
+        else if(in_array(trim($companyId), Company::getData()->parent_ids))
+        {
+            return true;
+        }
+        else if(trim($companyId) === Company::getData()->parent_super_id)
+        {
+            return true;
+        }
+        else
+        {
+            $bindRemote = [
+                'id' => $companyId,
+                'is_deleted' => ['$ne' => 1],
+                'parent_super_id' => Company::getData()->parent_super_id
+            ];
+            $query = CoreCompanies::findFirst([$bindRemote]);
+            if($query)
+                return true;
+        }
+
+        return false;
     }
 }
