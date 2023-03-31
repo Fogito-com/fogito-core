@@ -3,7 +3,6 @@ namespace Fogito;
 
 use ArrayAccess;
 use Countable;
-use Fogito\Exception;
 use Fogito\Http\Request;
 
 /**

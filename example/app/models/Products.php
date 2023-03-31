@@ -1,12 +1,12 @@
 <?php
 namespace Models;
 
-use Fogito\App;
 use Fogito\Lib\Lang;
-use Models\Files;
 
 class Products extends \Fogito\Db\ModelManager
 {
+    public static $_shared = true;
+
     const STATUS_ACTIVE   = 1;
     const STATUS_INACTIVE = 2;
 
