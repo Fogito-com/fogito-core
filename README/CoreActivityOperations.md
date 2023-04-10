@@ -18,7 +18,7 @@
             ],
             "default_targets"   => ["mobile", "email"],
             "allowed_targets"   => ["mobile", "email"],
-
+            "permission_keys"   => ["cards_view", "cards_checklist"],
         ]);
     ?>
 

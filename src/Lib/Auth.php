@@ -192,6 +192,26 @@ class Auth
         self::$_permissions = $_permissions;
     }
 
+    public static function checkPermission($key, $selected=false)
+    {
+        $permissions = self::getPermissions();
+
+        $allow = false;
+        if ($permissions[$key]['allow'])
+        {
+            if($selected){
+                if(in_array($selected, $permissions[$key]["selected"]))
+                    $allow = true;
+            }else if($permissions[$key]["selected"]){
+                $allow = $permissions[$key];
+            }else{
+                $allow = true;
+            }
+        }
+        return $allow;
+    }
+
+
     public static function setPricing($pricing=[])
     {
         return self::$_pricing = $pricing;
