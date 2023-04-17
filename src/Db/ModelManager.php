@@ -949,9 +949,6 @@ abstract class ModelManager
 
     public static function filterInsertBinds($filter = [], $options=[])
     {
-        if (in_array(self::$_source, App::$di->config->skipped_filtering_collections->toArray()))
-            return $filter;
-
         if (!isset($filter['business_type']) && Company::getData()->business_model)
             $filter["business_type"] = Company::getData()->business_model;
 

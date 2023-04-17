@@ -10,7 +10,8 @@ return [
         ],
     ],
     'skipped_filtering_collections' => [ // Will skip filtering collection in DBManager
-        "companies", "logs_access"
+        "companies",
+        "logs_access"
     ],
     'skip_filter_business_type' => false, // boolean
     'skip_filter_company_id' => false, // boolean
