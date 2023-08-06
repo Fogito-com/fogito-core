@@ -13,6 +13,8 @@
             "to"                  => "toEmail@todomain.com",
             "reply_to"            => "noreply@fogito.com", // OPTIONAL
             "body"                => "Hello world!", // TEXT or HTML
+            "filters"             => ["card" => "2k3j4k23j4k2j3k23k4j"], // IDs for filtering email log
+            "calback"             => "https://yourCallbackUrl", // OPTIONAL: status of emails will be sent to this link
             "expire"              => 120, // seconds, 0 is no expiration
         ]);
     ?>

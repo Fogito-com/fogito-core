@@ -62,7 +62,8 @@ sites
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreUsers.md">🙍‍ Core Users</a><br/>
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreFiles.md">📦 Core Files</a><br/>
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreNotifications.md">⏰ Core Notifications</a><br/>
-- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreEmails.md">✉️ Core Emails</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreEmails.md">📨 Core Emails</a><br/>
+- <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreSMS.md">✉️ Core SMS</a><br/>
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreActivities.md">🔍 Core Activities</a><br/>
 - <a href="https://github.com/Fogito-com/fogito-core/blob/master/README/CoreActivityOperations.md">🗓 Core Activity Operations</a><br/>
 
