@@ -10,13 +10,25 @@ class Response
         header('Content-Type: application/json');
     }
 
-    public static function setAllowOrigins()
-    {
-        header("Access-Control-Allow-Origin: ".Request::getServer("HTTP_ORIGIN"));
-        header("Access-Control-Allow-Headers: Content-Type, Accept");
-        header("Access-Control-Allow-Methods: GET, POST");
-        header("Access-Control-Allow-Credentials: true");
+   public static function setAllowOrigins()
+{
+    $allowed_origins = [
+        'https://trusted-origin1.com',
+        'https://trusted-origin2.com',
+    ];
+
+    $origin = Request::getServer("HTTP_ORIGIN");
+
+    if (in_array($origin, $allowed_origins)) {
+        header("Access-Control-Allow-Origin: " . $origin);
+    } else {
+        header("Access-Control-Allow-Origin: " . Request::getServerName() );
     }
+
+    header("Access-Control-Allow-Headers: Content-Type, Accept");
+    header("Access-Control-Allow-Methods: GET, POST");
+    header("Access-Control-Allow-Credentials: true");
+}
 
     public static function success($data, $description="")
     {
