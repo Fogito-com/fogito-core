@@ -930,7 +930,7 @@ abstract class ModelManager
     public static function filterBinds($filter = [], $options=[])
     {
         if (method_exists(new static(), "getFindFilters") && count(static::getFindFilters()) > 0)
-            $filter = array_merge($filter,static::getFindFilters());
+            $filter = array_merge(static::getFindFilters(), $filter);
 
         if (in_array(self::$_source, App::$di->config->skipped_filtering_collections->toArray()))
             return $filter;
@@ -954,7 +954,7 @@ abstract class ModelManager
     public static function filterInsertBinds($filter = [], $options=[])
     {
         if (method_exists(new static(), "getInsertFilters") && count(static::getInsertFilters()) > 0)
-            $filter = array_merge($filter,static::getInsertFilters());
+            $filter = array_merge(static::getInsertFilters(), $filter);
 
         if (!isset($filter['business_type']) && Company::getData()->business_model)
             $filter["business_type"] = Company::getData()->business_model;
