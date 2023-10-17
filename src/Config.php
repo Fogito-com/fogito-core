@@ -37,28 +37,28 @@ class Config implements ArrayAccess, Countable
      * @var array
      * @access private
      */
-    public static $_prodServerUrls = [
-        "s2s"           => "http://app.fogito.com/api/s2s",
-        "files"         => "http://app.fogito.com/api/files",
-        "core"          => "http://app.fogito.com/api/core",
-        "accounting"    => "http://app.fogito.com/api/invoices",
-    ];
-    public static $_devServerUrls = [
-        "s2s"           => "http://fogito.io/api/s2s",
-        "files"         => "http://fogito.io/api/files",
-        "core"          => "http://fogito.io/api/core",
-        "accounting"    => "http://fogito.io/api/invoices",
+
+    public static $_prodDomain = 'app.fogito.com';
+    public static $_devDomain = 'fogito.io';
+
+    public static $_servicePaths = [
+        "s2s"           => "/s2s",
+        "files"         => "/files",
+        "core"          => "/core",
+        "accounting"    => "/invoices",
     ];
 
+
+    public static function getDomain()
+    {
+        return Request::isDevMode() ? self::$_devDomain: self::$_prodDomain;
+    }
 
     public static function getUrl($server="s2s", $options=[])
     {
-        $url = self::$_prodServerUrls[$server];
-        if(Request::isDevMode())
-            $url = self::$_devServerUrls[$server];
-        if($options["protocol"] === "https")
-            $url = str_replace("http://", "https://", $url);
-        return $url;
+        $protocol = $options["protocol"] === "https" ? "https": "http";
+        $path = self::$_servicePaths[$server];
+        return $protocol.'://'.self::getDomain().'/api'.$path;
     }
 
     public static function getData($key=false)

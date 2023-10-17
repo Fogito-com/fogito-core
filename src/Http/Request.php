@@ -454,35 +454,9 @@ class Request
      */
     public static function getClientAddress($trustForwardedHeader = null)
     {
-        if (is_null($trustForwardedHeader) === true) {
-            $trustForwardedHeader = false;
-        } elseif (is_bool($trustForwardedHeader) === false) {
-            throw new Exception('Invalid parameter type.');
-        }
-
-        //Proxies use this IP
-        if ($trustForwardedHeader === true &&
-            isset($_SERVER['HTTP_X_FORWARDED_FOR']) === true) {
-            $address = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        }
-
-        if (isset($address) === false) {
-            if (isset($_SERVER['REMOTE_ADDR']) === true) {
-                $address = $_SERVER['REMOTE_ADDR'];
-            }
-        }
-
-        if (isset($address) === true) {
-            if (strpos($address, ',') !== false) {
-                //The client address has multiple parts, only return the first part
-                $addresses = explode(',', $address);
-                return $addresses[0];
-            }
-
-            return $address;
-        }
-
-        return false;
+        if($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP'])>0)
+            return $_SERVER['HTTP_USER_IP'];
+        return $_SERVER['REMOTE_ADDR'];
     }
 
     /**
@@ -682,11 +656,9 @@ class Request
 
     public static function getIP() 
     {
-        if (isset($_SERVER['REMOTE_ADDR']) === true) {
-            return $_SERVER['REMOTE_ADDR'];
-        }
-
-        return '';
+        if($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP']))
+            return $_SERVER['HTTP_USER_IP'];
+        return $_SERVER['REMOTE_ADDR'];
     }
 
     /**
