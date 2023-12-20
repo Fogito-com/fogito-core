@@ -9,6 +9,23 @@ return [
             'dbname'   => 'fogito',
         ],
     ],
+
+    'cache_server'                  => 'server1',
+    'cache_servers'                 => [
+        'server1' => [
+            'type' => 'memcache',
+            'host' => 'localhost',
+            'port' => 11211
+        ],
+        'server2'    => [
+            'type'     => 'redis',
+            'host'     => '127.0.0.1',
+            'port'     => 6379,
+            'username' => false,
+            'password' => false
+        ]
+    ],
+
     'skipped_filtering_collections' => [ // Will skip filtering collection in DBManager
         "companies",
         "logs_access"

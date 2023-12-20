@@ -39,7 +39,7 @@ class Config implements ArrayAccess, Countable
      */
 
     public static $_prodDomain = 'app.fogito.com';
-    public static $_devDomain = 'fogito.io';
+    public static $_devDomain = 'dev.fogito.com';
 
     public static $_servicePaths = [
         "s2s"           => "/s2s",
@@ -63,8 +63,12 @@ class Config implements ArrayAccess, Countable
 
     public static function getData($key=false)
     {
-        if($key && App::$di->config->{$key})
-            return App::$di->config->{$key};
+        if($key)
+        {
+            if(App::$di->config->{$key})
+                return App::$di->config->{$key};
+            return false;
+        }
         return App::$di->config;
     }
 

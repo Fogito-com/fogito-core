@@ -21,7 +21,11 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
 
     public static function fetch()
     {
-        if($list=self::getCache())
+        if($list=self::$data)
+        {
+            return $list;
+        }
+        elseif($list=self::getCache())
         {
             self::$data = $list;
             return $list;
@@ -38,6 +42,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
             $list = [];
             foreach ($result["data"] as $value)
                 $list[$value["id"]] = $value;
+            self::$data = $list;
             self::setCache($list);
             return $list;
         }
