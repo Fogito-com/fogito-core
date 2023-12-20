@@ -19,7 +19,7 @@ class Cache
     }
 
 
-    public static function set($key, $value, $time=0)
+    public static function set($key, $value, $time = 0)
     {
         if (!self::$data)
             self::connect();
@@ -28,7 +28,7 @@ class Cache
             $server = self::getServer();
             if ($server && $server->type === 'redis')
             {
-                if($time>0)
+                if ($time > 0)
                 {
                     return self::$data->setex($key, $time, $value);
                 }
@@ -57,10 +57,11 @@ class Cache
     public static function getServer()
     {
         $server = false;
-        if(Config::getData("cache_server") && Config::getData("cache_servers"))
+        if (Config::getData("cache_server") && Config::getData("cache_servers"))
             $server = Config::getData("cache_servers")->{Config::getData("cache_server")};
         return $server;
     }
+
     public static function connect()
     {
         $server = self::getServer();
@@ -77,7 +78,16 @@ class Cache
                         $server ? $server->port : 6379
                     );
                     if ($server && $server->password)
-                        $db->auth('password');
+                    {
+                        if ($server->password && strlen($server->username) > 0)
+                        {
+                            $db->auth($server->username . ":" . $server->password);
+                        }
+                        else
+                        {
+                            $db->auth($server->password);
+                        }
+                    }
                     if ($db->ping())
                     {
                         self::$data = $db;
@@ -86,7 +96,9 @@ class Cache
                     {
                         Response::error("Cache server error: 22");
                     }
-                } catch (\RedisException $e){
+                }
+                catch (\RedisException $e)
+                {
                     Response::error("Cache server error: 22");
                 }
             }
@@ -95,7 +107,7 @@ class Cache
                 Response::error("Cache server error: 21");
             }
         }
-        else if(!$server || $server->type === 'memcache')
+        else if (!$server || $server->type === 'memcache')
         {
             if (class_exists('Memcached'))
             {
@@ -107,7 +119,9 @@ class Cache
                         $server ? $server->host : 'localhost',
                         $server ? $server->port : 11211
                     );
-                } catch (\MemcachedException $e){
+                }
+                catch (\MemcachedException $e)
+                {
                     Response::error("Cache server error: 12");
                 }
 
