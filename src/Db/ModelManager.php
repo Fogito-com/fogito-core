@@ -929,11 +929,11 @@ abstract class ModelManager
      */
     public static function filterBinds($filter = [], $options=[])
     {
-        if (method_exists(new static(), "getFindFilters") && count(static::getFindFilters()) > 0)
-            $filter = array_merge(static::getFindFilters(), $filter);
-
         if (in_array(self::$_source, App::$di->config->skipped_filtering_collections->toArray()))
             return $filter;
+
+        if (method_exists(new static(), "getFindFilters") && count(static::getFindFilters()) > 0)
+            $filter = array_merge(static::getFindFilters(), $filter);
 
         if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && BUSINESS_TYPE)
             $filter["business_type"] = BUSINESS_TYPE;

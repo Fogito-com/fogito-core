@@ -2,6 +2,7 @@
 namespace Fogito\Lib;
 
 use Fogito\Http\Request;
+use Fogito\Http\Response;
 use Fogito\Lib\Lang;
 use Fogito\Models\CoreSettings;
 
@@ -208,6 +209,14 @@ class Auth
                 $allow = true;
             }
         }
+        return $allow;
+    }
+
+    public static function validatePermission($key, $selected=false)
+    {
+        $allow = self::validatePermission($key, $selected);
+        if(!$allow)
+            Response::error(Lang::get("PageNotAllowed"));
         return $allow;
     }
 
