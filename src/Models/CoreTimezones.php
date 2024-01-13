@@ -105,15 +105,11 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
         return date($formatto, $timestamp);
     }
 
-    /*
-     * countryCode: $_SERVER["HTTP_CF_IPCOUNTRY"], Cloudflare returns country code: AZ
-     */
     public static function detectTz($datetime=false)
     {
-        $timezone = self::getBySlug(Request::get("tz"));
+        $timezone = self::getBySlug(urldecode(Request::get("tz")));
         if(!$timezone)
             $timezone = self::getById(101);
-        $currentDate = self::date(time(), false, ["tzfrom" => 100, "tzto" => $timezone["id"]]);
         return [
             "id"            => $timezone["id"],
             "slug"          => $timezone["slug"],
