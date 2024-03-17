@@ -789,6 +789,47 @@ abstract class ModelManager
         throw new \Exception("Object ID is wrong");
     }
 
+    public static function insertBulk($data)
+    {
+        self::execute();
+        $bulk = new \MongoDB\Driver\BulkWrite;
+        foreach ($data as $row)
+        {
+            $data = self::filterBinds((array)$row);
+            $bulk->insert($data);
+        }
+        $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $bulk);
+        if ($result->getWriteErrors())
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public static function updateBulk($data, $options = [])
+    {
+        self::execute();
+        $queryOptions = [
+            'multi'  => $options['multi'] === false ? false : true,
+            'upsert' => $options['upsert'] === true ? true : false,
+        ];
+        $bulk = new \MongoDB\Driver\BulkWrite;
+        foreach ($data as $row)
+        {
+            $filter = static::filterBinds($row[0]);
+            $bulk->update(
+                $filter,
+                ['$set' => $row[1]], $queryOptions
+            );
+        }
+        $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $bulk);
+        if ($result->getWriteErrors())
+        {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Validation Mongo ID
      *
