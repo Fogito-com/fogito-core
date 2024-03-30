@@ -936,11 +936,12 @@ abstract class ModelManager
      * @param \MongoDB\BSON\UTCDateTime $date
      * @return integer
      */
-    public static function toSeconds($date)
+    public static function toSeconds($date, $round=true)
     {
-        if ($date && \method_exists($date, 'toDateTime'))
-        {
-            return round(@$date->toDateTime()->format('U.u'), 0);
+        if ($date && \method_exists($date, 'toDateTime')) {
+            if($round)
+                return round(@$date->toDateTime()->format('U.u'), 0);
+            return round(@$date->toDateTime()->format('U.u'), 3);
         }
         return 0;
     }
