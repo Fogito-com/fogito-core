@@ -236,7 +236,7 @@ class Auth
     public static function getAvatar($data, $type=false)
     {
         $avatars = [];
-        $url = "https://crm.fogito.com";
+        $url = "https://app.fogito.com/api/core";
         if ($data && $data->avatar && $data->avatar->avatars){
             $avatars = (array)$data->avatar->avatars;
         }else{
