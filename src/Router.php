@@ -202,14 +202,20 @@ class Router
      */
     public function getRewriteUri()
     {
-        //The developer can change the URI source
+        // The developer can change the URI source
         if (isset($this->_uriSource) === false ||
             $this->_uriSource === 0) {
-            //By default we use $_GET['url'] to obtain the rewrite information
-            if (isset($_GET['_url']) === true) {
-                if (empty($_GET['_url']) === false) {
+            // By default, we use $_GET['url'] to obtain the rewrite information
+            if (php_sapi_name() === 'cli')
+            {
+                foreach ((array)$_SERVER['argv'] as $arg)
+                    if(substr($arg, 0, 4) === '_url')
+                        return substr($arg, 5);
+            }
+            else if (isset($_GET['_url']) === true)
+            {
+                if (empty($_GET['_url']) === false)
                     return $_GET['_url'];
-                }
             }
         } else {
             //Otherwise use the standard $_SERVER['REQUEST_URI']

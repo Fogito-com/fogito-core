@@ -28,7 +28,14 @@ class Response
             "data"          => $data
         ]);
         $response = str_replace("fls01.kurcrm.com", "fls01.fogito.com", $response);
-        exit($response);
+        if (php_sapi_name() === 'cli')
+        {
+            echo $response.PHP_EOL;
+        }
+        else
+        {
+            exit($response);
+        }
     }
 
     public static function error($error, $code=2001, $data=false)
@@ -45,7 +52,14 @@ class Response
             $response["data"] = $data;
         $response = json_encode($response);
         $response = str_replace("fls01.kurcrm.com", "fls01.fogito.com", $response);
-        exit($response);
+        if (php_sapi_name() === 'cli')
+        {
+            echo $response.PHP_EOL;
+        }
+        else
+        {
+            exit($response);
+        }
     }
 
     public static function custom($response, $isJson=true)
@@ -55,6 +69,13 @@ class Response
         self::setAllowOrigins();
         $response = json_encode($response);
         $response = str_replace("fls01.kurcrm.com", "fls01.fogito.com", $response);
-        exit($response);
+        if (php_sapi_name() === 'cli')
+        {
+            echo $response.PHP_EOL;
+        }
+        else
+        {
+            exit($response);
+        }
     }
 }
