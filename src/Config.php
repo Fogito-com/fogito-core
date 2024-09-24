@@ -1,4 +1,5 @@
 <?php
+
 namespace Fogito;
 
 use ArrayAccess;
@@ -39,33 +40,45 @@ class Config implements ArrayAccess, Countable
      */
 
     public static $_prodDomain = 'app.fogito.com';
+    public static $_betaDomain = 'beta.fogito.com';
     public static $_devDomain = 'dev.fogito.com';
 
     public static $_servicePaths = [
-        "s2s"           => "/s2s",
-        "files"         => "/files",
-        "core"          => "/core",
-        "accounting"    => "/invoices",
+        "s2s"        => "/s2s",
+        "files"      => "/files",
+        "core"       => "/core",
+        "accounting" => "/invoices",
     ];
 
 
     public static function getDomain()
     {
-        return Request::isDevMode() ? self::$_devDomain: self::$_prodDomain;
-    }
-
-    public static function getUrl($server="s2s", $options=[])
-    {
-        $protocol = $options["protocol"] === "https" ? "https": "http";
-        $path = self::$_servicePaths[$server];
-        return $protocol.'://'.self::getDomain().'/api'.$path;
-    }
-
-    public static function getData($key=false)
-    {
-        if($key)
+        if (Request::envMode() === 'development')
         {
-            if(App::$di->config->{$key})
+            return self::$_devDomain;
+        }
+        else if (Request::envMode() === 'beta')
+        {
+            return self::$_betaDomain;
+        }
+        else
+        {
+            return self::$_prodDomain;
+        }
+    }
+
+    public static function getUrl($server = "s2s", $options = [])
+    {
+        $protocol = $options["protocol"] === "https" ? "https" : "http";
+        $path = self::$_servicePaths[$server];
+        return $protocol . '://' . self::getDomain() . '/api' . $path;
+    }
+
+    public static function getData($key = false)
+    {
+        if ($key)
+        {
+            if (App::$di->config->{$key})
                 return App::$di->config->{$key};
             return false;
         }
@@ -80,16 +93,19 @@ class Config implements ArrayAccess, Countable
      * @param array $arrayConfig
      * @throws Exception
      */
-    public function __construct($prodConfig, $devConfig=false)
+    public function __construct($prodConfig, $devConfig = false)
     {
-        $config = Request::isDevMode() && $devConfig ? $devConfig: $prodConfig;
+        $config = Request::isDevMode() && $devConfig ? $devConfig : $prodConfig;
         if (is_array($config) === false)
             throw new Exception('The configuration must be an Array');
 
         foreach ($config as $key => $value)
-            if (is_array($value) === true) {
+            if (is_array($value) === true)
+            {
                 $this->_storage[$key] = new self($value);
-            } else {
+            }
+            else
+            {
                 $this->_storage[$key] = $value;
             }
     }
@@ -107,7 +123,8 @@ class Config implements ArrayAccess, Countable
      */
     public function offsetExists($index)
     {
-        if (is_scalar($index) === false) {
+        if (is_scalar($index) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
         return isset($this->_storage[$index]);
@@ -128,7 +145,8 @@ class Config implements ArrayAccess, Countable
      */
     public function get($index, $defaultValue = null)
     {
-        if (is_scalar($index) === false) {
+        if (is_scalar($index) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
         return (isset($this->_storage[$index]) === true ? $this->_storage[$index] : $defaultValue);
@@ -163,7 +181,8 @@ class Config implements ArrayAccess, Countable
      */
     public function offsetSet($index, $value)
     {
-        if (is_scalar($index) === false) {
+        if (is_scalar($index) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -182,7 +201,8 @@ class Config implements ArrayAccess, Countable
      */
     public function offsetUnset($index)
     {
-        if (is_scalar($index) === false) {
+        if (is_scalar($index) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -202,28 +222,41 @@ class Config implements ArrayAccess, Countable
      * @param \Fogito\Config|array $config
      * @throws Exception Exception
      */
-    public function merge($prodConfig, $devConfig=false)
+    public function merge($prodConfig, $devConfig = false)
     {
-        $config = Request::isDevMode() && $devConfig ? $devConfig: $prodConfig;
-        if (is_object($config) === true && $config instanceof Config === true) {
+        $config = Request::isDevMode() && $devConfig ? $devConfig : $prodConfig;
+        if (is_object($config) === true && $config instanceof Config === true)
+        {
             $config = $config->toArray(false);
-        } elseif (is_array($config) === false) {
+        }
+        elseif (is_array($config) === false)
+        {
             throw new Exception('Configuration must be an object or array');
         }
 
-        foreach ($config as $key => $value) {
+        foreach ($config as $key => $value)
+        {
             //The key is already defined in the object, we have to merge it
-            if (isset($this->_storage[$key]) === true) {
+            if (isset($this->_storage[$key]) === true)
+            {
                 if ($this->$key instanceof Config === true &&
-                    $value instanceof Config === true) {
+                    $value instanceof Config === true)
+                {
                     $this->$key->merge($value);
-                } else {
+                }
+                else
+                {
                     $this->$key = $value;
                 }
-            } else {
-                if ($value instanceof Config === true) {
+            }
+            else
+            {
+                if ($value instanceof Config === true)
+                {
                     $this->$key = new self($value->toArray());
-                } else {
+                }
+                else
+                {
                     $this->$key = $value;
                 }
             }
@@ -246,11 +279,16 @@ class Config implements ArrayAccess, Countable
     {
         $array = $this->_storage;
 
-        if ($recursive === true) {
-            foreach ($this->_storage as $key => $value) {
-                if ($value instanceof Config === true) {
+        if ($recursive === true)
+        {
+            foreach ($this->_storage as $key => $value)
+            {
+                if ($value instanceof Config === true)
+                {
                     $array[$key] = $value->toArray($recursive);
-                } else {
+                }
+                else
+                {
                     $array[$key] = $value;
                 }
             }

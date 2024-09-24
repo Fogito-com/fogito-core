@@ -1,4 +1,5 @@
 <?php
+
 namespace Fogito\Http;
 
 use Fogito\Filter;
@@ -41,37 +42,46 @@ class Request
     public static function get($name = null, $filters = null, $defaultValue = null)
     {
         /* Validate input */
-        if (is_string($name) === false && is_null($name) === false) {
+        if (is_string($name) === false && is_null($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
         if (is_string($filters) === false && is_array($filters) === false &&
-            is_null($filters) === false) {
+            is_null($filters) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
         $raw = [];
-        foreach($_REQUEST as $key => $value) {
-            $raw[$key] = $value;
-        }
-        foreach(self::getJsonRawBody() as $key => $value) {
-            $raw[$key] = $value;
-        }
+        if ($_REQUEST && count($_REQUEST) > 0)
+            foreach ($_REQUEST as $key => $value)
+                $raw[$key] = $value;
+
+        if (self::getJsonRawBody() && count(self::getJsonRawBody()) > 0)
+            foreach (self::getJsonRawBody() as $key => $value)
+                $raw[$key] = $value;
 
         /* Get data */
-        if (is_null($name) === false) {
-            if (isset($raw[$name]) === true) {
+        if (is_null($name) === false)
+        {
+            if (isset($raw[$name]) === true)
+            {
                 $value = $raw[$name];
 
                 //Apply filters is required
-                if (!is_null($filters)) {
+                if (!is_null($filters))
+                {
                     //Get filter service
-                    if (!is_object(self::$filter)) {
+                    if (!is_object(self::$filter))
+                    {
                         self::$filter = new Filter();
                     }
 
                     return self::$filter->sanitize($value, $filters);
-                } else {
+                }
+                else
+                {
                     return $value;
                 }
             }
@@ -85,21 +95,27 @@ class Request
 
     public static function getPost($name = null, $filters = null, $defaultValue = null)
     {
-        if (is_string($name) === false && is_null($name) === false) {
+        if (is_string($name) === false && is_null($name) === false)
+        {
             throw new Exception('Invalid parmeter type.');
         }
 
         if (is_string($filters) === false && is_array($filters) === false &&
-            is_null($filters) === false) {
+            is_null($filters) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_null($name) === false) {
-            if (isset($_POST[$name]) === true) {
+        if (is_null($name) === false)
+        {
+            if (isset($_POST[$name]) === true)
+            {
                 $value = $_POST[$name];
 
-                if (!is_null($filters)) {
-                    if (!is_object(self::$filter)) {
+                if (!is_null($filters))
+                {
+                    if (!is_object(self::$filter))
+                    {
                         self::$filter = new Filter();
                     }
 
@@ -117,21 +133,27 @@ class Request
 
     public static function getQuery($name = null, $filters = null, $defaultValue = null)
     {
-        if (is_string($name) === false && is_null($name) === false) {
+        if (is_string($name) === false && is_null($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
         if (is_null($filters) === false && is_string($filters) === false &&
-            is_array($filters) === false) {
+            is_array($filters) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_null($name) === false) {
-            if (isset($_GET[$name]) === true) {
+        if (is_null($name) === false)
+        {
+            if (isset($_GET[$name]) === true)
+            {
                 $value = $_GET[$name];
 
-                if (!is_null($filters)) {
-                    if (!is_object(self::$filter)) {
+                if (!is_null($filters))
+                {
+                    if (!is_object(self::$filter))
+                    {
                         self::$filter = new Filter();
                     }
 
@@ -150,11 +172,13 @@ class Request
 
     public static function getServer($name)
     {
-        if (is_string($name) === false) {
+        if (is_string($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (isset($_SERVER[$name]) === true) {
+        if (isset($_SERVER[$name]) === true)
+        {
             return $_SERVER[$name];
         }
 
@@ -162,7 +186,7 @@ class Request
     }
 
 
-    public static function setServer($name, $value=false)
+    public static function setServer($name, $value = false)
     {
         $_SERVER[$name] = $value;
         return true;
@@ -177,7 +201,8 @@ class Request
      */
     public static function has($name)
     {
-        if (is_string($name) === false) {
+        if (is_string($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -193,7 +218,8 @@ class Request
      */
     public static function hasPost($name)
     {
-        if (is_string($name) === false) {
+        if (is_string($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -209,7 +235,8 @@ class Request
      */
     public static function hasQuery($name)
     {
-        if (is_string($name) === false) {
+        if (is_string($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -225,7 +252,8 @@ class Request
      */
     public static function hasServer($name)
     {
-        if (is_string($name) === false) {
+        if (is_string($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
@@ -241,14 +269,19 @@ class Request
      */
     public static function getHeader($header)
     {
-        if (is_string($header) === false) {
+        if (is_string($header) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (isset($_SERVER[$header]) === true) {
+        if (isset($_SERVER[$header]) === true)
+        {
             return $_SERVER[$header];
-        } else {
-            if (isset($_SERVER['HTTP_' . $header]) === true) {
+        }
+        else
+        {
+            if (isset($_SERVER['HTTP_' . $header]) === true)
+            {
                 return $_SERVER['HTTP_' . $header];
             }
         }
@@ -260,13 +293,19 @@ class Request
     public static function getScheme()
     {
         $https = self::getServer('HTTPS');
-        if (empty($https) === false) {
-            if ($https === 'off') {
+        if (empty($https) === false)
+        {
+            if ($https === 'off')
+            {
                 $scheme = 'http';
-            } else {
+            }
+            else
+            {
                 $scheme = 'https';
             }
-        } else {
+        }
+        else
+        {
             $scheme = 'http';
         }
 
@@ -282,10 +321,14 @@ class Request
 
     public static function isSoapRequested()
     {
-        if (isset($_SERVER['HTTP_SOAPACTION']) === true) {
+        if (isset($_SERVER['HTTP_SOAPACTION']) === true)
+        {
             return true;
-        } elseif (isset($_SERVER['CONTENT_TYPE']) === true) {
-            if (strpos($_SERVER['CONTENT_TYPE'], 'application/soap+xml') !== false) {
+        }
+        elseif (isset($_SERVER['CONTENT_TYPE']) === true)
+        {
+            if (strpos($_SERVER['CONTENT_TYPE'], 'application/soap+xml') !== false)
+            {
                 return true;
             }
         }
@@ -310,12 +353,16 @@ class Request
      */
     public static function getRawBody($name = null, $filters = null, $defaultValue = null)
     {
-        if (is_string(self::$rawBody)) {
+        if (is_string(self::$rawBody))
+        {
             return self::$rawBody;
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        }
+        elseif ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
             $raw = file_get_contents('php://input');
 
-            if ($raw === false) {
+            if ($raw === false)
+            {
                 $raw = [];
             }
 
@@ -334,7 +381,8 @@ class Request
     public static function getJsonRawBody()
     {
         $rawBody = self::getRawBody();
-        if (is_string($rawBody) === true) {
+        if (is_string($rawBody) === true)
+        {
             return json_decode($rawBody, 1);
         }
     }
@@ -346,26 +394,33 @@ class Request
      */
     public static function getInput($name = null, $filters = null, $defaultValue = null)
     {
-        if (is_string($name) === false && is_null($name) === false) {
+        if (is_string($name) === false && is_null($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
         if (is_null($filters) === false && is_string($filters) === false &&
-            is_array($filters) === false) {
+            is_array($filters) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
         $raw = json_decode(self::getRawBody(), true);
-        if (!is_array($raw)) {
+        if (!is_array($raw))
+        {
             throw new Exception('Invalid raw body.');
         }
 
-        if (is_null($name) === false) {
-            if (isset($raw[$name]) === true) {
+        if (is_null($name) === false)
+        {
+            if (isset($raw[$name]) === true)
+            {
                 $value = $raw[$name];
 
-                if (!is_null($filters)) {
-                    if (!is_object(self::$filter)) {
+                if (!is_null($filters))
+                {
+                    if (!is_object(self::$filter))
+                    {
                         self::$filter = new Filter();
                     }
 
@@ -383,7 +438,8 @@ class Request
 
     public static function getServerAddress()
     {
-        if (isset($_SERVER['SERVER_ADDR']) === true) {
+        if (isset($_SERVER['SERVER_ADDR']) === true)
+        {
             return $_SERVER['SERVER_ADDR'];
         }
 
@@ -397,7 +453,8 @@ class Request
      */
     public static function getServerName()
     {
-        if (isset($_SERVER['SERVER_NAME']) === true) {
+        if (isset($_SERVER['SERVER_NAME']) === true)
+        {
             return $_SERVER['SERVER_NAME'];
         }
 
@@ -413,7 +470,8 @@ class Request
     {
         //Get the server name from _SERVER['HTTP_HOST']
         $httpHost = self::getServer('HTTP_HOST');
-        if (isset($httpHost) === true) {
+        if (isset($httpHost) === true)
+        {
             return $httpHost;
         }
 
@@ -433,12 +491,13 @@ class Request
 
         //Check if the request is a secure http request
         $isSecureScheme = ($scheme === 'https' ? true : false);
-        $isSecurePort   = ($serverPort === 443 ? true : false);
-        $isSecureHttp   = ($isSecureScheme && $isSecurePort ? true : false);
+        $isSecurePort = ($serverPort === 443 ? true : false);
+        $isSecureHttp = ($isSecureScheme && $isSecurePort ? true : false);
 
         //If is is a standard http we return the server name only
         if ($isStdHttp === true ||
-            $isSecureHttp === true) {
+            $isSecureHttp === true)
+        {
             return $serverName;
         }
 
@@ -454,7 +513,7 @@ class Request
      */
     public static function getClientAddress($trustForwardedHeader = null)
     {
-        if($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP'])>0)
+        if ($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP']) > 0)
             return $_SERVER['HTTP_USER_IP'];
         return $_SERVER['REMOTE_ADDR'];
     }
@@ -466,7 +525,8 @@ class Request
      */
     public static function getMethod()
     {
-        if (isset($_SERVER['REQUEST_METHOD']) === true) {
+        if (isset($_SERVER['REQUEST_METHOD']) === true)
+        {
             return $_SERVER['REQUEST_METHOD'];
         }
 
@@ -480,9 +540,12 @@ class Request
      */
     public static function getUserAgent()
     {
-        if (isset($_SERVER['HTTP_USER_AGENT']) === true) {
+        if (isset($_SERVER['HTTP_USER_AGENT']) === true)
+        {
             return $_SERVER['HTTP_USER_AGENT'];
-        } else {
+        }
+        else
+        {
             return '';
         }
     }
@@ -497,11 +560,16 @@ class Request
     {
         $methodHttp = self::getMethod();
 
-        if (is_string($methods) === true) {
+        if (is_string($methods) === true)
+        {
             return ($methods == $methodHttp ? true : false);
-        } else {
-            foreach ($methods as $method) {
-                if ($method === $methodHttp) {
+        }
+        else
+        {
+            foreach ($methods as $method)
+            {
+                if ($method === $methodHttp)
+                {
                     return true;
                 }
             }
@@ -589,24 +657,35 @@ class Request
      */
     public static function hasFiles($notErrored = null)
     {
-        if (is_null($notErrored) === true) {
+        if (is_null($notErrored) === true)
+        {
             $notErrored = true;
-        } elseif (is_bool($notErrored) === false) {
+        }
+        elseif (is_bool($notErrored) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
-        if (is_array($_FILES) === false) {
+        if (is_array($_FILES) === false)
+        {
             return 0;
         }
 
         $count = 0;
-        foreach ($_FILES as $file) {
-            if ($notErrored === false) {
+        foreach ($_FILES as $file)
+        {
+            if ($notErrored === false)
+            {
                 ++$count;
-            } else {
-                if (isset($file['error']) === true) {
-                    foreach ($file['error'] as $error) {
-                        if ($error === \UPLOAD_ERR_OK) {
+            }
+            else
+            {
+                if (isset($file['error']) === true)
+                {
+                    foreach ($file['error'] as $error)
+                    {
+                        if ($error === \UPLOAD_ERR_OK)
+                        {
                             ++$count;
                             break;
                         }
@@ -626,13 +705,16 @@ class Request
      */
     public static function getHeaders()
     {
-        if (is_array($_SERVER) === false) {
+        if (is_array($_SERVER) === false)
+        {
             return;
         }
 
         $result = array();
-        foreach ($_SERVER as $key => $value) {
-            if (Text::startsWith($key, 'HTTP_') === true) {
+        foreach ($_SERVER as $key => $value)
+        {
+            if (Text::startsWith($key, 'HTTP_') === true)
+            {
                 $result[] = substr($key, 5);
             }
         }
@@ -647,16 +729,17 @@ class Request
      */
     public static function getHTTPReferer()
     {
-        if (isset($_SERVER['HTTP_REFERER']) === true) {
+        if (isset($_SERVER['HTTP_REFERER']) === true)
+        {
             return $_SERVER['HTTP_REFERER'];
         }
 
         return '';
     }
 
-    public static function getIP() 
+    public static function getIP()
     {
-        if($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP']))
+        if ($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP']))
             return $_SERVER['HTTP_USER_IP'];
         return $_SERVER['REMOTE_ADDR'];
     }
@@ -672,20 +755,26 @@ class Request
     protected static function _getBestQuality($qualityParts, $name)
     {
         if (is_array($qualityParts) === false ||
-            is_string($name) === false) {
+            is_string($name) === false)
+        {
             throw new Exception('Invalid parameter type.');
         }
 
         $quality = 0;
-        $i       = 0;
+        $i = 0;
 
-        foreach ($qualityParts as $accept) {
-            if ($i === 0) {
-                $quality      = $accept['quality'];
+        foreach ($qualityParts as $accept)
+        {
+            if ($i === 0)
+            {
+                $quality = $accept['quality'];
                 $selectedName = $accept[$name];
-            } else {
-                if ($quality < $accept['quality']) {
-                    $quality      = $accept['quality'];
+            }
+            else
+            {
+                if ($quality < $accept['quality'])
+                {
+                    $quality = $accept['quality'];
                     $selectedName = $accept[$name];
                 }
             }
@@ -716,9 +805,18 @@ class Request
         return self::_getBestQuality(self::getLanguages(), 'language');
     }
 
+    public static function envMode()
+    {
+        if (self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
+            return 'development';
+        if (substr(self::getServer("HTTP_HOST"), 0, 8) === "apptest." || substr(self::getServer("HTTP_HOST"), 0, 5) === "beta.")
+            return 'beta';
+        return 'production';
+    }
+
     public static function isDevMode()
     {
-        if(self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
+        if (self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
             return true;
         return false;
     }
