@@ -41,17 +41,11 @@ class Request
      */
     public static function get($name = null, $filters = null, $defaultValue = null)
     {
-        /* Validate input */
         if (is_string($name) === false && is_null($name) === false)
-        {
             throw new Exception('Invalid parameter type.');
-        }
 
-        if (is_string($filters) === false && is_array($filters) === false &&
-            is_null($filters) === false)
-        {
+        if (is_string($filters) === false && is_array($filters) === false && is_null($filters) === false)
             throw new Exception('Invalid parameter type.');
-        }
 
         $raw = [];
         if ($_REQUEST && count($_REQUEST) > 0)
@@ -61,6 +55,13 @@ class Request
         if (self::getJsonRawBody() && count(self::getJsonRawBody()) > 0)
             foreach (self::getJsonRawBody() as $key => $value)
                 $raw[$key] = $value;
+
+        if (php_sapi_name() === 'cli')
+            foreach ((array)$_SERVER['argv'] as $arg)
+            {
+                $args = explode('=', $arg);
+                $raw[$args[0]] = $args[1];
+            }
 
         /* Get data */
         if (is_null($name) === false)
@@ -816,7 +817,7 @@ class Request
 
     public static function isDevMode()
     {
-        if (self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
+        if(self::getServer("HTTP_ENV_MODE") === "development" || (self::getServer("HTTP_HOST") && substr(self::getServer("HTTP_HOST"), 0, 4) === "test"))
             return true;
         return false;
     }

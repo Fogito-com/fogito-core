@@ -24,7 +24,7 @@ class RemoteModelManager
     {
         $s2s = App::$di->config->s2s;
         if (\is_object($s2s)) {
-            $data = \array_merge($data, $s2s->toArray());
+            $data = \array_merge($s2s->toArray(), $data);
         }
         $mergeData = [
             "lang"          => Lang::getLang(),

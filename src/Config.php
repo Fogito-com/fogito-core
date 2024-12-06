@@ -235,32 +235,14 @@ class Config implements ArrayAccess, Countable
         }
 
         foreach ($config as $key => $value)
-        {
-            //The key is already defined in the object, we have to merge it
-            if (isset($this->_storage[$key]) === true)
+            if (is_array($value) === true)
             {
-                if ($this->$key instanceof Config === true &&
-                    $value instanceof Config === true)
-                {
-                    $this->$key->merge($value);
-                }
-                else
-                {
-                    $this->$key = $value;
-                }
+                $this->_storage[$key] = new self($value);
             }
             else
             {
-                if ($value instanceof Config === true)
-                {
-                    $this->$key = new self($value->toArray());
-                }
-                else
-                {
-                    $this->$key = $value;
-                }
+                $this->_storage[$key] = $value;
             }
-        }
     }
 
     /**
