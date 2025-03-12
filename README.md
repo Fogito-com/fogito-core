@@ -72,6 +72,7 @@ sites
 Fogito Core License
 
 Copyright (c) 2025 Fogito MMC
+
 Bakı şəhəri, Babək prospekti, Ələddin Quliyev küçəsi, 1131 məhəllə
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
