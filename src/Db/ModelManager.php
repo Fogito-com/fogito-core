@@ -1122,28 +1122,30 @@ abstract class ModelManager
     {
         self::execute();
         $pipleLine = [];
-        if (count($filter) > 0)
-        {
+
+        if (count($filter) > 0) {
             $pipleLine[] = ['$match' => $filter[0]];
         }
-        $pipleLine[] = $fields[0];
-        if (isset($filter["sort"]))
-        {
+        if(isset($filter["sort"])){
             $pipleLine[] = ['$sort' => $filter["sort"]];
         }
-        if (isset($filter["limit"]))
-        {
+
+        if(isset($filter["limit"])){
             $pipleLine[] = ['$limit' => $filter["limit"]];
         }
-        if (isset($filter["skip"]))
-        {
+
+        if(isset($filter["skip"])){
             $pipleLine[] = ['$skip' => $filter["skip"]];
         }
+        
+        $pipleLine[] = $fields[0];
+
         $Command = new \MongoDB\Driver\Command([
             'aggregate' => self::$_source,
             'pipeline'  => $pipleLine,
-            'cursor'    => ["batchSize" => 1],
+            'cursor' => ["batchSize" => 1],
         ]);
+
         $Result = self::$_connection->executeCommand(self::$_db, $Command);
         return $Result->toArray();
     }
