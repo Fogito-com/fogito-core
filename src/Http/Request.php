@@ -48,11 +48,11 @@ class Request
             throw new Exception('Invalid parameter type.');
 
         $raw = [];
-        if ($_REQUEST && count($_REQUEST) > 0)
+        if ($_REQUEST && count($_REQUEST ?: []) > 0)
             foreach ($_REQUEST as $key => $value)
                 $raw[$key] = $value;
 
-        if (self::getJsonRawBody() && count(self::getJsonRawBody()) > 0)
+        if (self::getJsonRawBody() && count(self::getJsonRawBody() ?: []) > 0)
             foreach (self::getJsonRawBody() as $key => $value)
                 $raw[$key] = $value;
 

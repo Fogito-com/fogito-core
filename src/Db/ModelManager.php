@@ -430,7 +430,7 @@ abstract class ModelManager
 
         $pipleLine = [];
         $filter = self::filterBinds((array)$filter[0]);
-        if (count($filter) > 0)
+        if (count($filter ?: []) > 0)
         {
             $pipleLine[] = ['$match' => $filter];
         }
@@ -575,7 +575,7 @@ abstract class ModelManager
         foreach ($documents as $row)
         {
             $id = $row->getId();
-            if (!in_array($id, $data))
+            if (!in_array($id, (array)$data))
             {
                 $data[] = $id;
             }
@@ -1076,7 +1076,7 @@ abstract class ModelManager
      */
     public static function filterBinds($filter = [], $options = [])
     {
-        if (in_array(self::$_source, App::$di->config->skipped_filtering_collections->toArray()))
+        if (in_array(self::$_source, (array)App::$di->config->skipped_filtering_collections->toArray()))
             return $filter;
 
         if (method_exists(new static(), "getFindFilters") && count(static::getFindFilters()) > 0)
@@ -1087,7 +1087,7 @@ abstract class ModelManager
 
         if (static::$_shared)
         {
-            if (count($filter['company_ids']) == 0 && Company::getId())
+            if (count($filter['company_ids'] ?: []) == 0 && Company::getId())
                 $filter["company_ids"] = ['$in' => array_merge(Company::getData()->branch_ids, [Company::getId()])];
         }
         else
@@ -1112,7 +1112,7 @@ abstract class ModelManager
             $filter["company_id"] = Company::getId();
 
         if (static::$_shared)
-            if (count($filter['company_ids']) == 0 && Company::getId())
+            if (count($filter['company_ids'] ?: []) == 0 && Company::getId())
                 $filter["company_ids"] = [Company::getId()];
 
         return $filter;
@@ -1123,7 +1123,7 @@ abstract class ModelManager
         self::execute();
         $pipleLine = [];
 
-        if (count($filter) > 0) {
+        if (count($filter ?: []) > 0) {
             $pipleLine[] = ['$match' => $filter[0]];
         }
         if(isset($filter["sort"])){

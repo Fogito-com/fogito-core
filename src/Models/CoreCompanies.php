@@ -42,11 +42,11 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
         {
             return true;
         }
-        else if(in_array(trim($companyId), Company::getData()->branch_ids))
+        else if(in_array(trim($companyId), (array)Company::getData()->branch_ids))
         {
             return true;
         }
-        else if(in_array(trim($companyId), Company::getData()->parent_ids))
+        else if(in_array(trim($companyId), (array)Company::getData()->parent_ids))
         {
             return false;
         }
@@ -75,11 +75,11 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
         {
             return true;
         }
-        else if(in_array(trim($companyId), Company::getData()->branch_ids))
+        else if(in_array(trim($companyId), (array)Company::getData()->branch_ids))
         {
             return true;
         }
-        else if(in_array(trim($companyId), Company::getData()->parent_ids))
+        else if(in_array(trim($companyId), (array)Company::getData()->parent_ids))
         {
             return true;
         }

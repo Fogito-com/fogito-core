@@ -102,7 +102,7 @@ class RemoteModelManager
     public static function find($filter, $options=false)
     {
         self::init("find");
-        if((!$filter["filter"] || count($filter["filter"])) && count($filter[0]) > 0)
+        if((!$filter["filter"] || count($filter["filter"] ?: [])) && count($filter[0] ?: []) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -155,7 +155,7 @@ class RemoteModelManager
     public static function findFirst($filter, $options=false)
     {
         self::init("findfirst");
-        if((!$filter["filter"] || count($filter["filter"])) && count($filter[0]) > 0)
+        if((!$filter["filter"] || count($filter["filter"]) ?: []) && count($filter[0] ?: []) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -236,7 +236,7 @@ class RemoteModelManager
     public static function count($filter, $options=false)
     {
         self::init("count");
-        if((!$filter["filter"] || count($filter["filter"])) && count($filter[0]) > 0)
+        if((!$filter["filter"] || count($filter["filter"] ?: [])) && count($filter[0] ?: []) > 0)
             $filter["filter"] = $filter[0];
         return self::request($filter, $options);
     }

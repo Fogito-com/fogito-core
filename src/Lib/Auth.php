@@ -201,7 +201,7 @@ class Auth
         if ($permissions[$key]['allow'])
         {
             if($selected){
-                if(in_array($selected, $permissions[$key]["selected"]))
+                if(in_array($selected, (array)$permissions[$key]["selected"]))
                     $allow = true;
             }else if($permissions[$key]["selected"]){
                 $allow = $permissions[$key];
@@ -266,7 +266,7 @@ class Auth
     {
         if(!self::$_permissions[$permission] || !self::$_permissions[$permission]["allow"])
             return false;
-        if($selected && !in_array($selected, !self::$_permissions[$permission]["selected"]))
+        if($selected && !in_array($selected, (array)self::$_permissions[$permission]["selected"]))
             return false;
         return self::$_permissions[$permission];
     }
