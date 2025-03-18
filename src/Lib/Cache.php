@@ -74,14 +74,14 @@ class Cache
                 try
                 {
                     $db->connect(
-                        $server ? $server->host : '127.0.0.2',
-                        $server ? $server->port : 6379
+                        $server->host ?: '127.0.0.2',
+                        $server->port ?: 6379
                     );
-                    if ($server && $server->password)
+                    if ($server->password)
                     {
-                        if ($server->password && strlen($server->username) > 0)
+                        if ($server->username && strlen($server->username) > 0)
                         {
-                            $db->auth($server->username . ":" . $server->password);
+                            $db->auth([$server->username, $server->password]);
                         }
                         else
                         {
@@ -94,12 +94,12 @@ class Cache
                     }
                     else
                     {
-                        Response::error("Cache server error: 22");
+                        Response::error("Cache server error: 23");
                     }
                 }
                 catch (\RedisException $e)
                 {
-                    Response::error("Cache server error: 22");
+                    Response::error("Cache server error: 22 ".$e);
                 }
             }
             else
