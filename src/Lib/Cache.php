@@ -13,8 +13,18 @@ class Cache
     {
         if (!self::$data)
             self::connect();
+        $server = self::getServer();
         if (self::$data)
-            return self::$data->get($key);
+        {
+            if ($server && $server->type === 'redis')
+            {
+                return self::$data->get($server->username . ':' . $key);
+            }
+            else
+            {
+                return self::$data->get($key);
+            }
+        }
         return false;
     }
 
@@ -30,11 +40,11 @@ class Cache
             {
                 if ($time > 0)
                 {
-                    return self::$data->setex($key, $time, $value);
+                    return self::$data->setex($server->username . ':' . $key, $time, $value);
                 }
                 else
                 {
-                    return self::$data->set($key, $value);
+                    return self::$data->set($server->username . ':' . $key, $value);
                 }
             }
             else
@@ -49,8 +59,18 @@ class Cache
     {
         if (!self::$data)
             self::connect();
+        $server = self::getServer();
         if (self::$data)
-            return self::$data->delete($key);
+        {
+            if ($server && $server->type === 'redis')
+            {
+                return self::$data->delete($server->username . ':' . $key);
+            }
+            else
+            {
+                return self::$data->delete($key);
+            }
+        }
         return false;
     }
 
@@ -81,7 +101,10 @@ class Cache
                     {
                         if ($server->username && strlen($server->username) > 0)
                         {
-                            $db->auth([$server->username, $server->password]);
+                            $db->auth([
+                                $server->username,
+                                $server->password
+                            ]);
                         }
                         else
                         {
@@ -99,7 +122,7 @@ class Cache
                 }
                 catch (\RedisException $e)
                 {
-                    Response::error("Cache server error: 22 ".$e);
+                    Response::error("Cache server error: 22 " . $e);
                 }
             }
             else
