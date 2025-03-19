@@ -43,8 +43,9 @@ class Auth
                     "account", "permissions", "company", "pricing", "translations"
                 ]
             ]);
-            $response = json_decode($response, true);
         }
+        if($response)
+            $response = json_decode($response, true);
         if (is_array($response))
         {
             if($response["status"] == "success" && $_data=$response["data"])
@@ -65,13 +66,13 @@ class Auth
                 if($_data["translations"])
                     Lang::setData($_data["translations"]);
 
-                Cache::set(self::getCacheKey(), $response, self::getCacheDuration());
+                Cache::set(self::getCacheKey(), json_encode($response), self::getCacheDuration());
             }
             else
             {
                 self::setError((int)$response["error_code"], (string)$response["description"]);
 
-                Cache::set(self::getCacheKey(), $response, 4);
+                Cache::set(self::getCacheKey(), json_encode($response), 4);
             }
         }
         else
