@@ -1,4 +1,5 @@
 <?php
+
 namespace Fogito\Db;
 
 use Fogito\App;
@@ -16,27 +17,28 @@ class RemoteModelManager
     public static function init($action)
     {
         self::$action = $action;
-        self::$url   = static::getServer()."/".static::getSource()."/".$action;
+        self::$url = static::getServer() . "/" . static::getSource() . "/" . $action;
     }
 
 
-    public static function filterSendParams($data=[])
+    public static function filterSendParams($data = [])
     {
         $s2s = App::$di->config->s2s;
-        if (\is_object($s2s)) {
+        if (\is_object($s2s))
+        {
             $data = \array_merge($s2s->toArray(), $data);
         }
         $mergeData = [
-            "lang"          => Lang::getLang(),
-            "token_user"    => Auth::getData() ? (string)Auth::getId(): "",
-            "http_origin"   => Request::getServer("HTTP_ORIGIN"),
-            "request_uri"   => Request::getServer("REQUEST_URI")
+            "lang"        => Lang::getLang(),
+            "token_user"  => Auth::getData() ? (string)Auth::getId() : "",
+            "http_origin" => Request::getServer("HTTP_ORIGIN"),
+            "request_uri" => Request::getServer("REQUEST_URI")
         ];
-        if(strlen(Auth::getToken()) > 0 && Auth::tokenAllowed())
+        if (strlen(Auth::getToken()) > 0 && Auth::tokenAllowed())
             $mergeData["token"] = Auth::getToken();
-        if(strlen(Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
+        if (strlen(Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
             $mergeData["token_user"] = Auth::getTokenUser();
-        if(strlen(Request::get("server_token")) > 0)
+        if (strlen(Request::get("server_token")) > 0)
             $mergeData["remote_server_token"] = Request::get("server_token");
         return array_merge($data, $mergeData);
     }
@@ -44,38 +46,38 @@ class RemoteModelManager
     public static function request($params = [], $options = false)
     {
         $postData = [
-            "data"          => $params,
+            "data" => $params,
         ];
 
-        $result = self::curl(self::$url, $postData);
-        $result = \json_decode($result, true);
-        if($result && $result["status"] === "success")
+        $raw_result = self::curl(self::$url, $postData);
+        $result = \json_decode($raw_result, true);
+        if ($result && $result["status"] === "success")
         {
-            if($options["result"])
+            if ($options["result"])
                 return $result;
             return $result["data"];
         }
-        elseif($result && $result["status"] === "error")
+        elseif ($result && $result["status"] === "error")
         {
             $error = $result;
         }
         else
         {
             $error = [
-                "status"        => "error",
-                "description"   => "Connection Error",
-                "error_code"    => 1004
+                "status"      => "error",
+                "description" => "Connection Error: " . $raw_result,
+                "error_code"  => 1004
             ];
         }
 
-        if($error && $options && $options["debug"] == true)
+        if ($error && $options && $options["debug"] == true)
             Response::error($error["description"], $error["error_code"]);
-        if($error && $options && $options["result"] == true)
-            return  $error;
+        if ($error && $options && $options["result"] == true)
+            return $error;
         return false;
-    } 
+    }
 
-    public static function  curl($url, $data)
+    public static function curl($url, $data)
     {
         $data = self::filterSendParams($data);
 
@@ -90,19 +92,19 @@ class RemoteModelManager
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $result = curl_exec($ch);
 
-        if(curl_errno($ch))
+        if (curl_errno($ch))
             $result = json_encode([
-                "status"        => "error",
-                "description"   => "Connection Error",
-                "error_code"    => 1003
+                "status"      => "error",
+                "description" => "Connection Error",
+                "error_code"  => 1003
             ]);
         return $result;
     }
 
-    public static function find($filter, $options=false)
+    public static function find($filter, $options = false)
     {
         self::init("find");
-        if((!$filter["filter"] || count($filter["filter"] ?: [])) && count($filter[0] ?: []) > 0)
+        if ((!$filter["filter"] || count($filter["filter"] ?: [])) && count($filter[0] ?: []) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -111,51 +113,50 @@ class RemoteModelManager
     }
 
 
-
     /**
-    UsersRemote::insert(
-    $insertData,
-    [
-    “debug”: true/false, // true olanda error olan kimi dayandirir skripti ozu response qaytarir apide,
-    “result”: true/false, // true olanda serverde qayidan erroru qaytarir. false olanda serverde error qayitsa response sadece false olur. esas find, findFirst ucun ele qurulub
-    ]
-    )
+     * UsersRemote::insert(
+     * $insertData,
+     * [
+     * “debug”: true/false, // true olanda error olan kimi dayandirir skripti ozu response qaytarir apide,
+     * “result”: true/false, // true olanda serverde qayidan erroru qaytarir. false olanda serverde error qayitsa response sadece false olur. esas find, findFirst ucun ele qurulub
+     * ]
+     * )
      */
-    public static function insert($params, $options=["result" => true])
+    public static function insert($params, $options = ["result" => true])
     {
         self::init("insert");
         return self::request(
             [
-                "insert"    => $params
+                "insert" => $params
             ],
             $options
         );
     }
 
     /**
-    UsersRemote::validate(
-    $insertData,
-    [
-    “debug”: true/false, // true olanda error olan kimi dayandirir skripti ozu response qaytarir apide,
-    “result”: true/false, // true olanda serverde qayidan erroru qaytarir. false olanda serverde error qayitsa response sadece false olur. esas find, findFirst ucun ele qurulub
-    ]
-    )
+     * UsersRemote::validate(
+     * $insertData,
+     * [
+     * “debug”: true/false, // true olanda error olan kimi dayandirir skripti ozu response qaytarir apide,
+     * “result”: true/false, // true olanda serverde qayidan erroru qaytarir. false olanda serverde error qayitsa response sadece false olur. esas find, findFirst ucun ele qurulub
+     * ]
+     * )
      */
-    public static function validate($params, $options=["result" => true])
+    public static function validate($params, $options = ["result" => true])
     {
         self::init("validate");
         return self::request(
             [
-                "validate"    => $params
+                "validate" => $params
             ],
             $options
         );
     }
 
-    public static function findFirst($filter, $options=false)
+    public static function findFirst($filter, $options = false)
     {
         self::init("findfirst");
-        if((!$filter["filter"] || count($filter["filter"]) ?: []) && count($filter[0] ?: []) > 0)
+        if ((!$filter["filter"] || count($filter["filter"]) ?: []) && count($filter[0] ?: []) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -163,7 +164,7 @@ class RemoteModelManager
         return self::request($filter, $options);
     }
 
-    public static function findById($id, $options=false)
+    public static function findById($id, $options = false)
     {
         self::init("findfirst");
         return self::request([
@@ -173,22 +174,22 @@ class RemoteModelManager
         ], $options);
     }
 
-    public static function update($filter, $data, $options=false)
+    public static function update($filter, $data, $options = false)
     {
         self::init("update");
         return self::request(
             [
                 "filter" => $filter,
-                "update"   => $data,
+                "update" => $data,
             ],
-            $options ? $options: ["result" => true]
+            $options ? $options : ["result" => true]
         );
     }
 
-    public static function delete($filter, $options=false)
+    public static function delete($filter, $options = false)
     {
         self::init("delete");
-        return self::request(["filter" => $filter], $options ? $options: ["result" => true]);
+        return self::request(["filter" => $filter], $options ? $options : ["result" => true]);
     }
 
     /**
@@ -200,19 +201,17 @@ class RemoteModelManager
      * @return array|false|mixed
      *
      */
-    public static function avatarupdate($userId, $fileId, $options=["result" => true])
+    public static function avatarupdate($userId, $fileId, $options = ["result" => true])
     {
         self::init("avatarupdate");
         return self::request(
             [
-                "id"   => $userId,
-                "file_id"   => $fileId,
+                "id"      => $userId,
+                "file_id" => $fileId,
             ],
             $options
         );
     }
-
-
 
 
     /**
@@ -222,7 +221,7 @@ class RemoteModelManager
      * @param bool[] $options
      * @return array|false|mixed
      */
-    public static function avatardelete($userId, $options=["result" => true])
+    public static function avatardelete($userId, $options = ["result" => true])
     {
         self::init("avatardelete");
         return self::request(
@@ -233,18 +232,16 @@ class RemoteModelManager
         );
     }
 
-    public static function count($filter, $options=false)
+    public static function count($filter, $options = false)
     {
         self::init("count");
-        if((!$filter["filter"] || count($filter["filter"] ?: [])) && count($filter[0] ?: []) > 0)
+        if ((!$filter["filter"] || count($filter["filter"] ?: [])) && count($filter[0] ?: []) > 0)
             $filter["filter"] = $filter[0];
         return self::request($filter, $options);
     }
 
 
-
-
-    public static function getPermissions($filter, $options=false)
+    public static function getPermissions($filter, $options = false)
     {
         self::init("permissions");
         return self::request($filter, $options);

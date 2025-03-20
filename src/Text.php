@@ -1,6 +1,6 @@
 <?php
 /**
- * @author Tural Ilyasov <senior2ral@gmail.com>
+ * @author Copyright Fogito LLC
  * @link https://github.com/Fogito-com/fogito-core
  * @version 1.0.2
  * @package Fogito-Core
