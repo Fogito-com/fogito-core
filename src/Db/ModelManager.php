@@ -1082,7 +1082,7 @@ abstract class ModelManager
         if (method_exists(new static(), "getFindFilters") && count(static::getFindFilters()) > 0)
             $filter = array_merge(static::getFindFilters(), $filter);
 
-        if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && BUSINESS_TYPE)
+        if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && defined('BUSINESS_TYPE') && (defined('BUSINESS_TYPE') && BUSINESS_TYPE))
             $filter["business_type"] = BUSINESS_TYPE;
 
         if (static::$_shared)
@@ -1092,12 +1092,11 @@ abstract class ModelManager
         }
         else
         {
-            if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && COMPANY_ID)
+            if (!isset($filter['company_id']) && !App::$di->config->skip_filter_company_id && (defined('COMPANY_ID') && COMPANY_ID))
                 $filter["company_id"] = COMPANY_ID;
         }
 
         return $filter;
-
     }
 
     public static function filterInsertBinds($filter = [], $options = [])
