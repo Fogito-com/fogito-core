@@ -1161,6 +1161,30 @@ abstract class ModelManager
         return 0;
     }
 
+    public static function nextNumber($parameter, $count = 1)
+    {
+        self::execute();
+
+        $filter = static::filterBinds(['counter' => $parameter]);
+
+        $command = new \MongoDB\Driver\Command([
+            'findAndModify' => self::$_source,
+            'query' => $filter,
+            'update' => ['$inc' => ['seq' =>  $count]],
+            'new' => true,
+            'upsert' => true
+        ]);
+
+        $cursor = self::$_connection->executeCommand(self::$_db, $command);
+        $result = current($cursor->toArray());
+
+        if (isset($result->value->seq)) {
+            return $result->value->seq;
+        } else {
+            return false;
+        }
+    }
+
 
     public static function dateFiltered($date, $format = "Y-m-d H:i:s")
     {
