@@ -938,7 +938,7 @@ abstract class ModelManager
      */
     public static function toSeconds($date, $round=true)
     {
-        if ($date && \method_exists($date, 'toDateTime')) {
+        if (is_object($date) && \method_exists($date, 'toDateTime')) {
             if($round)
                 return round(@$date->toDateTime()->format('U.u'), 0);
             return round(@$date->toDateTime()->format('U.u'), 3);
@@ -1156,7 +1156,7 @@ abstract class ModelManager
 
     public static function toMilliSeconds($date)
     {
-        if ($date && method_exists($date, "toDateTime"))
+        if (is_object($date) && method_exists($date, "toDateTime"))
             return round(@$date->toDateTime()->format("U.u") * 1000, 0);
         return 0;
     }
@@ -1164,7 +1164,7 @@ abstract class ModelManager
 
     public static function dateFiltered($date, $format = "Y-m-d H:i:s")
     {
-        if ($date && method_exists($date, "toDateTime"))
+        if (is_object($date) && method_exists($date, "toDateTime"))
         {
             return date($format, self::toSeconds($date));
         }

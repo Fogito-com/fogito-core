@@ -302,7 +302,7 @@ class App
         }
 
         $moduleClass = new $moduleNamespace();
-        if (!\method_exists($moduleClass, 'register')) {
+        if (is_object($moduleClass) && !\method_exists($moduleClass, 'register')) {
             $exception = new Exception('"register" method not found in ' . $moduleNamespace . ' class');
 
             if (is_object($this->eventsManager)) {
@@ -332,7 +332,7 @@ class App
         }
 
         $actionName = $router->getActionName() . $this->actionSuffix;
-        if (!\method_exists($controllerNamespace, $actionName)) {
+        if (is_object($controllerNamespace) && !\method_exists($controllerNamespace, $actionName)) {
             $exception = new Exception('"' . $actionName . '" method not found in ' . $controllerNamespace . '', Exception::ERROR_NOT_FOUND_ACTION);
 
             if (is_object($this->eventsManager)) {

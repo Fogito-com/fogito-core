@@ -85,7 +85,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
         $formatfrom     = $options["formatfrom"] ?  $options["formatfrom"]: self::$defaultDateFormat;
         $formatto       = $realFormatto ?  $realFormatto: self::$defaultDateFormat;
 
-        if (method_exists($datetime, "toDateTime")) {
+        if (is_object($datetime) && method_exists($datetime, "toDateTime")) {
             $datetime = @$datetime->toDateTime()->format("Y-m-d H:i:s");
         }elseif(is_numeric($datetime)){
             $datetime = date("Y-m-d H:i:s", $datetime);

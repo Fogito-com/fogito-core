@@ -252,7 +252,7 @@ class Manager
                         }
                     } else {
                         //Check if the listener has implemented an event with the same name
-                        if (method_exists($handler, $eventName) === true) {
+                        if (is_object($handler) && method_exists($handler, $eventName) === true) {
                             //Call the function in the PHP userland
                             $status = $handler->$eventName($event, $source, $data);
 
@@ -300,7 +300,7 @@ class Manager
                         }
                     } else {
                         //Ćheck if the listener has implemented an event with the same name
-                        if (method_exists($handler, $eventName) === true) {
+                        if (is_object($handler) && method_exists($handler, $eventName) === true) {
                             //Call the function in the PHP userland
                             $status = $handler->$eventName($event, $source, $data);
 
