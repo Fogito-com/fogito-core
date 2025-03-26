@@ -113,7 +113,7 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
     {
         $keyFrom    = $params["key_from"] ? $params["key_from"]: "user";
         $keyTo      = $params["key_to"] ? $params["key_to"]: "user";
-        $columns    = $params["columns"] && count($params["columns"] ?: []) > 0 ? $params["columns"]: ["id", "fullname", "avatar_tiny"];
+        $columns    = $params["columns"] && count((array)$params["columns"]) > 0 ? $params["columns"]: ["id", "fullname", "avatar_tiny"];
 
         $ids = [];
         foreach ($list as $value)

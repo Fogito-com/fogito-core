@@ -384,7 +384,7 @@ class Route
 
             //Explode the short paths using the :: separator
             $parts = explode('::', $paths);
-            $numberParts = count($parts ?: []);
+            $numberParts = count((array)$parts);
 
             //Create the array paths dynamically
             switch ($numberParts) {

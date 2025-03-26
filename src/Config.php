@@ -286,7 +286,7 @@ class Config implements ArrayAccess, Countable
      */
     public function count()
     {
-        return count($this->_storage ?: []);
+        return count((array)$this->_storage);
     }
 
     /**

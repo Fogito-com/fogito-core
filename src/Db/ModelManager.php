@@ -430,7 +430,7 @@ abstract class ModelManager
 
         $pipleLine = [];
         $filter = self::filterBinds((array)$filter[0]);
-        if (count($filter ?: []) > 0)
+        if (count((array)$filter) > 0)
         {
             $pipleLine[] = ['$match' => $filter];
         }
@@ -1079,7 +1079,7 @@ abstract class ModelManager
         if (in_array(self::$_source, (array)App::$di->config->skipped_filtering_collections->toArray()))
             return $filter;
 
-        if (method_exists(new static(), "getFindFilters") && count(static::getFindFilters()) > 0)
+        if (method_exists(new static(), "getFindFilters") && count((array)static::getFindFilters()) > 0)
             $filter = array_merge(static::getFindFilters(), $filter);
 
         if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && defined('BUSINESS_TYPE') && (defined('BUSINESS_TYPE') && BUSINESS_TYPE))
@@ -1087,7 +1087,7 @@ abstract class ModelManager
 
         if (static::$_shared)
         {
-            if (count($filter['company_ids'] ?: []) == 0 && Company::getId())
+            if (count((array)$filter['company_ids']) == 0 && Company::getId())
                 $filter["company_ids"] = ['$in' => array_merge(Company::getData()->branch_ids, [Company::getId()])];
         }
         else
@@ -1101,7 +1101,7 @@ abstract class ModelManager
 
     public static function filterInsertBinds($filter = [], $options = [])
     {
-        if (method_exists(new static(), "getInsertFilters") && count(static::getInsertFilters()) > 0)
+        if (method_exists(new static(), "getInsertFilters") && count((array)static::getInsertFilters()) > 0)
             $filter = array_merge(static::getInsertFilters(), $filter);
 
         if (!isset($filter['business_type']) && Company::getData()->business_model)
@@ -1111,7 +1111,7 @@ abstract class ModelManager
             $filter["company_id"] = Company::getId();
 
         if (static::$_shared)
-            if (count($filter['company_ids'] ?: []) == 0 && Company::getId())
+            if (count((array)$filter['company_ids']) == 0 && Company::getId())
                 $filter["company_ids"] = [Company::getId()];
 
         return $filter;
