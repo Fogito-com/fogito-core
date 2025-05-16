@@ -499,6 +499,47 @@ abstract class ModelManager
     }
 
     /**
+     * Returns a list of indexes for the current MongoDB collection.
+     *
+     * This function queries MongoDB for all defined indexes on the current collection (`self::$_source`)
+     * and returns them as a normalized array where each item contains the sorted list of index keys.
+     *
+     * @throws \MongoDB\Driver\Exception\Exception If the command execution fails.
+     * @return array List of existing index key combinations, sorted and normalized.
+     */
+    public static function getIndexes(): array
+    {
+        self::init();
+
+        $command = new \MongoDB\Driver\Command([
+            'listIndexes' => self::$_source,
+        ]);
+
+        try {
+            $cursor  = self::$_connection->executeCommand(self::$_db, $command);
+            $indexes = iterator_to_array($cursor);
+        } catch (\MongoDB\Driver\Exception\Exception $e) {
+            return [];
+        }
+
+        $result = [];
+
+        foreach ($indexes as $index) {
+            if (!isset($index->key)) {
+                continue;
+            }
+
+            if ($index->key->_id) {
+                continue;
+            }
+
+            $result[] = $index;
+        }
+
+        return $result;
+    }
+
+    /**
      * beforeUpdate
      *
      * @return void
