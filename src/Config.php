@@ -39,9 +39,9 @@ class Config implements ArrayAccess, Countable
      * @access private
      */
 
-    public static $_prodDomain = 'app.fogito.com';
-    public static $_betaDomain = 'beta.fogito.com';
-    public static $_devDomain = 'dev.fogito.com';
+    public static $_prodDomain = 'app.{domain}';
+    public static $_betaDomain = 'beta.{domain}';
+    public static $_devDomain = 'dev.{domain}';
 
     public static $_servicePaths = [
         "s2s"        => "/s2s",
@@ -53,18 +53,21 @@ class Config implements ArrayAccess, Countable
 
     public static function getDomain()
     {
+        $arr = array_slice(explode('.', Request::getServer('HTTP_HOST')), 1);
+        $mainDomain = implode('.', $arr);
         if (Request::envMode() === 'development')
         {
-            return self::$_devDomain;
+            $fullDomain = self::$_devDomain;
         }
         else if (Request::envMode() === 'beta')
         {
-            return self::$_betaDomain;
+            $fullDomain = self::$_betaDomain;
         }
         else
         {
-            return self::$_prodDomain;
+            $fullDomain = self::$_prodDomain;
         }
+        return str_replace('{domain}', $mainDomain, $fullDomain);
     }
 
     public static function getUrl($server = "s2s", $options = [])
