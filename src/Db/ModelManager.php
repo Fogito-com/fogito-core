@@ -504,8 +504,8 @@ abstract class ModelManager
      * This function queries MongoDB for all defined indexes on the current collection (`self::$_source`)
      * and returns them as a normalized array where each item contains the sorted list of index keys.
      *
-     * @throws \MongoDB\Driver\Exception\Exception If the command execution fails.
      * @return array List of existing index key combinations, sorted and normalized.
+     * @throws \MongoDB\Driver\Exception\Exception If the command execution fails.
      */
     public static function getIndexes(): array
     {
@@ -515,21 +515,27 @@ abstract class ModelManager
             'listIndexes' => self::$_source,
         ]);
 
-        try {
-            $cursor  = self::$_connection->executeCommand(self::$_db, $command);
+        try
+        {
+            $cursor = self::$_connection->executeCommand(self::$_db, $command);
             $indexes = iterator_to_array($cursor);
-        } catch (\MongoDB\Driver\Exception\Exception $e) {
+        }
+        catch (\MongoDB\Driver\Exception\Exception $e)
+        {
             return [];
         }
 
         $result = [];
 
-        foreach ($indexes as $index) {
-            if (!isset($index->key)) {
+        foreach ($indexes as $index)
+        {
+            if (!isset($index->key))
+            {
                 continue;
             }
 
-            if ($index->key->_id) {
+            if ($index->key->_id)
+            {
                 continue;
             }
 
@@ -950,7 +956,7 @@ abstract class ModelManager
     {
         if (!$time)
         {
-            $time = round(microtime(true) * 1000);
+            $time = (int)round(microtime(true) * 1000);
         }
         else if ($round)
         {
@@ -977,10 +983,11 @@ abstract class ModelManager
      * @param \MongoDB\BSON\UTCDateTime $date
      * @return integer
      */
-    public static function toSeconds($date, $round=true)
+    public static function toSeconds($date, $round = true)
     {
-        if (is_object($date) && \method_exists($date, 'toDateTime')) {
-            if($round)
+        if (is_object($date) && \method_exists($date, 'toDateTime'))
+        {
+            if ($round)
                 return round(@$date->toDateTime()->format('U.u'), 0);
             return round(@$date->toDateTime()->format('U.u'), 3);
         }
@@ -1163,27 +1170,31 @@ abstract class ModelManager
         self::execute();
         $pipleLine = [];
 
-        if (count($filter ?: []) > 0) {
+        if (count($filter ?: []) > 0)
+        {
             $pipleLine[] = ['$match' => $filter[0]];
         }
-        if(isset($filter["sort"])){
+        if (isset($filter["sort"]))
+        {
             $pipleLine[] = ['$sort' => $filter["sort"]];
         }
 
-        if(isset($filter["limit"])){
+        if (isset($filter["limit"]))
+        {
             $pipleLine[] = ['$limit' => $filter["limit"]];
         }
 
-        if(isset($filter["skip"])){
+        if (isset($filter["skip"]))
+        {
             $pipleLine[] = ['$skip' => $filter["skip"]];
         }
-        
+
         $pipleLine[] = $fields[0];
 
         $Command = new \MongoDB\Driver\Command([
             'aggregate' => self::$_source,
             'pipeline'  => $pipleLine,
-            'cursor' => ["batchSize" => 1],
+            'cursor'    => ["batchSize" => 1],
         ]);
 
         $Result = self::$_connection->executeCommand(self::$_db, $Command);
@@ -1210,18 +1221,21 @@ abstract class ModelManager
 
         $command = new \MongoDB\Driver\Command([
             'findAndModify' => self::$_source,
-            'query' => $filter,
-            'update' => ['$inc' => ['seq' =>  $count]],
-            'new' => true,
-            'upsert' => true
+            'query'         => $filter,
+            'update'        => ['$inc' => ['seq' => $count]],
+            'new'           => true,
+            'upsert'        => true
         ]);
 
         $cursor = self::$_connection->executeCommand(self::$_db, $command);
         $result = current($cursor->toArray());
 
-        if (isset($result->value->seq)) {
+        if (isset($result->value->seq))
+        {
             return $result->value->seq;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
