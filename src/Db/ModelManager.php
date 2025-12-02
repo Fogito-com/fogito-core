@@ -813,6 +813,34 @@ abstract class ModelManager
         return $objIds;
     }
 
+    public static function getNewId($type=false)
+    {
+        self::execute();
+
+        $id = static::$_source;
+        if($type)
+            $id .= '_'.$type;
+
+        $filter = static::filterBinds(['_id' => $id]);
+
+        $command = new \MongoDB\Driver\Command([
+            'findAndModify' => 'collection_sequences',
+            'query' => $filter,
+            'update' => ['$inc' => ['seq' => 1]],
+            'new' => true,
+            'upsert' => true
+        ]);
+
+        $cursor = self::$_connection->executeCommand(self::$_db, $command);
+        $result = current($cursor->toArray());
+
+        if (isset($result->value->seq)) {
+            return $result->value->seq;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Convert string _id to object id
      *
