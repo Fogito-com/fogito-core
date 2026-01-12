@@ -906,6 +906,35 @@ abstract class ModelManager
     }
 
     /**
+     * Ensures every "$in" operator receives an array.
+     *
+     * @param mixed $filter Filter data (recursive)
+     * @return mixed Normalized filter
+     */
+    protected static function normalizeMongoInOperator($filter)
+    {
+        if (!is_array($filter)) {
+            return $filter;
+        }
+
+        foreach ($filter as $k => $v) {
+            if ($k === '$in') {
+                // if scalar/null/object => wrap as array; if already array => ok
+                if (!is_array($v)) {
+                    $filter[$k] = $v === null ? [] : [$v];
+                }
+                continue;
+            }
+
+            if (is_array($v)) {
+                $filter[$k] = static::normalizeMongoInOperator($v);
+            }
+        }
+
+        return $filter;
+    }
+
+    /**
      * Validation Mongo ID
      *
      * @param \MongoDB\BSON\ObjectID|string|false $id
@@ -1047,10 +1076,8 @@ abstract class ModelManager
         self::setDb($config["dbname"]);
         self::setSource($source);
 
-        if (!isset($_connection))
-        {
+        if (!self::$_connection)
             self::connect();
-        }
     }
 
     /**
@@ -1152,6 +1179,7 @@ abstract class ModelManager
      */
     public static function filterBinds($filter = [], $options = [])
     {
+        $filter = self::normalizeMongoInOperator($filter);
         if (in_array(self::$_source, (array)App::$di->config->skipped_filtering_collections->toArray()))
             return $filter;
 
