@@ -810,6 +810,8 @@ class Request
     {
         if (self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
             return 'development';
+        if (self::getServer("HTTP_ENV_MODE") === "onpremise")
+            return 'onpremise';
         if (substr(self::getServer("HTTP_HOST"), 0, 8) === "apptest." || substr(self::getServer("HTTP_HOST"), 0, 5) === "beta.")
             return 'beta';
         return 'production';

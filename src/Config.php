@@ -96,9 +96,17 @@ class Config implements ArrayAccess, Countable
      * @param array $arrayConfig
      * @throws Exception
      */
-    public function __construct($prodConfig, $devConfig = false)
+    public function __construct($prodConfig, $devConfig = false, $onPremiseConfig = false)
     {
-        $config = Request::isDevMode() && $devConfig ? $devConfig : $prodConfig;
+        $config = $prodConfig;
+        if (Request::envMode() === 'development')
+        {
+            $config = $devConfig;
+        }
+        else if (Request::envMode() === 'onpremise')
+        {
+            $config = $onPremiseConfig;
+        }
         if (is_array($config) === false)
             throw new Exception('The configuration must be an Array');
 
