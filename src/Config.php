@@ -99,11 +99,11 @@ class Config implements ArrayAccess, Countable
     public function __construct($prodConfig, $devConfig = false, $onPremiseConfig = false)
     {
         $config = $prodConfig;
-        if (Request::envMode() === 'development')
+        if (Request::envMode() === 'development' && $devConfig)
         {
             $config = $devConfig;
         }
-        else if (Request::envMode() === 'onpremise')
+        else if (Request::envMode() === 'onpremise' && $onPremiseConfig)
         {
             $config = $onPremiseConfig;
         }
@@ -233,9 +233,17 @@ class Config implements ArrayAccess, Countable
      * @param \Fogito\Config|array $config
      * @throws Exception Exception
      */
-    public function merge($prodConfig, $devConfig = false)
+    public function merge($prodConfig, $devConfig = false, $onPremiseConfig = false)
     {
-        $config = Request::isDevMode() && $devConfig ? $devConfig : $prodConfig;
+        $config = $prodConfig;
+        if (Request::envMode() === 'development' && $devConfig)
+        {
+            $config = $devConfig;
+        }
+        else if (Request::envMode() === 'onpremise' && $onPremiseConfig)
+        {
+            $config = $onPremiseConfig;
+        }
         if (is_object($config) === true && $config instanceof Config === true)
         {
             $config = $config->toArray(false);
