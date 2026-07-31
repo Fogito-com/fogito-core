@@ -14,6 +14,10 @@ abstract class ModelManager
     protected static $_db;
     protected static $_source;
     protected static $_connection;
+
+    /** Managers built so far, keyed by DSN (see connect()). */
+    protected static $_connections = [];
+
     protected static $_shared = false;
 
     /**
@@ -1076,26 +1080,47 @@ abstract class ModelManager
         self::setDb($config["dbname"]);
         self::setSource($source);
 
-        if (!self::$_connection)
-            self::connect();
+        self::connect();
     }
 
     /**
      * connect
      *
+     * Selects the connection of the server set by execute(). A model that
+     * declares its own database must authenticate with its own credentials,
+     * so connections are pooled per DSN rather than kept as a single one:
+     * otherwise every model reuses whichever connection was opened first in
+     * the request, and only its database name changes.
+     *
      * @return void
      */
     public static function connect()
     {
-        if (!self::$_server['username'] || !self::$_server['password'])
-        {
-            $dsn = 'mongodb://' . self::$_server['host'] . ':' . self::$_server['port'];
-        }
-        else
-        {
-            $dsn = 'mongodb://' . self::$_server["username"] . ':' . self::$_server["password"] . '@' . self::$_server["host"] . ':' . self::$_server["port"] . '/' . self::$_server["dbname"];
-        }
-        self::$_connection = new \MongoDB\Driver\Manager($dsn);
+        $dsn = self::getDsn(self::$_server);
+
+        if (!isset(self::$_connections[$dsn]))
+            self::$_connections[$dsn] = new \MongoDB\Driver\Manager($dsn);
+
+        self::$_connection = self::$_connections[$dsn];
+    }
+
+    /**
+     * getDsn
+     *
+     * The credentials are percent encoded: ":", "/", "?", "#", "[", "]" and
+     * "@" are reserved in a connection string, so a password containing one
+     * of them would otherwise be cut short or misparsed.
+     *
+     * @param array $server
+     * @return string
+     */
+    public static function getDsn($server = [])
+    {
+        if (!$server['username'] || !$server['password'])
+            return 'mongodb://' . $server['host'] . ':' . $server['port'];
+
+        return 'mongodb://' . rawurlencode($server["username"]) . ':' . rawurlencode($server["password"])
+            . '@' . $server["host"] . ':' . $server["port"] . '/' . $server["dbname"];
     }
 
     /**
