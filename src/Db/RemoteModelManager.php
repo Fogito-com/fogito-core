@@ -14,6 +14,16 @@ class RemoteModelManager
 
     public static $action = "";
 
+    /** Opt-in for the current request only. The callback receives already-filtered data. */
+    private static $requestTransport = null;
+
+    public static function setRequestTransport(?callable $transport): ?callable
+    {
+        $previous = self::$requestTransport;
+        self::$requestTransport = $transport;
+        return $previous;
+    }
+
     public static function init($action)
     {
         self::$action = $action;
@@ -80,6 +90,11 @@ class RemoteModelManager
     public static function curl($url, $data)
     {
         $data = self::filterSendParams($data);
+
+        if (self::$requestTransport !== null)
+        {
+            return \call_user_func(self::$requestTransport, $url, $data);
+        }
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, 1);
