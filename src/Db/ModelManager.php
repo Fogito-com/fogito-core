@@ -909,7 +909,7 @@ abstract class ModelManager
     {
         if (!$time)
         {
-            $time = round(microtime(true) * 1000);
+            $time = (int)round(microtime(true) * 1000);
         }
         else if ($round)
         {
