@@ -4,6 +4,7 @@ namespace Fogito\Db;
 
 use Fogito\App;
 use Fogito\Exception;
+use Fogito\Lib\Auth;
 use Fogito\Lib\Company;
 use Fogito\Lib\Lang;
 use ReflectionClass;
@@ -175,7 +176,7 @@ abstract class ModelManager
 
         $query = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command([
             'count' => self::$_source,
-            'query' => $filter
+            'query' => (object)$filter // an empty PHP array would be sent as a BSON array
         ]));
         return $query->toArray()[0]->n;
     }
@@ -375,13 +376,329 @@ abstract class ModelManager
             'createIndexes' => self::$_source,
             'indexes'       => \array_map(function ($row) use ($ns)
             {
-                return \array_merge($row, [
+                return \array_merge(['background' => true], $row, [
                     'ns' => $ns,
                 ]);
             }, $indexes),
         ]));
 
         return !!$result;
+    }
+
+    /**
+     * getIndexes
+     *
+     * Returns the indexes of the collection, without the default "_id_" one.
+     * A missing collection has no indexes, so it returns an empty array.
+     *
+     * <code>
+     *      Model::getIndexes();
+     *      // [
+     *      //     [
+     *      //         'name'   => 'company_id_1_is_deleted_1',
+     *      //         'key'    => ['company_id' => 1, 'is_deleted' => 1],
+     *      //         'unique' => false,
+     *      //     ],
+     *      // ]
+     * </code>
+     *
+     * @return array
+     */
+    public static function getIndexes()
+    {
+        self::execute();
+
+        try
+        {
+            $cursor = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command([
+                'listIndexes' => self::$_source,
+            ]));
+        }
+        catch (\MongoDB\Driver\Exception\Exception $e)
+        {
+            return []; // NamespaceNotFound: the collection does not exist yet
+        }
+
+        $indexes = [];
+        foreach ($cursor as $index)
+        {
+            if (!isset($index->key) || $index->name === '_id_')
+                continue;
+
+            $index = self::objectToArray($index);
+            unset($index['v'], $index['ns']);
+            $index['key'] = self::normalizeIndexKey($index['key']);
+            $index['unique'] = !empty($index['unique']);
+            $indexes[] = $index;
+        }
+
+        return $indexes;
+    }
+
+    /**
+     * createIndex
+     *
+     * Creates one index on the collection. The key is a field name, a list of
+     * field names, or a field => direction/type map; field order matters for
+     * compound indexes. The name defaults to the one MongoDB would generate.
+     * Creating an index that already exists with the same options is a no-op.
+     *
+     * Indexes are built in the background unless 'background' => false is
+     * passed: a foreground build locks the database until it finishes, which
+     * freezes the service on big collections. MongoDB 4.2+ ignores the option
+     * and always builds without holding the lock for the whole build.
+     *
+     * <code>
+     *      Model::createIndex('company_id');
+     *      Model::createIndex(['company_id' => 1, 'created_at' => -1]);
+     *      Model::createIndex(['email' => 1], ['unique' => true]);
+     *      Model::createIndex(['created_at' => 1], ['expireAfterSeconds' => 300]);
+     * </code>
+     *
+     * @param string|array $key
+     * @param array $options name, unique, sparse, expireAfterSeconds, partialFilterExpression, background (true), ...
+     * @return bool
+     * @throws \MongoDB\Driver\Exception\Exception If MongoDB rejects the index
+     */
+    public static function createIndex($key, $options = [])
+    {
+        $key = self::normalizeIndexKey($key);
+        if (count($key) === 0)
+            throw new Exception('Index key is empty');
+
+        self::execute();
+
+        $index = array_merge(['background' => true], (array)$options, ['key' => $key]);
+        if (empty($index['name']))
+            $index['name'] = self::getIndexName($key);
+
+        $result = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command([
+            'createIndexes' => self::$_source,
+            'indexes'       => [$index],
+        ]));
+
+        return !empty($result->toArray()[0]->ok);
+    }
+
+    /**
+     * checkIndex
+     *
+     * Checks whether the collection has an index on the given key, in the
+     * same field order. Options that are passed (unique, sparse,
+     * expireAfterSeconds, ...) must match too; "name" is matched only when it
+     * is passed.
+     *
+     * <code>
+     *      Model::checkIndex('company_id');
+     *      Model::checkIndex(['email' => 1], ['unique' => true]);
+     * </code>
+     *
+     * @param string|array $key
+     * @param array $options
+     * @return bool
+     */
+    public static function checkIndex($key, $options = [])
+    {
+        $key = self::normalizeIndexKey($key);
+        $options = self::objectToArray((array)$options);
+        unset($options['background']); // build option, not stored on the index
+
+        foreach (self::getIndexes() as $index)
+        {
+            if ($index['key'] !== $key)
+                continue;
+
+            $matches = true;
+            foreach ($options as $option => $value)
+            {
+                $current = isset($index[$option]) ? $index[$option] : null;
+                if (\in_array($option, ['unique', 'sparse', 'hidden'], true))
+                {
+                    $matches = !empty($current) === !empty($value);
+                }
+                elseif (\is_numeric($value) && \is_numeric($current))
+                {
+                    $matches = $current == $value;
+                }
+                else
+                {
+                    $matches = $current === $value;
+                }
+
+                if (!$matches)
+                    break;
+            }
+
+            if ($matches)
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * normalizeIndexKey
+     *
+     * 'a' and ['a', 'b'] become ['a' => 1] and ['a' => 1, 'b' => 1]. Numeric
+     * directions become integers, because indexes created from the mongo
+     * shell store them as doubles (1.0).
+     *
+     * @param string|array|object $key
+     * @return array
+     */
+    protected static function normalizeIndexKey($key)
+    {
+        if (\is_string($key))
+            return [$key => 1];
+
+        $normalized = [];
+        foreach ((array)$key as $field => $direction)
+        {
+            if (\is_int($field))
+                $normalized[(string)$direction] = 1;
+            else
+                $normalized[$field] = \is_numeric($direction) ? (int)$direction : $direction;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * getIndexName
+     *
+     * The name MongoDB generates for a key, e.g. company_id_1_created_at_-1.
+     *
+     * @param array $key
+     * @return string
+     */
+    protected static function getIndexName($key)
+    {
+        $parts = [];
+        foreach ($key as $field => $direction)
+            $parts[] = $field . '_' . $direction;
+
+        return implode('_', $parts);
+    }
+
+    /**
+     * dropIndex
+     *
+     * Drops an index by its name or by its key. Returns false when there is
+     * no such index.
+     *
+     * <code>
+     *      Model::dropIndex('company_id_1');
+     *      Model::dropIndex(['company_id' => 1, 'created_at' => -1]);
+     * </code>
+     *
+     * @param string|array $nameOrKey
+     * @return bool
+     */
+    public static function dropIndex($nameOrKey)
+    {
+        $indexes = self::getIndexes();
+        $name = false;
+        foreach ($indexes as $index)
+        {
+            if (\is_string($nameOrKey) && $index['name'] === $nameOrKey)
+                $name = $index['name'];
+        }
+        if (!$name)
+        {
+            $key = self::normalizeIndexKey($nameOrKey);
+            foreach ($indexes as $index)
+            {
+                if ($index['key'] === $key)
+                    $name = $index['name'];
+            }
+        }
+        if (!$name)
+            return false;
+
+        $result = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command([
+            'dropIndexes' => self::$_source,
+            'index'       => $name,
+        ]));
+
+        return !empty($result->toArray()[0]->ok);
+    }
+
+    /**
+     * syncIndexes
+     *
+     * Creates the indexes the model declares in getIndexDefinitions() that
+     * the collection does not have yet. An index with the same key and options
+     * under another name counts as existing. With $drop, indexes the model
+     * does not declare are dropped too.
+     *
+     * <code>
+     *      class Notes extends ModelManager
+     *      {
+     *          public static function getIndexDefinitions()
+     *          {
+     *              return [
+     *                  ['key' => ['company_id' => 1, 'is_deleted' => 1]],
+     *                  ['key' => ['folder_id' => 1]],
+     *                  ['key' => ['code' => 1], 'unique' => true],
+     *              ];
+     *          }
+     *      }
+     *
+     *      Notes::syncIndexes();
+     *      // ['created' => ['code_1'], 'existing' => ['company_id_1_is_deleted_1', 'folder_id_1'], 'dropped' => []]
+     * </code>
+     *
+     * @param bool $drop
+     * @return array
+     */
+    public static function syncIndexes($drop = false)
+    {
+        if (!method_exists(get_called_class(), 'getIndexDefinitions'))
+            throw new Exception(get_called_class() . '::getIndexDefinitions() is not defined');
+
+        $report = ['created' => [], 'existing' => [], 'dropped' => []];
+        $declared = [];
+
+        foreach ((array)static::getIndexDefinitions() as $definition)
+        {
+            $definition = (array)$definition;
+            if (!isset($definition['key']))
+                throw new Exception('Index definition has no "key"');
+
+            $key = self::normalizeIndexKey($definition['key']);
+            $options = $definition;
+            unset($options['key'], $options['name']);
+            $declared[] = $key;
+
+            if (self::checkIndex($key, $options))
+            {
+                foreach (self::getIndexes() as $index)
+                {
+                    if ($index['key'] === $key)
+                    {
+                        $report['existing'][] = $index['name'];
+                        break;
+                    }
+                }
+                continue;
+            }
+
+            $options = $definition;
+            unset($options['key']);
+            self::createIndex($key, $options);
+            $report['created'][] = !empty($options['name']) ? $options['name'] : self::getIndexName($key);
+        }
+
+        if ($drop)
+        {
+            foreach (self::getIndexes() as $index)
+            {
+                if (!\in_array($index['key'], $declared, true) && self::dropIndex($index['name']))
+                    $report['dropped'][] = $index['name'];
+            }
+        }
+
+        return $report;
     }
 
     /**
@@ -460,6 +777,305 @@ abstract class ModelManager
 
 
     /**
+     * paginate
+     *
+     * Returns one page of documents and the total count of the filter.
+     * Takes the same parameters as find(); "limit" and "skip" in them are
+     * replaced by the page.
+     *
+     * <code>
+     *      Model::paginate([['is_deleted' => ['$ne' => 1]], 'sort' => ['_id' => -1]], 2, 20);
+     *      // ['items' => [...], 'total' => 135, 'page' => 2, 'limit' => 20, 'pages' => 7]
+     * </code>
+     *
+     * @param array $parameters
+     * @param int $page starts at 1
+     * @param int $limit
+     * @return array
+     */
+    public static function paginate($parameters = [], $page = 1, $limit = 20)
+    {
+        $page  = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
+
+        $parameters = (array)$parameters;
+        $parameters['limit'] = $limit;
+        $parameters['skip']  = ($page - 1) * $limit;
+
+        $total = (int)static::count($parameters);
+
+        return [
+            'items' => $total > $parameters['skip'] ? static::find($parameters) : [],
+            'total' => $total,
+            'page'  => $page,
+            'limit' => $limit,
+            'pages' => (int)ceil($total / $limit),
+        ];
+    }
+
+    /**
+     * exists
+     *
+     * Checks whether a document matches the filter, fetching only its _id.
+     *
+     * <code>
+     *      Model::exists(['email' => $email]);
+     * </code>
+     *
+     * @param array $filter
+     * @return bool
+     */
+    public static function exists($filter = [])
+    {
+        return static::findFirst([(array)$filter, 'projection' => ['_id']]) !== false;
+    }
+
+    /**
+     * findByIds
+     *
+     * Finds the documents with the given ids. Invalid ids are skipped, so an
+     * empty or fully invalid list returns [] without a query.
+     *
+     * <code>
+     *      Model::findByIds(['5f1d...', '5f2a...'], ['sort' => ['_id' => -1]]);
+     * </code>
+     *
+     * @param array $ids strings or ObjectIDs
+     * @param array $parameters other find() parameters; its filter is combined with the ids
+     * @return array
+     */
+    public static function findByIds($ids = [], $parameters = [])
+    {
+        $objectIds = [];
+        foreach ((array)$ids as $id)
+        {
+            if ($id instanceof \MongoDB\BSON\ObjectID)
+                $objectIds[(string)$id] = $id;
+            elseif (\is_scalar($id) && self::isMongoId(trim((string)$id)) && strlen(trim((string)$id)) === 24)
+                $objectIds[trim((string)$id)] = new \MongoDB\BSON\ObjectID(trim((string)$id));
+        }
+
+        if (count($objectIds) === 0)
+            return [];
+
+        $parameters = (array)$parameters;
+        $filter = isset($parameters[0]) && \is_array($parameters[0]) ? $parameters[0] : [];
+        $filter['_id'] = ['$in' => array_values($objectIds)];
+        $parameters[0] = $filter;
+
+        return static::find($parameters);
+    }
+
+    /**
+     * distinct
+     *
+     * Returns the distinct values of a field among the documents that match
+     * the filter.
+     *
+     * <code>
+     *      Model::distinct('folder_id', ['is_deleted' => ['$ne' => 1]]);
+     * </code>
+     *
+     * @param string $field
+     * @param array $filter
+     * @return array
+     */
+    public static function distinct($field, $filter = [])
+    {
+        self::execute();
+        $filter = static::filterBinds((array)$filter);
+
+        $result = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command([
+            'distinct' => self::$_source,
+            'key'      => (string)$field,
+            'query'    => (object)$filter,
+        ]));
+
+        $values = $result->toArray()[0]->values;
+        return \is_array($values) ? $values : [];
+    }
+
+    /**
+     * findOneAndUpdate
+     *
+     * Updates the first document that matches the filter and returns it, in
+     * one atomic step. $update is either an update document ('$set', '$inc',
+     * ...) or plain fields, which are $set.
+     *
+     * <code>
+     *      Model::findOneAndUpdate(['_id' => $id], ['$inc' => ['views' => 1]]);
+     *      Model::findOneAndUpdate(['code' => $code], ['status' => 2], ['new' => false]);
+     * </code>
+     *
+     * @param array $filter
+     * @param array $update
+     * @param array $options sort, upsert (false), new (true: return the updated document), projection
+     * @return false|\Fogito\Db\ModelManager
+     */
+    public static function findOneAndUpdate($filter, $update, $options = [])
+    {
+        self::execute();
+
+        $update = (array)$update;
+        if (count($update) === 0)
+            throw new Exception('Update is empty');
+
+        $isOperators = strpos((string)key($update), '$') === 0;
+        $command = [
+            'findAndModify' => self::$_source,
+            'query'         => (object)static::filterBinds((array)$filter),
+            'update'        => $isOperators ? $update : ['$set' => $update],
+            'new'           => !isset($options['new']) || $options['new'] !== false,
+            'upsert'        => isset($options['upsert']) && $options['upsert'] === true,
+        ];
+        if (isset($options['sort']))
+            $command['sort'] = $options['sort'];
+        if (isset($options['projection']))
+            $command['fields'] = \array_fill_keys($options['projection'], true);
+
+        $result = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command($command));
+        $document = $result->toArray()[0]->value;
+        if (!$document)
+            return false;
+
+        $static = new static();
+        foreach ($document as $key => $value)
+        {
+            $static->{$key} = $value;
+        }
+        return $static;
+    }
+
+    /**
+     * addToSet
+     *
+     * Adds values to an array field, skipping values it already contains.
+     *
+     * <code>
+     *      Model::addToSet(['_id' => $id], 'users', [$userId1, $userId2]);
+     * </code>
+     *
+     * @param array $filter
+     * @param string $field
+     * @param mixed $values one value or a list of values
+     * @param array $options multi (true), upsert (false)
+     * @return bool
+     */
+    public static function addToSet($filter, $field, $values, $options = [])
+    {
+        return self::updateArray($filter, ['$addToSet' => [$field => ['$each' => self::toList($values)]]], $options);
+    }
+
+    /**
+     * pull
+     *
+     * Removes values from an array field.
+     *
+     * <code>
+     *      Model::pull(['_id' => $id], 'users', $userId);
+     * </code>
+     *
+     * @param array $filter
+     * @param string $field
+     * @param mixed $values one value or a list of values
+     * @param array $options multi (true), upsert (false)
+     * @return bool
+     */
+    public static function pull($filter, $field, $values, $options = [])
+    {
+        return self::updateArray($filter, ['$pull' => [$field => ['$in' => self::toList($values)]]], $options);
+    }
+
+    /**
+     * softDelete
+     *
+     * Marks the matching documents as deleted (is_deleted, deleter_id,
+     * deleted_at) instead of removing them. The filter must not be empty, so
+     * a missing condition cannot delete the whole collection.
+     *
+     * <code>
+     *      Model::softDelete(['_id' => Model::objectId($id)]);
+     * </code>
+     *
+     * @param array $filter
+     * @param array $options multi (true)
+     * @return bool
+     */
+    public static function softDelete($filter, $options = [])
+    {
+        $filter = (array)$filter;
+        if (count($filter) === 0)
+            throw new Exception('softDelete filter is empty');
+
+        return static::update($filter, [
+            'is_deleted' => 1,
+            'deleter_id' => (string)Auth::getId(),
+            'deleted_at' => self::getDate(),
+        ], ['multi' => !isset($options['multi']) || $options['multi'] !== false, 'upsert' => false]);
+    }
+
+    /**
+     * restore
+     *
+     * Undoes softDelete() on the matching deleted documents.
+     *
+     * <code>
+     *      Model::restore(['_id' => Model::objectId($id)]);
+     * </code>
+     *
+     * @param array $filter
+     * @param array $options multi (true)
+     * @return bool
+     */
+    public static function restore($filter, $options = [])
+    {
+        $filter = (array)$filter;
+        if (count($filter) === 0)
+            throw new Exception('restore filter is empty');
+
+        $filter['is_deleted'] = 1;
+        return self::updateArray($filter, [
+            '$set'   => ['is_deleted' => 0],
+            '$unset' => ['deleter_id' => true, 'deleted_at' => true],
+        ], $options);
+    }
+
+    /**
+     * updateArray
+     *
+     * Runs an update document (operators) on the matching documents.
+     *
+     * @param array $filter
+     * @param array $update
+     * @param array $options multi (true), upsert (false)
+     * @return bool
+     */
+    protected static function updateArray($filter, $update, $options = [])
+    {
+        self::execute();
+        $filter = static::filterBinds((array)$filter);
+
+        $query = new \MongoDB\Driver\BulkWrite;
+        $query->update($filter, $update, [
+            'multi'  => !isset($options['multi']) || $options['multi'] !== false,
+            'upsert' => isset($options['upsert']) && $options['upsert'] === true,
+        ]);
+        $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
+        return !!$result;
+    }
+
+    /**
+     * toList
+     *
+     * @param mixed $values
+     * @return array
+     */
+    protected static function toList($values)
+    {
+        return \is_array($values) ? array_values($values) : [$values];
+    }
+
+    /**
      * save
      *
      * @param mixed $forceInsert
@@ -501,53 +1117,6 @@ abstract class ModelManager
             $this->_id = self::objectId($result);
             $this->afterSave($forceInsert);
         }
-        return $result;
-    }
-
-    /**
-     * Returns a list of indexes for the current MongoDB collection.
-     *
-     * This function queries MongoDB for all defined indexes on the current collection (`self::$_source`)
-     * and returns them as a normalized array where each item contains the sorted list of index keys.
-     *
-     * @return array List of existing index key combinations, sorted and normalized.
-     * @throws \MongoDB\Driver\Exception\Exception If the command execution fails.
-     */
-    public static function getIndexes(): array
-    {
-        self::execute();
-
-        $command = new \MongoDB\Driver\Command([
-            'listIndexes' => self::$_source,
-        ]);
-
-        try
-        {
-            $cursor = self::$_connection->executeCommand(self::$_db, $command);
-            $indexes = iterator_to_array($cursor);
-        }
-        catch (\MongoDB\Driver\Exception\Exception $e)
-        {
-            return [];
-        }
-
-        $result = [];
-
-        foreach ($indexes as $index)
-        {
-            if (!isset($index->key))
-            {
-                continue;
-            }
-
-            if ($index->key->_id)
-            {
-                continue;
-            }
-
-            $result[] = $index;
-        }
-
         return $result;
     }
 
