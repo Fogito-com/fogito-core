@@ -177,7 +177,7 @@ class Cache
                 {
                     $error = "Technical error. Please try again after a minute";
                 }
-                Cache::set($brute_force_key, $brute_force_count + 1, time() + 60);
+                Cache::set($brute_force_key, $brute_force_count + 1, 60);
             }
             ######################### END BRUTE FORCE CHECK IN MINUTE ###################
 
@@ -186,11 +186,11 @@ class Cache
             {
                 $brute_force_key = md5(date("mdH") . "-" . $key);
                 $brute_force_count = Cache::get($brute_force_key);
-                if ($brute_force_count >= $day_limit)
+                if ($brute_force_count >= $hour_limit)
                 {
                     $error = "Technical error. Please try again after an hour";
                 }
-                Cache::set($brute_force_key, $brute_force_count + 1, time() + 2 * 3600);
+                Cache::set($brute_force_key, $brute_force_count + 1, 2 * 3600);
             }
             ######################### END BRUTE FORCE CHECK IN HOUR ###################
 
@@ -203,7 +203,7 @@ class Cache
                 {
                     $error = "Technical error. Please try again after a day";
                 }
-                Cache::set($brute_force_key, $brute_force_count + 1, time() + 24 * 3600);
+                Cache::set($brute_force_key, $brute_force_count + 1, 24 * 3600);
             }
             ######################### END BRUTE FORCE CHECK IN DAY ###################
 

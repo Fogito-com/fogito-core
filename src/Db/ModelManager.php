@@ -221,6 +221,8 @@ abstract class ModelManager
 
         $query = new \MongoDB\Driver\BulkWrite;
         $insertId = $query->insert($parameters);
+        if (!$insertId && isset($parameters['_id']))
+            $insertId = $parameters['_id'];
         $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $query);
 
         return $insertId ? $insertId : false;
@@ -491,13 +493,13 @@ abstract class ModelManager
         if ($this->_id && !$forceInsert)
         {
             $result = self::update(['_id' => $this->_id], $properties);
-            $this->afterSave($forceInsert);
+            $this->afterUpdate();
         }
         else
         {
             $result = self::insert($properties);
             $this->_id = self::objectId($result);
-            $this->afterUpdate();
+            $this->afterSave($forceInsert);
         }
         return $result;
     }
@@ -513,7 +515,7 @@ abstract class ModelManager
      */
     public static function getIndexes(): array
     {
-        self::init();
+        self::execute();
 
         $command = new \MongoDB\Driver\Command([
             'listIndexes' => self::$_source,
@@ -825,7 +827,10 @@ abstract class ModelManager
         if($type)
             $id .= '_'.$type;
 
-        $filter = static::filterBinds(['_id' => $id]);
+        // Not filterBinds(): the sequence document is keyed by _id alone, and an
+        // added company_id would make the upsert insert a duplicate _id for
+        // every company other than the one that created the sequence.
+        $filter = ['_id' => $id];
 
         $command = new \MongoDB\Driver\Command([
             'findAndModify' => 'collection_sequences',
@@ -874,8 +879,7 @@ abstract class ModelManager
         $bulk = new \MongoDB\Driver\BulkWrite;
         foreach ($data as $row)
         {
-            $data = self::filterBinds((array)$row);
-            $bulk->insert($data);
+            $bulk->insert(static::filterInsertBinds((array)$row));
         }
         $result = self::$_connection->executeBulkWrite(self::$_db . '.' . self::$_source, $bulk);
         if ($result->getWriteErrors())
@@ -1251,23 +1255,24 @@ abstract class ModelManager
         self::execute();
         $pipleLine = [];
 
-        if (count($filter ?: []) > 0)
+        $match = static::filterBinds(isset($filter[0]) ? (array)$filter[0] : []);
+        if (count($match) > 0)
         {
-            $pipleLine[] = ['$match' => $filter[0]];
+            $pipleLine[] = ['$match' => $match];
         }
         if (isset($filter["sort"]))
         {
             $pipleLine[] = ['$sort' => $filter["sort"]];
         }
 
-        if (isset($filter["limit"]))
-        {
-            $pipleLine[] = ['$limit' => $filter["limit"]];
-        }
-
         if (isset($filter["skip"]))
         {
             $pipleLine[] = ['$skip' => $filter["skip"]];
+        }
+
+        if (isset($filter["limit"]))
+        {
+            $pipleLine[] = ['$limit' => $filter["limit"]];
         }
 
         $pipleLine[] = $fields[0];

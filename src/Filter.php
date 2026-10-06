@@ -114,7 +114,7 @@ class Filter
         }
 
         /* User-defined filter */
-        if (isset($filters[$filter]) === true) {
+        if (isset($this->_filters[$filter]) === true) {
             $filterObject = $this->_filters[$filter];
             if ($filterObject instanceof \Closure) {
                 return call_user_func_array($filterObject, array($value));

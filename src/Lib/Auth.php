@@ -215,7 +215,7 @@ class Auth
 
     public static function validatePermission($key, $selected=false)
     {
-        $allow = self::validatePermission($key, $selected);
+        $allow = self::checkPermission($key, $selected);
         if(!$allow)
             Response::error(Lang::get("PageNotAllowed"));
         return $allow;
