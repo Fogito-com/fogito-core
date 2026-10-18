@@ -24,7 +24,7 @@ class Auth
 
     public static function init()
     {
-        $lang = isset($_COOKIE['lang']) ? (string) trim($_COOKIE['lang']) : (string) trim(Request::get('lang'));
+        $lang = isset($_COOKIE['lang']) ? trim((string) $_COOKIE['lang']) : trim((string) Request::get('lang'));
         if (preg_match('/[a-z]{2}/i', trim($lang)))
             Lang::setLang($lang);
 
@@ -52,18 +52,18 @@ class Auth
             {
                 CoreSettings::setData($_data);
 
-                if($_data["account_error"])
-                    self::setError($_data["account_error"]["error_code"], $_data["account_error"]["description"]);
+                if(!empty($_data["account_error"]))
+                    self::setError($_data["account_error"]["error_code"] ?? 1001, $_data["account_error"]["description"] ?? "");
 
-                if($_data["account"])
+                if(!empty($_data["account"]))
                     self::setData($_data["account"]);
-                if($_data["permissions"])
+                if(!empty($_data["permissions"]))
                     self::setPermissions($_data["permissions"]);
-                if($_data["company"])
+                if(!empty($_data["company"]))
                     Company::setData($_data["company"]);
-                if($_data["pricing"])
+                if(!empty($_data["pricing"]))
                     self::setPricing($_data["pricing"]);
-                if($_data["translations"])
+                if(!empty($_data["translations"]))
                     Lang::setData($_data["translations"]);
 
                 Cache::set(self::getCacheKey(), json_encode($response), self::getCacheDuration());
@@ -290,12 +290,12 @@ class Auth
     {
         $_token = false;
         $_tokenUser = false;
-        if(strlen(@$_COOKIE["ut"]) > 1){
-            $_token      = (string)@$_COOKIE["ut"];
-            $_tokenUser  = (string)@$_COOKIE["token_user"];
+        if(isset($_COOKIE["ut"]) && strlen((string) $_COOKIE["ut"]) > 1){
+            $_token      = (string) $_COOKIE["ut"];
+            $_tokenUser  = isset($_COOKIE["token_user"]) ? (string) $_COOKIE["token_user"] : "";
         }else if(Request::get('token')){
-            $_token      = (string)trim(Request::get('token'));
-            $_tokenUser  = (string)trim(Request::get('token_user'));
+            $_token      = trim((string) Request::get('token'));
+            $_tokenUser  = trim((string) Request::get('token_user'));
         }
         return [$_token, $_tokenUser];
     }

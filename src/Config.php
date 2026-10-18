@@ -132,6 +132,7 @@ class Config implements ArrayAccess, Countable
      * @return boolean
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($index)
     {
         if (is_scalar($index) === false)
@@ -174,6 +175,7 @@ class Config implements ArrayAccess, Countable
      * @return mixed
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($index)
     {
         return $this->get($index);
@@ -190,6 +192,7 @@ class Config implements ArrayAccess, Countable
      * @param mixed $value
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($index, $value)
     {
         if (is_scalar($index) === false)
@@ -210,6 +213,7 @@ class Config implements ArrayAccess, Countable
      * @param scalar $index
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($index)
     {
         if (is_scalar($index) === false)
@@ -303,6 +307,7 @@ class Config implements ArrayAccess, Countable
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count((array)$this->_storage);

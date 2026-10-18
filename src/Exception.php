@@ -42,7 +42,7 @@ class Exception extends \Exception
      * @param  mixed $previous
      * @return void
      */
-    public function __construct($message = null, $code = null, \Exception $previous = null)
+    public function __construct($message = null, $code = null, $previous = null)
     {
         if ($previous instanceof \Exception) {
             if (is_null($code)) {

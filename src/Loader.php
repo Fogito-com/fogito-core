@@ -363,6 +363,8 @@ class Loader
             $length--;
         }
 
+        $seperatorCode = is_null($seperator) === true ? null : ord($seperator);
+
         $virtualStr = '';
 
         $lengthClassName = strlen($className);
@@ -381,7 +383,7 @@ class Loader
             }
 
             //Replace seperator
-            if ($ch === ord($seperator)) {
+            if (is_null($seperatorCode) === false && $ch === $seperatorCode) {
                 $virtualStr .= $virtualSeperator;
                 continue;
             }
