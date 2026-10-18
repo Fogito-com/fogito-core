@@ -4,15 +4,17 @@ declare(strict_types=1);
 namespace Fogito { class App { public static $di; } class Config { public static function getUrl($service){return 'http://legacy.invalid/api/'.$service;} } }
 namespace Fogito\Http {
     class Request {
+        public static $values=[];
         public static function getServer($key){return $key==='REQUEST_URI'?'/owned-fixture':null;}
-        public static function get($key){return '';}
+        public static function get($key){return self::$values[$key]??null;}
     }
 }
 namespace Fogito\Lib {
     class Auth {
         public static $enabled=true;
+        public static $token='synthetic-human'; public static $tokenUser='';
         public static function getData(){return ['id'=>'synthetic-actor'];} public static function getId(){return 'synthetic-actor';}
-        public static function getToken(){return 'synthetic-human';} public static function getTokenUser(){return '';}
+        public static function getToken(){return self::$token;} public static function getTokenUser(){return self::$tokenUser;}
         public static function tokenAllowed(){return self::$enabled;}
     }
     class Lang { public static function getLang(){return 'da';} }
@@ -29,6 +31,8 @@ namespace Fogito\Db {
     function curl_errno($handle){return RequestTransportProbe::$error;}
 }
 namespace {
+    error_reporting(E_ALL);
+    set_error_handler(static function($severity,$message,$file,$line){throw new \ErrorException($message,0,$severity,$file,$line);});
     use Fogito\Db\{RemoteModelManager,RequestTransportProbe};
     use Fogito\Models\{CoreUsers,CoreCompanies,CoreFiles};
     use Fogito\Lib\Auth;
@@ -85,6 +89,24 @@ namespace {
     $raw=RemoteModelManager::curl('http://legacy.invalid/read',$input);
     checkTransport($raw===RequestTransportProbe::$raw&&RequestTransportProbe::$calls===$before+1,
         'A cleared hook restores the unchanged default branch for unconfigured callers');
+    RemoteModelManager::setRequestTransport($hook);
+    Auth::$token=null;Auth::$tokenUser=null;
+    $params=RemoteModelManager::filterSendParams([]);
+    checkTransport(!isset($params['token'])&&!isset($params['remote_server_token']), 'Absent nullable tokens produce no PHP warnings or fabricated credentials');
+    \Fogito\Http\Request::$values['server_token']=['invalid'];
+    checkTransport(!isset(RemoteModelManager::filterSendParams([])['remote_server_token']), 'Array-shaped request tokens are not forwarded');
+    \Fogito\Http\Request::$values=[];
+    checkTransport(CoreUsers::find(['filter'=>['id'=>'named']])===['id'=>'synthetic-row'], 'Named filters need no positional placeholder or options array');
+    checkTransport(CoreUsers::findFirst([['id'=>'positional']])===['id'=>'synthetic-row']&&end($calls)['data']['data']['filter']===['id'=>'positional'], 'Positional filter compatibility is warning-free');
+    RequestTransportProbe::$raw='{"status":"success","data":3}';
+    checkTransport(CoreUsers::count(['filter'=>['id'=>'count']])===3, 'Count accepts named filter and omitted options');
+    RequestTransportProbe::$raw='{"status":"error","error_code":123,"description":"Synthetic refusal"}';
+    checkTransport(CoreUsers::find([])===false&&CoreUsers::find([],['result'=>true])['error_code']===123, 'Default failure and explicit error envelope semantics are preserved');
+    RequestTransportProbe::$raw='{}';
+    checkTransport(CoreUsers::find([],['result'=>true])['error_code']===1004, 'Incomplete remote response becomes a controlled error without undefined keys');
+    RequestTransportProbe::$raw='{"status":"success"}';
+    checkTransport(CoreUsers::find([])===null, 'Missing optional response data does not emit a warning');
+    RemoteModelManager::setRequestTransport(null);
     $result=['check_count'=>count($checks),'checks'=>$checks,'network_calls'=>0,'database_calls'=>0,'legacy_curl_executions_mocked'=>RequestTransportProbe::$calls];
     if($path=getenv('CORE_REQUEST_TRANSPORT_EVIDENCE')){file_put_contents($path,json_encode($result,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR)."\n");}
     echo 'Core request transport: '.count($checks)." checks passed; no network/database calls.\n";

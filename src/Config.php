@@ -72,7 +72,7 @@ class Config implements ArrayAccess, Countable
 
     public static function getUrl($server = "s2s", $options = [])
     {
-        $protocol = $options["protocol"] === "https" ? "https" : "http";
+        $protocol = ($options["protocol"] ?? null) === "https" ? "https" : "http";
         $path = self::$_servicePaths[$server];
         return $protocol . '://' . self::getDomain() . '/api' . $path;
     }

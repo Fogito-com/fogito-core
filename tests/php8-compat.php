@@ -16,7 +16,7 @@ namespace Fogito\Http {
 
         public static function getServer($key)
         {
-            return null;
+            return $key === 'HTTP_HOST' ? 'contracts.fogito.test' : null;
         }
     }
 
@@ -114,6 +114,10 @@ namespace {
     }
     $config['name'] = 'Fogito';
     unset($config['name']);
+    if (Fogito\Config::getUrl() !== 'http://app.fogito.test/api/s2s' ||
+        Fogito\Config::getUrl('files', ['protocol' => 'https']) !== 'https://app.fogito.test/api/files') {
+        throw new RuntimeException('Optional protocol defaults must preserve HTTP and explicit HTTPS.');
+    }
 
     Fogito\Lib\Auth::init();
     if (Fogito\Lib\Auth::getId() !== 'compat-user') {

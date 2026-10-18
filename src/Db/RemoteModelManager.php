@@ -44,30 +44,32 @@ class RemoteModelManager
             "http_origin" => Request::getServer("HTTP_ORIGIN"),
             "request_uri" => Request::getServer("REQUEST_URI")
         ];
-        if (strlen(Auth::getToken()) > 0 && Auth::tokenAllowed())
+        if (strlen((string)Auth::getToken()) > 0 && Auth::tokenAllowed())
             $mergeData["token"] = Auth::getToken();
-        if (strlen(Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
+        if (strlen((string)Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
             $mergeData["token_user"] = Auth::getTokenUser();
-        if (strlen(Request::get("server_token")) > 0)
-            $mergeData["remote_server_token"] = Request::get("server_token");
+        $remoteServerToken = Request::get("server_token");
+        if (is_scalar($remoteServerToken) && strlen((string)$remoteServerToken) > 0)
+            $mergeData["remote_server_token"] = (string)$remoteServerToken;
         return array_merge($data, $mergeData);
     }
 
     public static function request($params = [], $options = false)
     {
+        $options = (array)$options;
         $postData = [
             "data" => $params,
         ];
 
         $raw_result = self::curl(self::$url, $postData);
         $result = \json_decode($raw_result, true);
-        if ($result && $result["status"] === "success")
+        if (is_array($result) && ($result["status"] ?? null) === "success")
         {
-            if ($options["result"])
+            if (!empty($options["result"]))
                 return $result;
-            return $result["data"];
+            return $result["data"] ?? null;
         }
-        elseif ($result && $result["status"] === "error")
+        elseif (is_array($result) && ($result["status"] ?? null) === "error")
         {
             $error = $result;
         }
@@ -80,9 +82,9 @@ class RemoteModelManager
             ];
         }
 
-        if ($error && $options && $options["debug"] == true)
-            Response::error($error["description"], $error["error_code"]);
-        if ($error && $options && $options["result"] == true)
+        if ($error && !empty($options["debug"]))
+            Response::error($error["description"] ?? 'Connection Error', $error["error_code"] ?? 1004);
+        if ($error && !empty($options["result"]))
             return $error;
         return false;
     }
@@ -119,7 +121,7 @@ class RemoteModelManager
     public static function find($filter, $options = false)
     {
         self::init("find");
-        if ((!$filter["filter"] || count((array)$filter["filter"])) && count((array)$filter[0]) > 0)
+        if (count((array)($filter[0] ?? [])) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -171,7 +173,7 @@ class RemoteModelManager
     public static function findFirst($filter, $options = false)
     {
         self::init("findfirst");
-        if ((!$filter["filter"] || count((array)$filter["filter"])) && count((array)$filter[0]) > 0)
+        if (count((array)($filter[0] ?? [])) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -250,7 +252,7 @@ class RemoteModelManager
     public static function count($filter, $options = false)
     {
         self::init("count");
-        if ((!$filter["filter"] || count((array)$filter["filter"])) && count((array)$filter[0]) > 0)
+        if (count((array)($filter[0] ?? [])) > 0)
             $filter["filter"] = $filter[0];
         return self::request($filter, $options);
     }
