@@ -1789,8 +1789,8 @@ abstract class ModelManager
 
         if (static::$_shared)
         {
-            if (count((array)$filter['company_ids']) === 0 && Company::getId())
-                $filter["company_ids"] = ['$in' => array_merge(Company::getData()->branch_ids, [Company::getId()])];
+            if (count((array)($filter['company_ids'] ?? [])) === 0 && Company::getId())
+                $filter["company_ids"] = ['$in' => array_merge((array)(Company::getData()->branch_ids ?? []), [Company::getId()])];
         }
         else
         {

@@ -80,9 +80,12 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
      */
     public static function date($datetime=0, $realFormatto=false, $options=[])
     {
-        $tzfrom         = self::getById($options["tzfrom"]) ?  (int)$options["tzfrom"]: self::$defaultTimezone;
-        $tzto           = self::getById($options["tzto"]) ?  (int)$options["tzto"]: self::$userTimezone;
-        $formatfrom     = $options["formatfrom"] ?  $options["formatfrom"]: self::$defaultDateFormat;
+        $options        = (array)$options;
+        $fromTimezone   = self::getById($options['tzfrom'] ?? self::$defaultTimezone) ?: self::getById(self::$defaultTimezone);
+        $targetTimezone = self::getById($options['tzto'] ?? self::$userTimezone) ?: self::getById(self::$userTimezone);
+        if (!$fromTimezone || !$targetTimezone) {
+            throw new \InvalidArgumentException('Default timezone is unavailable');
+        }
         $formatto       = $realFormatto ?  $realFormatto: self::$defaultDateFormat;
 
         if (is_object($datetime) && method_exists($datetime, "toDateTime")) {
@@ -91,8 +94,8 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
             $datetime = date("Y-m-d H:i:s", $datetime);
         }
 
-        $dt1 = new \DateTime($datetime, new \DateTimeZone(self::getById($tzfrom)["slug"]));
-        $toTimezone = new \DateTimeZone(self::getById($tzto)["slug"]);
+        $dt1 = new \DateTime((string)$datetime, new \DateTimeZone($fromTimezone["slug"]));
+        $toTimezone = new \DateTimeZone($targetTimezone["slug"]);
         $dt1->setTimezone($toTimezone);
         $datetime = $dt1->format('Y-m-d H:i:s');
 
@@ -140,7 +143,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
 
     public static function getById($id)
     {
-        return self::getList()[(int)$id];
+        return self::getList()[(int)$id] ?? false;
     }
 
 
