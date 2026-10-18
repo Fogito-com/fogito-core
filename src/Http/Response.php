@@ -22,7 +22,7 @@ class Response
     {
         self::setHeaderJson();
         self::setAllowOrigins();
-        $response = json_encode([
+        $response = (string)json_encode([
             "status"        => "success",
             "description"   => $description,
             "data"          => $data
@@ -50,7 +50,7 @@ class Response
         ];
         if($data)
             $response["data"] = $data;
-        $response = json_encode($response);
+        $response = (string)json_encode($response);
         $response = str_replace("fls01.kurcrm.com", "fls01.fogito.com", $response);
         if (php_sapi_name() === 'cli')
         {
@@ -67,7 +67,7 @@ class Response
         if($isJson)
             self::setHeaderJson();
         self::setAllowOrigins();
-        $response = json_encode($response);
+        $response = (string)json_encode($response);
         $response = str_replace("fls01.kurcrm.com", "fls01.fogito.com", $response);
         if (php_sapi_name() === 'cli')
         {

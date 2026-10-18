@@ -106,18 +106,19 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
     public static function findFirstAndSet($user, $params=[])
     {
         $data = self::findAndSet([$user], $params);
-        return $data[0];
+        return $data[0] ?? false;
     }
 
     public static function findAndSet($list, $params=[])
     {
-        $keyFrom    = $params["key_from"] ? $params["key_from"]: "user";
-        $keyTo      = $params["key_to"] ? $params["key_to"]: "user";
-        $columns    = $params["columns"] && count((array)$params["columns"]) > 0 ? $params["columns"]: ["id", "fullname", "avatar_tiny"];
+        $keyFrom    = !empty($params["key_from"]) ? $params["key_from"]: "user";
+        $keyTo      = !empty($params["key_to"]) ? $params["key_to"]: "user";
+        $columns    = !empty($params["columns"]) ? $params["columns"]: ["id", "fullname", "avatar_tiny"];
 
         $ids = [];
         foreach ($list as $value)
-            $ids[] = (string)$value[$keyFrom];
+            if (isset($value[$keyFrom]))
+                $ids[] = (string)$value[$keyFrom];
 
 
         // ########## start Fetch ############
@@ -134,7 +135,8 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
                 "columns" => $columns,
             ]);
             foreach ($query as $value)
-                $dataById[(string)$value["id"]] = $value;
+                if (isset($value["id"]))
+                    $dataById[(string)$value["id"]] = $value;
         }
         // ########## end Fetch ############
 
@@ -142,7 +144,8 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
         $data = [];
         foreach ($list as $value)
         {
-            $value[$keyTo] = $dataById[$value[$keyFrom]] ? $dataById[$value[$keyFrom]] : false;
+            $sourceId = $value[$keyFrom] ?? null;
+            $value[$keyTo] = $sourceId !== null && isset($dataById[$sourceId]) ? $dataById[$sourceId] : false;
             $data[] = $value;
         }
 
@@ -154,7 +157,7 @@ class CoreUsers extends \Fogito\Db\RemoteModelManager
         $data = [];
         foreach ($list as $value)
         {
-            $value["position"] = implode(", ", array_map(function ($position){ return $position["title"];}, $value["positions"]));
+            $value["position"] = implode(", ", array_map(function ($position){ return $position["title"] ?? "";}, (array)($value["positions"] ?? [])));
             $data[] = $value;
         }
         return $data;

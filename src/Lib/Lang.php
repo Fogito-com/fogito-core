@@ -87,6 +87,7 @@ class Lang
      */
     public static function get($key, $default = null)
     {
+        $key = (string)$key;
         if (!array_key_exists($key, self::$_data))
             self::$_data[$key] = $default ? $default : $key;
         return self::$_data[$key];

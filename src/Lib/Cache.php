@@ -16,9 +16,9 @@ class Cache
         $server = self::getServer();
         if (self::$data)
         {
-            if ($server && $server->type === 'redis')
+            if ($server && ($server->type ?? null) === 'redis')
             {
-                return self::$data->get($server->username . ':' . $key);
+                return self::$data->get(($server->username ?? '') . ':' . $key);
             }
             else
             {
@@ -36,15 +36,15 @@ class Cache
         if (self::$data)
         {
             $server = self::getServer();
-            if ($server && $server->type === 'redis')
+            if ($server && ($server->type ?? null) === 'redis')
             {
                 if ($time > 0)
                 {
-                    return self::$data->setex($server->username . ':' . $key, $time, $value);
+                    return self::$data->setex(($server->username ?? '') . ':' . $key, $time, $value);
                 }
                 else
                 {
-                    return self::$data->set($server->username . ':' . $key, $value);
+                    return self::$data->set(($server->username ?? '') . ':' . $key, $value);
                 }
             }
             else
@@ -62,9 +62,9 @@ class Cache
         $server = self::getServer();
         if (self::$data)
         {
-            if ($server && $server->type === 'redis')
+            if ($server && ($server->type ?? null) === 'redis')
             {
-                return self::$data->delete($server->username . ':' . $key);
+                return self::$data->delete(($server->username ?? '') . ':' . $key);
             }
             else
             {
@@ -86,7 +86,7 @@ class Cache
     {
         $server = self::getServer();
 
-        if ($server && $server->type === 'redis')
+        if ($server && ($server->type ?? null) === 'redis')
         {
             if (class_exists('Redis'))
             {
@@ -94,12 +94,12 @@ class Cache
                 try
                 {
                     $db->connect(
-                        $server->host ?: '127.0.0.2',
-                        $server->port ?: 6379
+                        $server->host ?? '127.0.0.2',
+                        $server->port ?? 6379
                     );
-                    if ($server->password)
+                    if (!empty($server->password))
                     {
-                        if ($server->username && strlen($server->username) > 0)
+                        if (!empty($server->username) && strlen((string)$server->username) > 0)
                         {
                             $db->auth([
                                 $server->username,
@@ -130,7 +130,7 @@ class Cache
                 Response::error("Cache server error: 21");
             }
         }
-        else if (!$server || $server->type === 'memcache')
+        else if (!$server || ($server->type ?? null) === 'memcache')
         {
             if (class_exists('Memcached'))
             {
@@ -139,8 +139,8 @@ class Cache
                     $db = new \Memcached();
                     $db->setOption(\Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
                     $db->addServer(
-                        $server ? $server->host : 'localhost',
-                        $server ? $server->port : 11211
+                        $server ? ($server->host ?? 'localhost') : 'localhost',
+                        $server ? ($server->port ?? 11211) : 11211
                     );
                 }
                 catch (\MemcachedException $e)
@@ -162,11 +162,11 @@ class Cache
 
     public static function is_brute_force($key, $limits)
     {
-        $minute_limit = $limits["minute"];
-        $hour_limit = $limits["hour"];
-        $day_limit = $limits["day"];
+        $minute_limit = $limits["minute"] ?? 0;
+        $hour_limit = $limits["hour"] ?? 0;
+        $day_limit = $limits["day"] ?? 0;
         $error = false;
-        if (strlen($key) > 1)
+        if (strlen((string)$key) > 1)
         {
             ######################### START BRUTE FORCE CHECK IN MINUTE ###################
             if ($minute_limit > 0)

@@ -35,13 +35,14 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
             $result = self::curl(Config::getUrl("s2s") . "/default/timezones", []);
         }
 
-        if ($result)
+        if (is_string($result))
             $result = json_decode($result, true);
-        if($result && $result["status"] === "success")
+        if(is_array($result) && ($result["status"] ?? null) === "success")
         {
             $list = [];
-            foreach ($result["data"] as $value)
-                $list[$value["id"]] = $value;
+            foreach ((array)($result["data"] ?? []) as $value)
+                if (isset($value["id"]))
+                    $list[$value["id"]] = $value;
             self::$data = $list;
             self::setCache($list);
             return $list;
@@ -56,7 +57,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
 
     public static function getCache()
     {
-        return json_decode(Cache::get(self::getCachKey()), true);
+        return json_decode((string)Cache::get(self::getCachKey()), true);
     }
 
     public static function setCache($data)
@@ -89,7 +90,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
         $formatto       = $realFormatto ?  $realFormatto: self::$defaultDateFormat;
 
         if (is_object($datetime) && method_exists($datetime, "toDateTime")) {
-            $datetime = @$datetime->toDateTime()->format("Y-m-d H:i:s");
+            $datetime = $datetime->toDateTime()->format("Y-m-d H:i:s");
         }elseif(is_numeric($datetime)){
             $datetime = date("Y-m-d H:i:s", $datetime);
         }
@@ -110,14 +111,14 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
 
     public static function detectTz($datetime=false)
     {
-        $timezone = self::getBySlug(urldecode(Request::get("tz")));
+        $timezone = self::getBySlug(urldecode((string)Request::get("tz")));
         if(!$timezone)
             $timezone = self::getById(101);
         return [
-            "id"            => $timezone["id"],
-            "slug"          => $timezone["slug"],
-            "offset"        => $timezone["offset"],
-            "title"         => $timezone["title"],
+            "id"            => $timezone["id"] ?? null,
+            "slug"          => $timezone["slug"] ?? null,
+            "offset"        => $timezone["offset"] ?? null,
+            "title"         => $timezone["title"] ?? null,
         ];
     }
 
@@ -125,7 +126,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
     {
         foreach (self::getList() as $value)
         {
-            if(mb_strtolower($value["slug"]) === mb_strtolower($slug))
+            if(mb_strtolower((string)($value["slug"] ?? '')) === mb_strtolower((string)$slug))
                 return $value;
         }
         return false;
@@ -135,7 +136,7 @@ class CoreTimezones extends \Fogito\Db\RemoteModelManager
     {
         foreach (self::getList() as $value)
         {
-            if($value["country_code"] === mb_strtolower($countryCode))
+            if(($value["country_code"] ?? null) === mb_strtolower((string)$countryCode))
                 return $value;
         }
         return false;

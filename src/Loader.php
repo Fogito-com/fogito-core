@@ -352,6 +352,10 @@ class Loader
             return false;
         }
 
+        if (is_string($seperator) === true && $seperator === '') {
+            return false;
+        }
+
         $length = strlen($prefix);
         if ($length === 0 || $length > strlen($className)) {
             return false;

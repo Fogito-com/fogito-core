@@ -38,19 +38,21 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
 
     public static function validateCompanyFilter($companyId, $parentId=false, $stop=true)
     {
-        if(trim($companyId) === Company::getId())
+        $companyId = trim((string)$companyId);
+        $companyData = Company::getData();
+        if($companyId === Company::getId())
         {
             return true;
         }
-        else if(in_array(trim($companyId), (array)Company::getData()->branch_ids))
+        else if(in_array($companyId, (array)($companyData->branch_ids ?? [])))
         {
             return true;
         }
-        else if(in_array(trim($companyId), (array)Company::getData()->parent_ids))
+        else if(in_array($companyId, (array)($companyData->parent_ids ?? [])))
         {
             return false;
         }
-        else if(trim($companyId) === Company::getData()->parent_super_id)
+        else if($companyId === ($companyData->parent_super_id ?? null))
         {
             return false;
         }
@@ -71,19 +73,21 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
 
     public static function canShareWithCompany($companyId)
     {
-        if(trim($companyId) === Company::getId())
+        $companyId = trim((string)$companyId);
+        $companyData = Company::getData();
+        if($companyId === Company::getId())
         {
             return true;
         }
-        else if(in_array(trim($companyId), (array)Company::getData()->branch_ids))
+        else if(in_array($companyId, (array)($companyData->branch_ids ?? [])))
         {
             return true;
         }
-        else if(in_array(trim($companyId), (array)Company::getData()->parent_ids))
+        else if(in_array($companyId, (array)($companyData->parent_ids ?? [])))
         {
             return true;
         }
-        else if(trim($companyId) === Company::getData()->parent_super_id)
+        else if($companyId === ($companyData->parent_super_id ?? null))
         {
             return true;
         }
@@ -92,7 +96,7 @@ class CoreCompanies extends \Fogito\Db\RemoteModelManager
             $bindRemote = [
                 'id' => $companyId,
                 'is_deleted' => ['$ne' => 1],
-                'parent_super_id' => Company::getData()->parent_super_id
+                'parent_super_id' => $companyData->parent_super_id ?? null
             ];
             $query = CoreCompanies::findFirst([$bindRemote]);
             if($query)

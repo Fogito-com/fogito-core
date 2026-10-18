@@ -53,7 +53,7 @@ class Config implements ArrayAccess, Countable
 
     public static function getDomain()
     {
-        $arr = array_slice(explode('.', Request::getServer('HTTP_HOST')), 1);
+        $arr = array_slice(explode('.', (string)Request::getServer('HTTP_HOST')), 1);
         $mainDomain = implode('.', $arr);
         if (Request::envMode() === 'development')
         {
@@ -73,6 +73,8 @@ class Config implements ArrayAccess, Countable
     public static function getUrl($server = "s2s", $options = [])
     {
         $protocol = ($options["protocol"] ?? null) === "https" ? "https" : "http";
+        if (!isset(self::$_servicePaths[$server]))
+            throw new Exception('Service path was not found');
         $path = self::$_servicePaths[$server];
         return $protocol . '://' . self::getDomain() . '/api' . $path;
     }

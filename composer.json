@@ -11,7 +11,7 @@
     "authors": [],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.0",
+        "php": "^8.1",
         "fogito/core": "^1.1"
     }
 }

@@ -44,11 +44,11 @@ class Auth
                 ]
             ]);
         }
-        if($response)
+        if(is_string($response))
             $response = json_decode($response, true);
         if (is_array($response))
         {
-            if($response["status"] == "success" && $_data=$response["data"])
+            if(($response["status"] ?? null) == "success" && $_data=($response["data"] ?? null))
             {
                 CoreSettings::setData($_data);
 
@@ -70,7 +70,7 @@ class Auth
             }
             else
             {
-                self::setError((int)$response["error_code"], (string)$response["description"]);
+                self::setError((int)($response["error_code"] ?? 1000), (string)($response["description"] ?? Lang::get("ConnectionError", "Connection Error")));
 
                 Cache::set(self::getCacheKey(), json_encode($response), 4);
             }
@@ -82,15 +82,21 @@ class Auth
 
         if(self::getData())
         {
-            define("TOKEN", (string) self::getToken());
-            define("BUSINESS_TYPE", (int) @Company::getData()->business_model);
-            define("COMPANY_ID", (string) @Company::getId());
+            if (!defined("TOKEN"))
+                define("TOKEN", (string) self::getToken());
+            if (!defined("BUSINESS_TYPE"))
+                define("BUSINESS_TYPE", (int) (Company::getData()->business_model ?? 0));
+            if (!defined("COMPANY_ID"))
+                define("COMPANY_ID", (string) Company::getId());
         }
         else
         {
-            define("TOKEN", false);
-            define("BUSINESS_TYPE", false);
-            define("COMPANY_ID", false);
+            if (!defined("TOKEN"))
+                define("TOKEN", false);
+            if (!defined("BUSINESS_TYPE"))
+                define("BUSINESS_TYPE", false);
+            if (!defined("COMPANY_ID"))
+                define("COMPANY_ID", false);
         }
     }
 
@@ -111,7 +117,7 @@ class Auth
 
     public static function setData($_data)
     {
-        self::$_data = \json_decode(\json_encode($_data));
+        self::$_data = \json_decode((string)\json_encode($_data));
     }
 
     public static function getData()
@@ -122,7 +128,7 @@ class Auth
     public static function getId()
     {
         if (isset(self::$_data)) {
-            return self::$_data->id;
+            return self::$_data->id ?? null;
         }
         return null;
     }
@@ -130,7 +136,7 @@ class Auth
     public static function getType()
     {
         if (isset(self::$_data)) {
-            return self::$_data->type;
+            return self::$_data->type ?? null;
         }
         return null;
     }
@@ -138,7 +144,7 @@ class Auth
     public static function getLevel()
     {
         if (isset(self::$_data)) {
-            return self::$_data->level;
+            return self::$_data->level ?? null;
         }
         return null;
     }
@@ -199,12 +205,12 @@ class Auth
         $permissions = self::getPermissions();
 
         $allow = false;
-        if ($permissions[$key]['allow'])
+        if (!empty($permissions[$key]['allow']))
         {
             if($selected){
-                if(in_array($selected, (array)$permissions[$key]["selected"]))
+                if(in_array($selected, (array)($permissions[$key]["selected"] ?? [])))
                     $allow = true;
-            }else if($permissions[$key]["selected"]){
+            }else if(!empty($permissions[$key]["selected"])){
                 $allow = $permissions[$key];
             }else{
                 $allow = true;
@@ -238,7 +244,7 @@ class Auth
     {
         $avatars = [];
         $url = "https://app.fogito.com/api/core";
-        if ($data && $data->avatar && $data->avatar->avatars){
+        if ($data && !empty($data->avatar) && !empty($data->avatar->avatars)){
             $avatars = (array)$data->avatar->avatars;
         }else{
             $avatars = [
@@ -252,7 +258,7 @@ class Auth
         }
 
         if($type){
-            if($avatars[$type])
+            if(!empty($avatars[$type]))
                 return $avatars[$type];
             return $url . "/assets/images/noavatar.png";
         }else{
@@ -265,9 +271,9 @@ class Auth
      */
     public static function isAllowed($permission, $selected=false)
     {
-        if(!self::$_permissions[$permission] || !self::$_permissions[$permission]["allow"])
+        if(empty(self::$_permissions[$permission]) || empty(self::$_permissions[$permission]["allow"]))
             return false;
-        if($selected && !in_array($selected, (array)self::$_permissions[$permission]["selected"]))
+        if($selected && !in_array($selected, (array)(self::$_permissions[$permission]["selected"] ?? [])))
             return false;
         return self::$_permissions[$permission];
     }

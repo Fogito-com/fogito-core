@@ -57,10 +57,11 @@ class Request
                 $raw[$key] = $value;
 
         if (php_sapi_name() === 'cli')
-            foreach ((array)$_SERVER['argv'] as $arg)
+            foreach ((array)($_SERVER['argv'] ?? []) as $arg)
             {
-                $args = explode('=', $arg);
-                $raw[$args[0]] = $args[1];
+                $args = explode('=', $arg, 2);
+                if (isset($args[1]))
+                    $raw[$args[0]] = $args[1];
             }
 
         /* Get data */
@@ -358,7 +359,7 @@ class Request
         {
             return self::$rawBody;
         }
-        elseif ($_SERVER['REQUEST_METHOD'] === 'POST')
+        elseif (self::getMethod() === 'POST')
         {
             $raw = file_get_contents('php://input');
 
@@ -514,9 +515,11 @@ class Request
      */
     public static function getClientAddress($trustForwardedHeader = null)
     {
-        if ($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP']) > 0)
-            return $_SERVER['HTTP_USER_IP'];
-        return $_SERVER['REMOTE_ADDR'];
+        $remoteAddress = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+        $userAddress = (string)($_SERVER['HTTP_USER_IP'] ?? '');
+        if ($remoteAddress === '168.119.97.124' && strlen($userAddress) > 0)
+            return $userAddress;
+        return $remoteAddress;
     }
 
     /**
@@ -683,7 +686,7 @@ class Request
             {
                 if (isset($file['error']) === true)
                 {
-                    foreach ($file['error'] as $error)
+                    foreach ((array)$file['error'] as $error)
                     {
                         if ($error === \UPLOAD_ERR_OK)
                         {
@@ -740,9 +743,52 @@ class Request
 
     public static function getIP()
     {
-        if ($_SERVER['REMOTE_ADDR'] === '168.119.97.124' && strlen(@$_SERVER['HTTP_USER_IP']))
-            return $_SERVER['HTTP_USER_IP'];
-        return $_SERVER['REMOTE_ADDR'];
+        $remoteAddress = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+        $userAddress = (string)($_SERVER['HTTP_USER_IP'] ?? '');
+        if ($remoteAddress === '168.119.97.124' && strlen($userAddress) > 0)
+            return $userAddress;
+        return $remoteAddress;
+    }
+
+    /**
+     * Parses a weighted request header such as Accept-Language.
+     *
+     * @param string $serverIndex
+     * @param string $name
+     * @return array
+     * @throws Exception
+     */
+    protected static function _getQualityHeader($serverIndex, $name)
+    {
+        if (!is_string($serverIndex) || !is_string($name))
+            throw new Exception('Invalid parameter type.');
+
+        $header = (string)self::getServer($serverIndex);
+        if ($header === '')
+            return [];
+
+        $qualityParts = [];
+        foreach (explode(',', $header) as $part)
+        {
+            $segments = array_map('trim', explode(';', $part));
+            $value = array_shift($segments);
+            if ($value === '')
+                continue;
+
+            $quality = 1.0;
+            foreach ($segments as $segment)
+            {
+                if (strpos($segment, 'q=') === 0)
+                {
+                    $quality = (float)substr($segment, 2);
+                    break;
+                }
+            }
+
+            $qualityParts[] = [$name => $value, 'quality' => $quality];
+        }
+
+        return $qualityParts;
     }
 
     /**
@@ -762,10 +808,14 @@ class Request
         }
 
         $quality = 0;
+        $selectedName = null;
         $i = 0;
 
         foreach ($qualityParts as $accept)
         {
+            if (!isset($accept['quality']) || !array_key_exists($name, $accept))
+                continue;
+
             if ($i === 0)
             {
                 $quality = $accept['quality'];
@@ -808,18 +858,21 @@ class Request
 
     public static function envMode()
     {
-        if (self::getServer("HTTP_ENV_MODE") === "development" || substr(self::getServer("HTTP_HOST"), 0, 4) === "test")
+        $envMode = self::getServer("HTTP_ENV_MODE");
+        $host = (string)self::getServer("HTTP_HOST");
+        if ($envMode === "development" || substr($host, 0, 4) === "test")
             return 'development';
-        if (self::getServer("HTTP_ENV_MODE") === "onpremise")
+        if ($envMode === "onpremise")
             return 'onpremise';
-        if (substr(self::getServer("HTTP_HOST"), 0, 8) === "apptest." || substr(self::getServer("HTTP_HOST"), 0, 5) === "beta.")
+        if (substr($host, 0, 8) === "apptest." || substr($host, 0, 5) === "beta.")
             return 'beta';
         return 'production';
     }
 
     public static function isDevMode()
     {
-        if(self::getServer("HTTP_ENV_MODE") === "development" || (self::getServer("HTTP_HOST") && substr(self::getServer("HTTP_HOST"), 0, 4) === "test"))
+        $host = (string)self::getServer("HTTP_HOST");
+        if(self::getServer("HTTP_ENV_MODE") === "development" || ($host !== '' && substr($host, 0, 4) === "test"))
             return true;
         return false;
     }

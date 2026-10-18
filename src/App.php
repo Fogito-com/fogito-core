@@ -213,6 +213,8 @@ class App
      */
     public function get($property)
     {
+        if (!array_key_exists($property, $this->services))
+            return null;
         $service = $this->services[$property];
         if (\is_callable($service)) {
             $service = \call_user_func($service, $this);

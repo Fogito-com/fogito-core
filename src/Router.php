@@ -208,7 +208,7 @@ class Router
             // By default, we use $_GET['url'] to obtain the rewrite information
             if (php_sapi_name() === 'cli')
             {
-                foreach ((array)$_SERVER['argv'] as $arg)
+                foreach ((array)($_SERVER['argv'] ?? []) as $arg)
                     if(substr($arg, 0, 4) === '_url')
                         return substr($arg, 5);
             }
@@ -532,14 +532,14 @@ class Router
                     //Get the route converters if any
                     $converters = $route->getConverters();
                     foreach ($paths as $part => $position) {
-                        if (is_string($part) === false || $part[0] !== chr(0)) {
+                        if (is_string($part) === false || $part === '' || $part[0] !== chr(0)) {
                             if (isset($matches[$position])) {
                                 $matchPosition = $matches[$position];
 
                                 //Check if the part has a converter
                                 if (isset($converters[$part])) {
                                     $converter    = $converters[$part];
-                                    $parts[$part] = call_user_func_array($converter, $matchPosition);
+                                    $parts[$part] = call_user_func_array($converter, array($matchPosition));
                                     continue;
                                 }
 
@@ -628,9 +628,9 @@ class Router
             //Check for parameters
             $params = array();
             if (isset($parts['params']) === true) {
-                $paramStr = (string) substr($parts['params'], 1, 0);
+                $paramStr = (string) substr($parts['params'], 1);
                 if (empty($paramStr) === false) {
-                    $params = explode($paramStr, '/');
+                    $params = explode('/', $paramStr);
                 }
 
                 unset($parts['params']);

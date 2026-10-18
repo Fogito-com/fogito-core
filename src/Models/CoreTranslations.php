@@ -21,10 +21,10 @@ class CoreTranslations extends \Fogito\Db\RemoteModelManager
 
         $result = self::curl(Config::getUrl("s2s") . "/default/translations", $data);
 
-        if ($result)
+        if (is_string($result))
             $result = json_decode($result, true);
-        if($result && $result["status"] === "success")
-            return $result["data"];
+        if(is_array($result) && ($result["status"] ?? null) === "success")
+            return $result["data"] ?? false;
         return false;
     }
 }

@@ -8,6 +8,7 @@ use Fogito\Http\Response;
 use Fogito\Lib\Auth;
 use Fogito\Lib\Lang;
 
+#[\AllowDynamicProperties]
 class RemoteModelManager
 {
     public static $url = "";
@@ -62,7 +63,8 @@ class RemoteModelManager
         ];
 
         $raw_result = self::curl(self::$url, $postData);
-        $result = \json_decode($raw_result, true);
+        $rawText = is_string($raw_result) ? $raw_result : (is_scalar($raw_result) ? (string)$raw_result : '');
+        $result = \json_decode($rawText, true);
         if (is_array($result) && ($result["status"] ?? null) === "success")
         {
             if (!empty($options["result"]))
@@ -77,7 +79,7 @@ class RemoteModelManager
         {
             $error = [
                 "status"      => "error",
-                "description" => "Connection Error: " . $raw_result,
+                "description" => "Connection Error: " . $rawText,
                 "error_code"  => 1004
             ];
         }
@@ -121,6 +123,7 @@ class RemoteModelManager
     public static function find($filter, $options = false)
     {
         self::init("find");
+        $filter = (array)$filter;
         if (count((array)($filter[0] ?? [])) > 0)
         {
             $filter["filter"] = $filter[0];
@@ -173,6 +176,7 @@ class RemoteModelManager
     public static function findFirst($filter, $options = false)
     {
         self::init("findfirst");
+        $filter = (array)$filter;
         if (count((array)($filter[0] ?? [])) > 0)
         {
             $filter["filter"] = $filter[0];
@@ -252,6 +256,7 @@ class RemoteModelManager
     public static function count($filter, $options = false)
     {
         self::init("count");
+        $filter = (array)$filter;
         if (count((array)($filter[0] ?? [])) > 0)
             $filter["filter"] = $filter[0];
         return self::request($filter, $options);

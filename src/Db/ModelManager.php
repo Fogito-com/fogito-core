@@ -9,6 +9,7 @@ use Fogito\Lib\Company;
 use Fogito\Lib\Lang;
 use ReflectionClass;
 
+#[\AllowDynamicProperties]
 abstract class ModelManager
 {
     protected static $_server;
@@ -194,8 +195,8 @@ abstract class ModelManager
         self::execute();
 
         $queryOptions = [
-            'multi'  => $options['multi'] === false ? false : true,
-            'upsert' => $options['upsert'] === true ? true : false,
+            'multi'  => ($options['multi'] ?? true) !== false,
+            'upsert' => ($options['upsert'] ?? false) === true,
         ];
         $filter = static::filterBinds($filter);
 
@@ -242,8 +243,8 @@ abstract class ModelManager
         self::execute();
 
         $queryOptions = [
-            'multi'  => $options['multi'] === false ? false : true,
-            'upsert' => $options['upsert'] === true ? true : false,
+            'multi'  => ($options['multi'] ?? true) !== false,
+            'upsert' => ($options['upsert'] ?? false) === true,
         ];
         $filter = static::filterBinds($filter);
 
@@ -262,14 +263,14 @@ abstract class ModelManager
     {
         self::execute();
         $filter = self::filterBinds((array)$filter);
-        if (is_array($increment['is_deleted']) && array_key_exists('$ne', $increment['is_deleted']))
+        if (isset($increment['is_deleted']) && is_array($increment['is_deleted']) && array_key_exists('$ne', $increment['is_deleted']))
         {
             $increment['is_deleted'] = ((int)$increment['is_deleted']['$ne'] == 1 ? 0 : 1);
         }
 
         $queryOptions = [
-            'multi'  => $options['multi'] === false ? false : true,
-            'upsert' => $options['upsert'] === true ? true : false,
+            'multi'  => ($options['multi'] ?? true) !== false,
+            'upsert' => ($options['upsert'] ?? false) === true,
         ];
         $query = new \MongoDB\Driver\BulkWrite;
         $query->update(
@@ -422,12 +423,12 @@ abstract class ModelManager
         $indexes = [];
         foreach ($cursor as $index)
         {
-            if (!isset($index->key) || $index->name === '_id_')
+            if (!isset($index->key) || ($index->name ?? null) === '_id_')
                 continue;
 
             $index = self::objectToArray($index);
             unset($index['v'], $index['ns']);
-            $index['key'] = self::normalizeIndexKey($index['key']);
+            $index['key'] = self::normalizeIndexKey($index['key'] ?? []);
             $index['unique'] = !empty($index['unique']);
             $indexes[] = $index;
         }
@@ -477,7 +478,9 @@ abstract class ModelManager
             'indexes'       => [$index],
         ]));
 
-        return !empty($result->toArray()[0]->ok);
+        $responses = $result->toArray();
+        $response = $responses[0] ?? null;
+        return !empty($response->ok);
     }
 
     /**
@@ -620,7 +623,9 @@ abstract class ModelManager
             'index'       => $name,
         ]));
 
-        return !empty($result->toArray()[0]->ok);
+        $responses = $result->toArray();
+        $response = $responses[0] ?? null;
+        return !empty($response->ok);
     }
 
     /**
@@ -713,7 +718,7 @@ abstract class ModelManager
         self::execute();
 
         $queryOptions = [
-            "limit" => (int)$options["limit"]
+            "limit" => (int)($options["limit"] ?? 0)
         ];
         $filter = static::filterBinds($filter);
 
@@ -752,7 +757,7 @@ abstract class ModelManager
         self::execute();
 
         $pipleLine = [];
-        $filter = self::filterBinds((array)$filter[0]);
+        $filter = self::filterBinds((array)($filter[0] ?? []));
         if (count((array)$filter) > 0)
         {
             $pipleLine[] = ['$match' => $filter];
@@ -772,7 +777,9 @@ abstract class ModelManager
         ]);
 
         $Result = self::$_connection->executeCommand(self::$_db, $Command);
-        return $Result->toArray()[0]->total;
+        $responses = $Result->toArray();
+        $response = $responses[0] ?? null;
+        return $response->total ?? 0;
     }
 
 
@@ -891,7 +898,9 @@ abstract class ModelManager
             'query'    => (object)$filter,
         ]));
 
-        $values = $result->toArray()[0]->values;
+        $responses = $result->toArray();
+        $response = $responses[0] ?? null;
+        $values = $response->values ?? [];
         return \is_array($values) ? $values : [];
     }
 
@@ -934,7 +943,9 @@ abstract class ModelManager
             $command['fields'] = \array_fill_keys($options['projection'], true);
 
         $result = self::$_connection->executeCommand(self::$_db, new \MongoDB\Driver\Command($command));
-        $document = $result->toArray()[0]->value;
+        $responses = $result->toArray();
+        $response = $responses[0] ?? null;
+        $document = $response->value ?? null;
         if (!$document)
             return false;
 
@@ -1321,6 +1332,8 @@ abstract class ModelManager
             {
                 if (\array_key_exists($key, (array)$row))
                 {
+                    if ($row[$key] === null)
+                        continue;
                     if ($dynamic)
                     {
                         $data[$row[$key]] = $callback ? $callback($row) : $row;
@@ -1359,6 +1372,8 @@ abstract class ModelManager
                     }
                     else
                     {
+                        if ($row->{$key} === null)
+                            continue;
                         if ($dynamic)
                         {
                             $data[$row->{$key}] = $callback ? $callback($row) : $row;
@@ -1410,7 +1425,8 @@ abstract class ModelManager
         ]);
 
         $cursor = self::$_connection->executeCommand(self::$_db, $command);
-        $result = current($cursor->toArray());
+        $results = $cursor->toArray();
+        $result = $results[0] ?? null;
 
         if (isset($result->value->seq)) {
             return $result->value->seq;
@@ -1427,17 +1443,17 @@ abstract class ModelManager
      */
     public static function objectId($id)
     {
-        if (strlen($id) < 5)
-        {
-            return false;
-        }
-        elseif ($id instanceof \MongoDB\BSON\ObjectID)
+        if ($id instanceof \MongoDB\BSON\ObjectID)
         {
             return $id;
         }
-        elseif (preg_match('/^[a-f\d]{24}$/i', $id))
+        elseif (!is_scalar($id) || strlen((string)$id) < 5)
         {
-            return new \MongoDB\BSON\ObjectID($id);
+            return false;
+        }
+        elseif (preg_match('/^[a-f\d]{24}$/i', (string)$id))
+        {
+            return new \MongoDB\BSON\ObjectID((string)$id);
         }
         throw new \Exception("Object ID is wrong");
     }
@@ -1462,12 +1478,14 @@ abstract class ModelManager
     {
         self::execute();
         $queryOptions = [
-            'multi'  => $options['multi'] === false ? false : true,
-            'upsert' => $options['upsert'] === true ? true : false,
+            'multi'  => ($options['multi'] ?? true) !== false,
+            'upsert' => ($options['upsert'] ?? false) === true,
         ];
         $bulk = new \MongoDB\Driver\BulkWrite;
         foreach ($data as $row)
         {
+            if (!isset($row[0], $row[1]))
+                continue;
             $filter = static::filterBinds($row[0]);
             $bulk->update(
                 $filter,
@@ -1524,7 +1542,7 @@ abstract class ModelManager
             return false;
         }
 
-        if ($id instanceof \MongoDB\BSON\ObjectID || preg_match('/^[a-f\d]{24}$/i', $id))
+        if ($id instanceof \MongoDB\BSON\ObjectID || (is_scalar($id) && preg_match('/^[a-f\d]{24}$/i', (string)$id)))
         {
             return true;
         }
@@ -1555,9 +1573,9 @@ abstract class ModelManager
         $data = [];
         foreach ($ids as $id)
         {
-            if (self::isMongoId(trim($id)))
+            if (is_scalar($id) && self::isMongoId(trim((string)$id)))
             {
-                $data[] = trim($id);
+                $data[] = trim((string)$id);
             }
         }
 
@@ -1622,8 +1640,8 @@ abstract class ModelManager
         if (is_object($date) && \method_exists($date, 'toDateTime'))
         {
             if ($round)
-                return round(@$date->toDateTime()->format('U.u'), 0);
-            return round(@$date->toDateTime()->format('U.u'), 3);
+                return round($date->toDateTime()->format('U.u'), 0);
+            return round($date->toDateTime()->format('U.u'), 3);
         }
         return 0;
     }
@@ -1639,11 +1657,11 @@ abstract class ModelManager
         $config = App::$di->config->databases->default->toArray();
         if (method_exists(get_class(new static()), 'getConfig'))
             $config = static::getConfig();
-        if (!$config["dbname"])
-            throw new Exception('Database not found');
-
         if (!$config)
             throw new Exception('MongoDB server not found');
+
+        if (empty($config["dbname"]))
+            throw new Exception('Database not found');
 
         $source = static::getSource();
         if (!$source)
@@ -1689,11 +1707,15 @@ abstract class ModelManager
      */
     public static function getDsn($server = [])
     {
-        if (!$server['username'] || !$server['password'])
-            return 'mongodb://' . $server['host'] . ':' . $server['port'];
+        $username = $server['username'] ?? '';
+        $password = $server['password'] ?? '';
+        $host = $server['host'] ?? 'localhost';
+        $port = $server['port'] ?? 27017;
+        if (!$username || !$password)
+            return 'mongodb://' . $host . ':' . $port;
 
-        return 'mongodb://' . rawurlencode($server["username"]) . ':' . rawurlencode($server["password"])
-            . '@' . $server["host"] . ':' . $server["port"] . '/' . $server["dbname"];
+        return 'mongodb://' . rawurlencode($username) . ':' . rawurlencode($password)
+            . '@' . $host . ':' . $port . '/' . ($server["dbname"] ?? '');
     }
 
     /**
@@ -1778,7 +1800,11 @@ abstract class ModelManager
     public static function filterBinds($filter = [], $options = [])
     {
         $filter = self::normalizeMongoInOperator($filter);
-        if (in_array(self::$_source, (array)App::$di->config->skipped_filtering_collections->toArray()))
+        $skippedCollections = App::$di->config->skipped_filtering_collections;
+        $skippedCollections = is_object($skippedCollections) && method_exists($skippedCollections, 'toArray')
+            ? $skippedCollections->toArray()
+            : (array)$skippedCollections;
+        if (in_array(self::$_source, $skippedCollections))
             return $filter;
 
         if (method_exists(new static(), "getFindFilters") && count((array)static::getFindFilters()) > 0)
@@ -1806,14 +1832,15 @@ abstract class ModelManager
         if (method_exists(new static(), "getInsertFilters") && count((array)static::getInsertFilters()) > 0)
             $filter = array_merge(static::getInsertFilters(), $filter);
 
-        if (!isset($filter['business_type']) && Company::getData()->business_model)
-            $filter["business_type"] = Company::getData()->business_model;
+        $companyData = Company::getData();
+        if (!isset($filter['business_type']) && !empty($companyData->business_model))
+            $filter["business_type"] = $companyData->business_model;
 
         if (!isset($filter['company_id']) && Company::getId())
             $filter["company_id"] = Company::getId();
 
         if (static::$_shared)
-            if (count((array)$filter['company_ids']) == 0 && Company::getId())
+            if (count((array)($filter['company_ids'] ?? [])) == 0 && Company::getId())
                 $filter["company_ids"] = [Company::getId()];
 
         return $filter;
@@ -1844,6 +1871,8 @@ abstract class ModelManager
             $pipleLine[] = ['$limit' => $filter["limit"]];
         }
 
+        if (!isset($fields[0]))
+            throw new Exception('Aggregation fields are empty');
         $pipleLine[] = $fields[0];
 
         $Command = new \MongoDB\Driver\Command([
@@ -1858,13 +1887,14 @@ abstract class ModelManager
 
     public static function getSchemeByColumn($column)
     {
-        return static::getScheme()[$column];
+        $scheme = static::getScheme();
+        return $scheme[$column] ?? null;
     }
 
     public static function toMilliSeconds($date)
     {
         if (is_object($date) && method_exists($date, "toDateTime"))
-            return round(@$date->toDateTime()->format("U.u") * 1000, 0);
+            return round($date->toDateTime()->format("U.u") * 1000, 0);
         return 0;
     }
 
@@ -1883,7 +1913,8 @@ abstract class ModelManager
         ]);
 
         $cursor = self::$_connection->executeCommand(self::$_db, $command);
-        $result = current($cursor->toArray());
+        $results = $cursor->toArray();
+        $result = $results[0] ?? null;
 
         if (isset($result->value->seq))
         {

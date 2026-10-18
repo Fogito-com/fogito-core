@@ -123,6 +123,13 @@ namespace {
     if (Fogito\Lib\Auth::getId() !== 'compat-user') {
         throw new RuntimeException('Auth compatibility check failed.');
     }
+    if (Fogito\Lib\Auth::checkPermission('missing') !== false || Fogito\Lib\Auth::isAllowed('missing') !== false) {
+        throw new RuntimeException('Missing permissions must be handled without warnings.');
+    }
+    $avatar = Fogito\Lib\Auth::getAvatar((object) array(), 'missing');
+    if (!is_string($avatar)) {
+        throw new RuntimeException('Sparse avatar data must use the fallback image.');
+    }
 
     echo "PHP 8 compatibility regression checks passed.\n";
 }

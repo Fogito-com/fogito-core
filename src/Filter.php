@@ -126,7 +126,7 @@ class Filter
         /* Predefined filter */
         switch ($filter) {
             case 'email':
-                return filter_var(str_replace('\'', '', $value), 517);
+                return filter_var(str_replace('\'', '', (string)$value), 517);
                 break;
             case 'int':
                 return filter_var($value, 519);
@@ -155,25 +155,25 @@ class Filter
                 return $filtered;
                 break;
             case 'trim':
-                return trim($value);
+                return trim((string)$value);
                 break;
             case 'striptags':
-                return strip_tags($value);
+                return strip_tags((string)$value);
                 break;
             case 'lower':
                 if (function_exists('mb_strtolower') === true) {
-                    return mb_strtolower($value);
+                    return mb_strtolower((string)$value);
                 } else {
                     //@note we use the default implementation instad of a custom one
-                    return strtolower($value);
+                    return strtolower((string)$value);
                 }
                 break;
             case 'upper':
                 if (function_exists('mb_strtoupper') === true) {
-                    return mb_strtoupper($value);
+                    return mb_strtoupper((string)$value);
                 } else {
                     //@note we use the default implementation instad of a custom one
-                    return strtoupper($value);
+                    return strtoupper((string)$value);
                 }
         }
 
