@@ -915,7 +915,7 @@ abstract class ModelManager
         {
             $time *= 1000;
         }
-        return new \MongoDB\BSON\UTCDateTime($time);
+        return new \MongoDB\BSON\UTCDateTime((int)$time);
     }
 
     /**
@@ -1076,19 +1076,27 @@ abstract class ModelManager
      */
     public static function filterBinds($filter = [], $options = [])
     {
-        if (in_array(self::$_source, (array)App::$di->config->skipped_filtering_collections->toArray()))
+        $skippedCollections = App::$di->config->skipped_filtering_collections;
+        $skippedCollections = is_object($skippedCollections) && method_exists($skippedCollections, 'toArray')
+            ? $skippedCollections->toArray()
+            : (array)($skippedCollections ?: []);
+        if (in_array(self::$_source, $skippedCollections))
             return $filter;
 
-        if (method_exists(new static(), "getFindFilters") && count((array)static::getFindFilters()) > 0)
-            $filter = array_merge(static::getFindFilters(), $filter);
+        if (method_exists(new static(), "getFindFilters"))
+        {
+            $findFilters = (array)(static::getFindFilters() ?: []);
+            if (count($findFilters) > 0)
+                $filter = array_merge($findFilters, $filter);
+        }
 
         if (!isset($filter['business_type']) && !App::$di->config->skip_filter_business_type && defined('BUSINESS_TYPE') && (defined('BUSINESS_TYPE') && BUSINESS_TYPE))
             $filter["business_type"] = BUSINESS_TYPE;
 
         if (static::$_shared)
         {
-            if (count((array)$filter['company_ids']) === 0 && Company::getId())
-                $filter["company_ids"] = ['$in' => array_merge(Company::getData()->branch_ids, [Company::getId()])];
+            if (count((array)(($filter['company_ids'] ?? []) ?: [])) === 0 && Company::getId())
+                $filter["company_ids"] = ['$in' => array_merge((array)((Company::getData()->branch_ids ?? []) ?: []), [Company::getId()])];
         }
         else
         {
@@ -1101,17 +1109,22 @@ abstract class ModelManager
 
     public static function filterInsertBinds($filter = [], $options = [])
     {
-        if (method_exists(new static(), "getInsertFilters") && count((array)static::getInsertFilters()) > 0)
-            $filter = array_merge(static::getInsertFilters(), $filter);
+        if (method_exists(new static(), "getInsertFilters"))
+        {
+            $insertFilters = (array)(static::getInsertFilters() ?: []);
+            if (count($insertFilters) > 0)
+                $filter = array_merge($insertFilters, $filter);
+        }
 
-        if (!isset($filter['business_type']) && Company::getData()->business_model)
-            $filter["business_type"] = Company::getData()->business_model;
+        $companyData = Company::getData();
+        if (!isset($filter['business_type']) && !empty($companyData->business_model))
+            $filter["business_type"] = $companyData->business_model;
 
         if (!isset($filter['company_id']) && Company::getId())
             $filter["company_id"] = Company::getId();
 
         if (static::$_shared)
-            if (count((array)$filter['company_ids']) == 0 && Company::getId())
+            if (count((array)(($filter['company_ids'] ?? []) ?: [])) === 0 && Company::getId())
                 $filter["company_ids"] = [Company::getId()];
 
         return $filter;

@@ -69,7 +69,10 @@ class Config implements ArrayAccess, Countable
 
     public static function getUrl($server = "s2s", $options = [])
     {
-        $protocol = $options["protocol"] === "https" ? "https" : "http";
+        $options = (array)$options;
+        $protocol = ($options["protocol"] ?? null) === "http" ? "http" : "https";
+        if (!isset(self::$_servicePaths[$server]))
+            throw new Exception('Service path was not found');
         $path = self::$_servicePaths[$server];
         return $protocol . '://' . self::getDomain() . '/api' . $path;
     }
@@ -121,6 +124,7 @@ class Config implements ArrayAccess, Countable
      * @return boolean
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($index)
     {
         if (is_scalar($index) === false)
@@ -163,6 +167,7 @@ class Config implements ArrayAccess, Countable
      * @return mixed
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($index)
     {
         return $this->get($index);
@@ -179,6 +184,7 @@ class Config implements ArrayAccess, Countable
      * @param mixed $value
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($index, $value)
     {
         if (is_scalar($index) === false)
@@ -199,6 +205,7 @@ class Config implements ArrayAccess, Countable
      * @param scalar $index
      * @throws Exception
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($index)
     {
         if (is_scalar($index) === false)
@@ -284,6 +291,7 @@ class Config implements ArrayAccess, Countable
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count((array)$this->_storage);

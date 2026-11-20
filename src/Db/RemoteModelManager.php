@@ -34,30 +34,33 @@ class RemoteModelManager
             "http_origin" => Request::getServer("HTTP_ORIGIN"),
             "request_uri" => Request::getServer("REQUEST_URI")
         ];
-        if (strlen(Auth::getToken()) > 0 && Auth::tokenAllowed())
+        if (strlen((string)Auth::getToken()) > 0 && Auth::tokenAllowed())
             $mergeData["token"] = Auth::getToken();
-        if (strlen(Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
+        if (strlen((string)Auth::getTokenUser()) > 0 && Auth::tokenAllowed())
             $mergeData["token_user"] = Auth::getTokenUser();
-        if (strlen(Request::get("server_token")) > 0)
-            $mergeData["remote_server_token"] = Request::get("server_token");
+        $remoteServerToken = Request::get("server_token");
+        if (is_scalar($remoteServerToken) && strlen((string)$remoteServerToken) > 0)
+            $mergeData["remote_server_token"] = (string)$remoteServerToken;
         return array_merge($data, $mergeData);
     }
 
     public static function request($params = [], $options = false)
     {
+        $options = (array)$options;
         $postData = [
             "data" => $params,
         ];
 
         $raw_result = self::curl(self::$url, $postData);
-        $result = \json_decode($raw_result, true);
-        if ($result && $result["status"] === "success")
+        $rawText = is_string($raw_result) ? $raw_result : (is_scalar($raw_result) ? (string)$raw_result : '');
+        $result = \json_decode($rawText, true);
+        if (is_array($result) && ($result["status"] ?? null) === "success")
         {
-            if ($options["result"])
+            if (!empty($options["result"]))
                 return $result;
-            return $result["data"];
+            return $result["data"] ?? null;
         }
-        elseif ($result && $result["status"] === "error")
+        elseif (is_array($result) && ($result["status"] ?? null) === "error")
         {
             $error = $result;
         }
@@ -65,14 +68,14 @@ class RemoteModelManager
         {
             $error = [
                 "status"      => "error",
-                "description" => "Connection Error: " . $raw_result,
+                "description" => "Connection Error: " . $rawText,
                 "error_code"  => 1004
             ];
         }
 
-        if ($error && $options && $options["debug"] == true)
-            Response::error($error["description"], $error["error_code"]);
-        if ($error && $options && $options["result"] == true)
+        if ($error && !empty($options["debug"]))
+            Response::error($error["description"] ?? 'Connection Error', $error["error_code"] ?? 1004);
+        if ($error && !empty($options["result"]))
             return $error;
         return false;
     }
@@ -84,15 +87,16 @@ class RemoteModelManager
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Env-Mode: '.Request::envMode()));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
         $result = curl_exec($ch);
-
-        if (curl_errno($ch))
+        $error = curl_errno($ch);
+        curl_close($ch);
+        if ($error)
             $result = json_encode([
                 "status"      => "error",
                 "description" => "Connection Error",
@@ -104,7 +108,8 @@ class RemoteModelManager
     public static function find($filter, $options = false)
     {
         self::init("find");
-        if ((!$filter["filter"] || count((array)$filter["filter"])) && count((array)$filter[0]) > 0)
+        $filter = (array)($filter ?: []);
+        if (count((array)(($filter[0] ?? null) ?: [])) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -156,7 +161,8 @@ class RemoteModelManager
     public static function findFirst($filter, $options = false)
     {
         self::init("findfirst");
-        if ((!$filter["filter"] || count((array)$filter["filter"])) && count((array)$filter[0]) > 0)
+        $filter = (array)($filter ?: []);
+        if (count((array)(($filter[0] ?? null) ?: [])) > 0)
         {
             $filter["filter"] = $filter[0];
             unset($filter[0]);
@@ -235,7 +241,8 @@ class RemoteModelManager
     public static function count($filter, $options = false)
     {
         self::init("count");
-        if ((!$filter["filter"] || count((array)$filter["filter"])) && count((array)$filter[0]) > 0)
+        $filter = (array)($filter ?: []);
+        if (count((array)(($filter[0] ?? null) ?: [])) > 0)
             $filter["filter"] = $filter[0];
         return self::request($filter, $options);
     }

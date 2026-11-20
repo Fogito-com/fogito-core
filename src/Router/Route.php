@@ -414,14 +414,14 @@ class Route
             if (is_null($controllerName) === false) {
                 //Check if we need to obtain the namespace
                 if (strpos($controllerName, '\\') !== false) {
-                    $classWithNamespace = get_class($controllerName);
+                    $classWithNamespace = $controllerName;
 
                     //Extract the real class name from the namespaced class
                     //Extract the namespace from the namespaced class
                     $pos = strrpos($classWithNamespace, '\\');
                     if ($pos !== false) {
                         $namespaceName = substr($classWithNamespace, 0, $pos);
-                        $realClassName = substr($classWithNamespace, $pos);
+                        $realClassName = substr($classWithNamespace, $pos + 1);
                     } else {
                         $realClassName = $classWithNamespace;
                     }
